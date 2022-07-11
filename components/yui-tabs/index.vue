@@ -32,10 +32,8 @@
 		<!-- 标签内容 -->
 		<view class="yui-tabs__content" :class="{'yui-tabs__content--animated':animated}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
-				<!-- 未开启手势左右滑动下 -->
 				<view class="yui-tab__pane" v-for="(tab,index) in tabList" :key="index" v-show="tab.show"
 					@touchstart="touchStart" @touchend="touchEnd($event,index)">
-					<!--  @touchmove="touchMove($event,index)" -->
 					<view v-if="tab.rendered ? true :value == index">
 						<!-- #ifdef H5 || APP-PLUS -->
 						<slot :name="tab.slot"></slot>
@@ -51,7 +49,6 @@
 </template>
 
 <script>
-	// 注意：APP在HBuilderX 3.5.0 alpha 才支持slot动态插槽名
 	import {
 		isNull,
 		addUnit,
