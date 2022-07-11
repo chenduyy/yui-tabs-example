@@ -1,0 +1,18 @@
+ "uListMedia": {
+        "body": [
+			"<view class=\"uni-list\">",
+				 "\t<view class=\"uni-list-cell\" hover-class=\"uni-list-cell-hover\" v-for=\"(item,index) in list\" :key=\"index\">",
+					  "\t\t<view class=\"uni-media-list\">",
+						  "\t\t\t<image class=\"uni-media-list-logo\" :src=\"item.img\"></image>",
+						  "\t\t\t<view class=\"uni-media-list-body\">",
+							  "\t\t\t\t<view class=\"uni-media-list-text-top\">{{item.title}}</view>",
+							  "\t\t\t\t<view class=\"uni-media-list-text-bottom uni-ellipsis\">{{item.content}}</view>",
+						  "\t\t\t</view>",
+					  "\t\t</view>",
+				 "\t</view>",
+			 "</view>"
+        ],
+        "prefix": "ulistmedia",
+        "project": "uni-app",
+        "scope": "source.vue.html"
+    }
