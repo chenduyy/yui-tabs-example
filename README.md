@@ -56,7 +56,7 @@
 		},
 		data() {
 			return {
-				tabs0: Array.from({
+				tabs: Array.from({
 					length: 5
 				}, (o, i) => `标签${i+1}`),
 				activeIndex: 0,
@@ -83,7 +83,7 @@
 
 | 参数      | 类型		| 描述										| 默认值										
 | ---------	| -------	| ---------------------------------------	| ---------------------------------------	
-| v-model   | string | 绑定当前选中标签的标识符 | 0 
+| v-model   | string | 绑定当前选中标签的标识符（即tabs中选中项的下标） | 0 
 | tabs   | [stirng,object] | 标签页数据，支持字符串类型与对象类型的数组结构(对象类型需符合{label:'标签1',slot:'slotName'}这样的格式，slot为自定义的标签内容插槽名，否则插槽名默认为"pane"+tab下标的命名) | - 
 | color | string | 标签主题色 | #0022AB 
 | background    | string | 标签栏背景色  | #fff 
