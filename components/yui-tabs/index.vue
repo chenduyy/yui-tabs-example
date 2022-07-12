@@ -137,7 +137,7 @@
 			// 滚动阈值，手指滑动页面触发切换的阈值,单位为px，表示横向滑动整个可视区域的多少px时才切换标签内容
 			scrollThreshold: {
 				type: [Number, String],
-				default: 20,
+				default: 50,
 			},
 		},
 		data() {

@@ -97,7 +97,7 @@
 | swipeable    | boolean | 是否开启手势滑动切换 |  false 
 | is-lazy-render    | boolean | 是否开启延迟渲染（首次切换到标签时才触发内容渲染）  | true 
 | swipeThreshold    | number、string | 导航标签滚动阈值，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动  | 5 
-| scrollThreshold    | number、string | 滚动阈值，手指滑动页面触发切换的阈值,单位为px，表示横向滑动整个可视区域的多少px时才切换标签内容  | 20 
+| scrollThreshold    | number、string | 滚动阈值，手指滑动页面触发切换的阈值,单位为px，表示横向滑动整个可视区域的多少px时才切换标签内容  | 50 
 | visible   | boolean | 标签栏可见性，结合fixed使用，用于模拟滚动吸顶 | true 
 | fixed    | boolean | 标签页是否滚动吸顶  | false 
 | offset-top    | number | 滚动吸顶下与顶部的最小距离，默认 px  | 0 
