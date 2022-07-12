@@ -1,15 +1,11 @@
 {
-	// "uni-app": {
-	// 	"scripts": {
-	// 		"mp-dingtalk": {
-	// 			"title": "钉钉小程序",
-	// 			"env": {
-	// 				"UNI_PLATFORM": "mp-alipay"
-	// 			},
-	// 			"define": {
-	// 				"MP-DINGTALK": true
-	// 			}
-	// 		}
-	// 	}
-	// }
+	"id": "yui-demo",
+	"name": "tab标签页",
+	"version": "1.0.1",
+	"description": "tab标签页，滑动内容切换",
+	"keywords": [
+		"tab",
+		"切换",
+		"滑动"
+	]
 }

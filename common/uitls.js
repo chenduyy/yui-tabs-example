@@ -78,15 +78,16 @@ export function getDirection(startx, starty, endx, endy) {
 	}
 
 	var angle = getAngle(angx, angy);
-	if (angle >= -135 && angle <= -45) {
+	if (angle >= -160 && angle <= -20) {
 		result = 1;
-	} else if (angle > 45 && angle < 135) {
+	} else if (angle > 20 && angle < 160) {
 		result = 2;
-	} else if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle < -135)) {
+	} else if ((angle >= 160 && angle <= 180) || (angle >= -180 && angle < -160)) {
 		result = 3;
-	} else if (angle >= -45 && angle <= 45) {
+	} else if (angle >= -20 && angle <= 20) {
 		result = 4;
 	}
 
 	return result;
 }
+

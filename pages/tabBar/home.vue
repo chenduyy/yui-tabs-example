@@ -2,15 +2,14 @@
 	<view class="page-container">
 		<banner class="depend-wrapper" />
 		<!-- 用于滚动吸顶的标签页 -->
-		<yui-tabs :visible="isFixed" :tabs="tabs" v-model="activeIndex" animated fixed :wrapStyle="wrapStyle">
-			<!-- 标签栏右侧额外内容 -->
+	<!-- 	<yui-tabs :visible="isFixed" :tabs="tabs" v-model="activeIndex" animated fixed :wrapStyle="wrapStyle">
 			<template #extra>
 				<view class="extra-wrapper">
 					<text>更多</text>
 					<uni-icons type="right" :color="'#5e6d82'" size="14" />
 				</view>
 			</template>
-		</yui-tabs>
+		</yui-tabs> -->
 		<!-- 用于默认显示的标签页 -->
 		<yui-tabs :visible="!isFixed" :tabs="tabs" v-model="activeIndex" animated background="#f5f5f5">
 			<!-- 标签栏右侧额外内容 -->

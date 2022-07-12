@@ -13,7 +13,7 @@
 							{{tab.label}}
 						</view>
 					</view>
-					<view class="yui-tabs__line" :style="[lineStyle]"></view>
+					<view class="yui-tabs__line" :style="[lineStyle,lineAnimatedStyle]"></view>
 				</view>
 			</scroll-view>
 			<view v-else class="yui-tabs__nav">
@@ -23,7 +23,7 @@
 						{{tab.label}}
 					</view>
 				</view>
-				<view class="yui-tabs__line" :style="[lineStyle]"></view>
+				<view class="yui-tabs__line" :style="[lineStyle,lineAnimatedStyle]"></view>
 			</view>
 			<view class="yui-tabs__extra">
 				<slot name="extra"></slot>
@@ -143,7 +143,6 @@
 		data() {
 			return {
 				tabList: [],
-				translateX: null,
 				scrollId: 'tab_0',
 				scrollLeft: 0, //滚动left值
 				extraWidth: 0, //标签栏右侧额外区域宽度
@@ -154,6 +153,13 @@
 					startX: null, //记录touch位置的横坐标
 					startY: null //记录touch位置的纵坐标
 				},
+				// 标签栏底部线条动画相关
+				translateX: null,
+				lineAnimated: false, //是否开启标签栏动画
+				lineAnimatedStyle: {
+					transform: `translateX(-100%) translateX(-50%)`,
+					transitionDuration: `0s`
+				}, //标签栏底部线条动画样式
 			}
 		},
 		computed: {
@@ -170,9 +176,9 @@
 				const style = {
 					backgroundColor: this.background,
 				}
-				
+
 				// 滚动吸顶下
-				if(this.fixed){
+				if (this.fixed) {
 					style.top = this.offsetTop + "px"
 					style.zIndex = this.zIndex
 				}
@@ -184,20 +190,16 @@
 					width: `calc(100% - ${this.extraWidth}px)`
 				}
 			},
-			// 选中状态的线条样式
+			// 标签栏底部线条样式
 			lineStyle() {
 				const {
-					translateX,
 					lineWidth,
 					lineHeight,
 					duration
 				} = this;
-				const x = isDef(translateX) ? translateX + "px" : '-100%'
 				const lineStyle = {
 					width: addUnit(lineWidth),
 					backgroundColor: this.color,
-					transform: `translateX(${x}) translateX(-50%)`,
-					transitionDuration: `${duration}s`
 				}
 
 				if (isDef(lineHeight)) {
@@ -205,7 +207,6 @@
 					lineStyle.height = height;
 					lineStyle.borderRadius = height;
 				}
-
 				return lineStyle
 			},
 			// 是否允许横向滚动
@@ -232,9 +233,19 @@
 			// 可见时也需要计算translateX
 			visible: {
 				handler() {
+					this.lineAnimated = false //是否开启标签栏动画
 					this.$nextTick(() => {
-						this.setTranslateX()
+						this.changeStyle() // 样式切换
 					})
+				}
+			},
+			// 监听translateX，设置标签栏底部线条动画
+			translateX: {
+				handler(val) {
+					const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
+					const duration = `${this.lineAnimated?this.duration:'0'}s`
+					this.$set(this.lineAnimatedStyle, 'transform', transform)
+					this.$set(this.lineAnimatedStyle, 'transitionDuration', duration)
 				}
 			},
 		},
@@ -308,12 +319,10 @@
 				const oldValue = this.value //获取旧的index
 				//更新v-model绑定的值
 				this.$emit('input', index) //更新v-model绑定的值
-				this.tabChange(index, oldValue)
+				// this.tabChange(index, oldValue)
 			},
 			// 标签切换
 			tabChange(value, oldValue) {
-				this.scrollId = `tab_${value-1}`; //设置scroll-into-view
-
 				const oldTab = this.tabList[oldValue] //上一个tab
 				const currTab = this.tabList[value] //当前tab
 				// 设置选中态
@@ -331,7 +340,9 @@
 			},
 			// 样式切换
 			changeStyle() {
+				this.scrollId = ""
 				this.$nextTick(() => {
+					this.scrollId = `tab_${this.value-1}`; //设置scroll-into-view
 					this.setTranslateX() //设置translateX
 					this.changeTrackStyle(false, this.duration) //改变标签内容滑动轨道样式
 				})
@@ -341,6 +352,9 @@
 				if (this.tabList[this.value].disabled) return
 				const rect = await this.getRect('.yui-tab_' + this.value)
 				if (rect) this.translateX = this.scrollLeft + rect.left + rect.width / 2
+				this.$nextTick(() => {
+					this.lineAnimated = true //是否开启标签栏动画
+				})
 			},
 			// 改变标签内容滑动轨道样式
 			changeTrackStyle(isSlide = false, duration = 0, offsetWidth = 0) {
@@ -515,6 +529,7 @@
 			height: 3px;
 			background-color: #0022AB;
 			border-radius: 3px;
+			transform: translateX(-100%) translateX(-50%);
 			// transition-duration: 0.3s;
 		}
 
