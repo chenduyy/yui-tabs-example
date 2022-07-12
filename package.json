@@ -1,7 +1,7 @@
 {
 	"id": "yui-demo",
 	"name": "tab标签页",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "tab标签页，滑动内容切换",
 	"keywords": [
 		"tab",
