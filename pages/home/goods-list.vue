@@ -1,7 +1,7 @@
 <template>
 	<view class="goods-list-container">
 		<no-data v-show="isEmpty" description="抱歉,没有您想要的商品~~" padding="100rpx 0"></no-data>
-		<uni-grid :column="2" :showBorder="false">
+		<uni-grid v-show="!isEmpty" :column="2" :showBorder="false">
 			<uni-grid-item v-for="(item,index) in dataList" :key="index">
 				<view class="image-wrapper">
 					<image class="image-content" mode="scaleToFill" :src="item.img" />
@@ -65,7 +65,7 @@
 				return this.dataSource[this.activeIndex]
 			},
 			isEmpty() {
-				return this.dataList.length == 0
+				return  !this.dataList || this.dataList.length == 0
 			},
 			dataSource() {
 				const list1 = [{

@@ -3,7 +3,10 @@
 		<view class="title-wrap">
 			基础用法
 		</view>
-		<yui-tabs :tabs="tabs1" v-model="activeIndex1" :isLazyRender="false">
+		<yui-tabs :tabs="tabs1" v-model="activeIndex1" :isLazyRender="false" animated>
+			<!-- <view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs1" :key="index">
+				<view v-for="(item,sIndex) in 5*(index+1)" :key="sIndex">内容{{(index+1)+'--'+sIndex}}</view>
+			</view> -->
 			<template #pane0>
 				<view class="content-wrap">内容1</view>
 			</template>
@@ -28,13 +31,15 @@
 				自定义标签主题色(color)、标题文字默认/选中颜色(titleInactiveColor/titleActiveColor)、标签栏背景色(background)、底部线条宽度(lineWidth)、
 			</view>
 		</view>
+		<view style="padding: 20px;position: relative;overflow-x: hidden;">
 		<yui-tabs :tabs="tabs1" v-model="activeIndex1" lineWidth="20" color="#ee0a24" background="#fff"
-			titleActiveColor="#ee0a24" titleInactiveColor="#333">
+			titleActiveColor="#ee0a24" titleInactiveColor="#333" >
 			<!-- 标签内容 -->
 			<view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs1" :key="index">
 				<view>内容{{index+1}}</view>
 			</view>
 		</yui-tabs>
+		</view>
 
 		<view class="title-wrap">
 			标签标题文字超出省略
@@ -229,7 +234,7 @@
 				// 获取依赖元素的bottom值，判断是否该元素是否完全消失在可见区域中
 				// 用于控制用户滚动到顶显示的标签页的显隐
 				dependEl.boundingClientRect(rect => {
-					this.isFixed = rect.bottom - this.navHeight <= 0
+					if (rect) this.isFixed = rect.bottom - this.navHeight <= 0
 				}).exec()
 			}
 		},

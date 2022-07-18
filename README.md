@@ -14,12 +14,13 @@
 + 该插件使用的预编译，需要自行安装less插件。
 + 如果发现组件有bug或者不完善可以留言交流。
 + 测试demo请移步git地址：<https://github.com/chenduyy/yui-demo>
++ 最新的代码请下载示例项目ZIP,在项目的components/yui-tabs下，插件ZIP并非最新的代码
 
 
 
 <div id="supportPlatform">支持的平台：</div>
 
-+ H5、app-vue、微信小程序可用，其他的小程序平台可自行测试。
++ H5、app-vue、微信、支付宝、钉钉小程序可用，其他的小程序平台可自行测试。
 + 暂不支持nvue。
 
 

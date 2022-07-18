@@ -32,7 +32,7 @@
 		<!-- 标签内容 -->
 		<view class="yui-tabs__content" :class="{'yui-tabs__content--animated':animated}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
-				<view class="yui-tab__pane" v-for="(tab,index) in tabList" :key="index" v-show="tab.show"
+				<view class="yui-tab__pane" v-for="(tab,index) in tabList" :key="index" :style="[paneStyle(tab)]"
 					@touchstart="touchStart" @touchend="touchEnd($event,index)">
 					<view v-if="tab.rendered ? true :value == index">
 						<!-- #ifdef H5 || APP-PLUS -->
@@ -276,6 +276,18 @@
 					color: tab.active ? this.titleActiveColor : this.titleInactiveColor
 				}
 			},
+			// 标签内容style
+			paneStyle(tab) {
+				if (this.animated) {
+					return {
+						visibility: tab.show ? 'visible' : 'hidden',
+						height: tab.show ? 'auto' : '0px'
+					}
+				}
+				return {
+					display: tab.show ? 'block' : 'none'
+				}
+			},
 			// 初始化操作 
 			async init() {
 				//获取额外区域的宽度
@@ -300,7 +312,7 @@
 						disabled: false, //是否禁用标签
 						active: isCurr, //是否选中
 						rendered: isCurr || !this.isLazyRender, //标记是否渲染过
-						show: this.animated ? true : isCurr //是否显示内容(标签内容转场动画不使用v-show控制显隐,直接显示)
+						show: isCurr // this.animated ? true : isCurr //是否显示内容(标签内容转场动画不使用v-show控制显隐,直接显示)
 					}
 					if (isObject(item)) {
 						obj.label = item.label
@@ -331,10 +343,11 @@
 				currTab.rendered = true //标记渲染过
 
 				// 转场动画时不需要
-				if (!this.animated) {
-					oldTab.show = false //隐藏旧内容区域
-					currTab.show = true //隐藏当前tab对应的内容区域
-				}
+				// if (!this.animated) {
+				oldTab.show = false //隐藏旧内容区域
+				currTab.show = true //隐藏当前tab对应的内容区域
+				// }
+
 				// 触发change事件
 				this.$emit('change', value, this.tabs[value])
 			},
@@ -350,8 +363,14 @@
 			// 设置translateX，用于改变标签栏底部线条位置
 			async setTranslateX() {
 				if (this.tabList[this.value].disabled) return
+				const parentRect = await this.getRect('.yui-tabs')
+				const parentLeft = parentRect ? parentRect.left : 0
 				const rect = await this.getRect('.yui-tab_' + this.value)
-				if (rect) this.translateX = this.scrollLeft + rect.left + rect.width / 2
+				// 需要减去顶级容器的left，才能保证线条位置正确
+				if (rect) this.translateX = this.scrollLeft + rect.left - parentLeft + rect.width / 2
+
+
+
 				this.$nextTick(() => {
 					this.lineAnimated = true //是否开启标签栏动画
 				})
@@ -485,6 +504,7 @@
 				padding: 0 8rpx;
 				flex: 1;
 				cursor: pointer;
+				-webkit-tap-highlight-color: transparent;
 
 				&--active {
 					color: #212121;
@@ -535,6 +555,9 @@
 
 		// 标签内容
 		&__content {
+			background-color: #fff;
+			overflow: hidden;
+
 			.yui-tab__pane {
 				flex-shrink: 0;
 				box-sizing: border-box;
@@ -545,6 +568,10 @@
 		// 标签内容转场动画样式
 		&__content--animated {
 			overflow: hidden;
+
+			.yui-tab__pane {
+				transition-duration: 0.3s;
+			}
 		}
 
 		// 标签内容的滑动轨道容器
@@ -554,6 +581,7 @@
 			width: 100%;
 			height: 100%;
 			will-change: left;
+			background-color: #fff;
 		}
 	}
 </style>

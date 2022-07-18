@@ -1,11 +1,24 @@
 {
 	"id": "yui-demo",
-	"name": "tab标签页",
+	"name": "Tabs标签页 灵活配置 简单易用",
 	"version": "1.0.2",
-	"description": "tab标签页，滑动内容切换",
+	"description": "tab标签页，支持标签栏滚动、滑动切换、模拟滚动吸顶、标题超出隐藏",
 	"keywords": [
-		"tab",
-		"切换",
+		"tabs标签页",
+		"tab切换",
 		"滑动"
-	]
+	],
+	"uni-app": {
+		"scripts": {
+			"mp-dingtalk": {
+				"title": "钉钉小程序",
+				"env": {
+					"UNI_PLATFORM": "mp-alipay"
+				},
+				"define": {
+					"MP-DINGTALK": true
+				}
+			}
+		}
+	}
 }
