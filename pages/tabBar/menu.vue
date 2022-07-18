@@ -159,12 +159,8 @@
 </template>
 
 <script>
-	import yuiTabs from '@/components/yui-tabs/index'
 	let dependEl = null //依赖元素(请不要将该变量放在data中)
 	export default {
-		components: {
-			yuiTabs,
-		},
 		data() {
 			return {
 				tabs1: Array.from({

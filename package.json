@@ -1,5 +1,5 @@
 {
-	"id": "yui-demo",
+	"id": "yui-tabs",
 	"name": "Tabs标签页 灵活配置 简单易用",
 	"version": "1.0.2",
 	"description": "tab标签页，支持标签栏滚动、滑动切换、模拟滚动吸顶、标题超出隐藏",

@@ -27,7 +27,6 @@
 
 <script>
 	import banner from '@/pages/home/banner'
-	import yuiTabs from '@/components/yui-tabs/index'
 	import goodsList from '@/pages/home/goods-list'
 
 	let dependEl = null //依赖元素(请不要将该变量放在data中)
@@ -38,7 +37,6 @@
 		},
 		components: {
 			banner,
-			yuiTabs,
 			goodsList
 		},
 		data() {

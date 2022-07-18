@@ -1,4 +1,4 @@
-## 关于标签页组件
+# yui-tabs 关于标签页组件
 
 + [Tips](#tips)
 + [支持的平台](#supportPlatform)
