@@ -1,5 +1,7 @@
 <template>
-	<view class="yui-tabs" :class="{'yui-tabs--visible':visible,'yui-tabs--fixed':fixed}">
+	<view class="yui-tabs" :class="[tabsClass]">
+		<!-- 依赖元素，用于处理滚动吸顶所需 -->
+		<view class="depend-wrap"></view>
 		<!-- 标签区域 -->
 		<view class="yui-tabs__wrap" :style="[wrapStyle,innerWrapStyle]">
 			<!-- scrollX为true，表示允许横向滚动 -->
@@ -51,7 +53,7 @@
 	} from "@/common/uitls.js"
 	export default {
 		name: "yui-tabs",
-		emits: ['input', 'change', 'click'],
+		emits: ['input', 'change', 'click', 'scroll'],
 		// uni-app自定义v-model需要按照如下的规范，直接用value和input，否则在微信小程序上会失效
 		model: {
 			prop: 'value',
@@ -94,6 +96,13 @@
 			fixed: Boolean,
 			// 滚动吸顶下与顶部的最小距离，默认 px
 			offsetTop: {
+				type: Number,
+				default: 0
+			},
+			// 是否使用粘性定位布局
+			sticky: Boolean,
+			// 粘性布局的判断阈值
+			stickyThreshold: {
 				type: Number,
 				default: 0
 			},
@@ -160,9 +169,17 @@
 					transform: `translateX(-100%) translateX(-50%)`,
 					transitionDuration: `0s`
 				}, //标签栏底部线条动画样式
+				isFixed: false, //是否吸顶
 			}
 		},
 		computed: {
+			// 标签页容器class
+			tabsClass() {
+				return `
+				${this.visible?'yui-tabs--visible':''}  
+				${this.fixed || this.isFixed?'yui-tabs--fixed':''}
+				`
+			},
 			// 导航区域包裹层样式
 			innerWrapStyle() {
 				const style = {
@@ -170,7 +187,7 @@
 				}
 
 				// 滚动吸顶下
-				if (this.fixed) {
+				if (this.fixed || this.isFixed) {
 					style.top = this.offsetTop + "px"
 					style.zIndex = this.zIndex
 				}
@@ -242,6 +259,7 @@
 		},
 		mounted() {
 			this.init() //初始化操作
+			this.listenEvent(); //监听事件
 		},
 		methods: {
 			// 获取元素位置信息
@@ -275,6 +293,23 @@
 			// 标题右上角信息class
 			infoClass(tab) {
 				return `yui-tab__info ${tab.dot?'yui-tab__info--dot':''}`
+			},
+			// 监听事件
+			listenEvent() {
+				const that = this
+				// 粘性定位布局下的吸顶处理
+				if (this.sticky) {
+					uni.$on('onPageScroll', function(e) {
+						that.getRect('.depend-wrap').then(rect => {
+							that.isFixed = rect.bottom - that.stickyThreshold <= that.offsetTop
+							// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
+							that.$emit("scroll", {
+								scrollTop: e.scrollTop,
+								isFixed: that.isFixed
+							})
+						})
+					})
+				}
 			},
 			// 初始化操作 
 			async init() {
@@ -466,6 +501,11 @@
 	.yui-tabs {
 		position: relative;
 		width: 100%;
+
+		.depend-wrap {
+			position: absolute;
+			top: 0;
+		}
 
 
 		// 开启粘性定位布局

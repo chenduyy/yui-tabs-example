@@ -16,6 +16,7 @@
 + 如果发现组件有bug或者不完善可以留言交流。
 + 如需查看效果，请下载示例项目ZIP运行(标签页组件在uni_modules/yui-tabs下)。
 + 以往版本放在uni_modules/yui-tabs/version中。
++ 关于标签栏滚动吸顶提供了两种实现方式,具体可查看示例项目中的演示。
 
 
 
@@ -98,9 +99,11 @@
 | swipeThreshold    | number、string | 导航标签滚动阈值，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动  | 5 
 | scrollThreshold    | number、string | 滚动阈值，手指滑动页面触发切换的阈值,单位为px；表示开启手势滑动时，横向滑动整个可视区域的多少px时才切换标签内容  | 50 
 | visible   | boolean | 标签栏可见性，结合fixed使用，用于模拟滚动吸顶 | true 
-| fixed    | boolean | 标签页是否滚动吸顶  | false 
-| offset-top    | number | 滚动吸顶下与顶部的最小距离，默认 px  | 0 
+| fixed    | boolean | 标签页是否滚动吸顶(请查看示例项目中的具体用法；示例->滚动吸顶(fixed方式)；与sticky的效果相同,但是不推荐使用)  | false 
+| offset-top    | number | 滚动吸顶(粘性定位布局)下与顶部的最小距离，默认 px  | 0 
 | z-index    | number | 滚动吸顶下，标签栏的z-index值  | 99 
+| sticky	| boolean	| 是否使用粘性定位布局(请查看示例项目中的具体用法；示例->滚动吸顶(sticky方式))	| false
+| stickyThreshold | number | 粘性定位布局的判断阈值 | 0
 
 
 <div id="tabsAttr">tabs数组参数</div>
@@ -113,7 +116,6 @@
 | dot | boolean | 是否在标题右上角显示小红点（优先级高于badge） | false
 | badge | number/string | 图标右上角徽标的内容 | -
 
-label:'标签1',slot:'slotName'
 
 <div id="tabsEvents">Tabs Events</div>
 
@@ -121,6 +123,7 @@ label:'标签1',slot:'slotName'
 | ---------	| -------	| ---------------------------------------
 | click   | 点击标签时触发 | index:下标；item：当前点击的tab项
 | change   | 当前激活的标签改变时触发 | index:下标；item：当前改变的tab项
+| scroll   | 滚动时触发，仅在 sticky 模式下生效 | { scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
 
 
 <div id="tabsSlots">Tabs Slots</div>

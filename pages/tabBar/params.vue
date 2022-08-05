@@ -163,28 +163,18 @@
 			</template>
 		</yui-tabs>
 
-		<view class="title-wrap depend-wrapper">
+		<view class="title-wrap" style="padding-bottom: 10rpx;">
 			滚动吸顶
-			<view class="title-wrap__desc">
-				在自定义导航栏的情况下，采用了两个标签页的场景模拟该效果
-				让具备fixed属性的标签页通过visible隐藏，显示不固定的标签页，通过监听页面滚动事件，计算一个边界值，处理两个标签页的显隐
-			</view>
+			<view class="title-wrap__desc">提供了两种方式(可在示例中查看):</view>
 		</view>
-		<!-- 用于滚动吸顶的标签页 -->
-		<yui-tabs :visible="isFixed" :tabs="fixedTabs" v-model="activeIndex11" animated fixed :wrapStyle="wrapStyle">
-		</yui-tabs>
-		<!-- 用于默认显示的标签页 -->
-		<yui-tabs :visible="!isFixed" :tabs="fixedTabs" v-model="activeIndex11" animated background="#f5f5f5" swipeable
-			:isLazyRender="false">
-			<view class="content-wrap" :slot="`pane${index}`" v-for="(tab,index) in fixedTabs" :key="index">
-				<p v-for="(item,sIndex) in 50" :key="sIndex">内容{{tab+"--"+sIndex}}</p>
-			</view>
-		</yui-tabs>
+		<ul>
+			<li>fixed模式,采用了两个标签页的场景模拟该效果</li>
+			<li>sticky模式(推荐)</li>
+		</ul>
 	</view>
 </template>
 
 <script>
-	let dependEl = null //依赖元素(请不要将该变量放在data中)
 	export default {
 		data() {
 			return {
@@ -248,73 +238,9 @@
 					}
 				],
 				imgUrl: require('@/static/image/goods1.png'),
-				// 滚动吸顶相关
-				navHeight: 0, //状态栏的高度+导航栏的高度
-				isFixed: false, //用于标记标签页是否滚动到顶固定
-				time: 0, //时间戳的值，用于控制滚动触发事件中的逻辑不频繁执行
-				fixedTabs: ['618返场', '颜值水杯', '家居日用', '冲调零食', '生鲜水果', '鞋子服饰', '钻石珠宝', '生活用品'],
-			}
-		},
-		computed: {
-			// 固定的标签页的标签栏样式
-			wrapStyle() {
-				return {
-					paddingTop: this.isFixed ? this.navHeight + 'px' : 0
-				}
-			}
-		},
-		mounted() {
-			this.scrollToTopInit() // 滚动吸顶初始化操作
-		},
-		// 页面滚动触发事件
-		onPageScroll(e) {
-			if (!dependEl) return
-			const time = Date.now()
-			if (time - this.time > 10) {
-				this.time = time
-				// 获取依赖元素的bottom值，判断是否该元素是否完全消失在可见区域中
-				// 用于控制用户滚动到顶显示的标签页的显隐
-				dependEl.boundingClientRect(rect => {
-					if (rect) this.isFixed = rect.bottom - this.navHeight <= 0
-				}).exec()
 			}
 		},
 		methods: {
-			// 滚动吸顶初始化操作
-			scrollToTopInit() {
-				// 获取滚动吸顶依赖哪个元素进行显示隐藏操作
-				let dependNode
-				// #ifdef MP-ALIPAY
-				dependNode = uni.createSelectorQuery()
-				// #endif
-				// #ifndef MP-ALIPAY
-				dependNode = uni.createSelectorQuery().in(this)
-				// #endif
-				dependEl = dependNode.select('.depend-wrapper')
-
-				let statusBarH = 0,
-					navBarH = 0
-				// 获取状态栏的高度+导航栏的高度
-
-				// #ifdef MP-WEIXIN || APP-PLUS
-				// 微信小程序、APP获取状态栏高度 
-				statusBarH = uni.getSystemInfoSync().statusBarHeight
-				// #endif
-
-				// #ifdef MP-WEIXIN
-				// 微信小程序获取胶囊位置信息
-				const menuBtnInfo = uni.getMenuButtonBoundingClientRect()
-				//navHeight的值为状态栏的高度+导航栏的高度
-				if (menuBtnInfo) {
-					//导航栏的高度 = (胶囊底部高度 - 状态栏的高度) + (胶囊顶部高度 - 状态栏内的高度)
-					navBarH = (menuBtnInfo.bottom - statusBarH) +
-						(menuBtnInfo.top - statusBarH)
-				}
-				// #endif
-
-				//状态栏的高度+导航栏的高度
-				this.navHeight = navBarH + statusBarH
-			},
 			// 标签点击事件
 			tabClick(index, item) {
 				console.log("tabClick", index, item);
@@ -325,7 +251,7 @@
 			},
 			// 更新徽标
 			updateBadge() {
-				this.customTabs.forEach(tab => {
+				this.customTabs.forEach((tab, i) => {
 					if (tab.badge) this.$set(tab, 'badge', (Math.random() * 10 + 5).toFixed(0))
 				})
 			}
@@ -359,6 +285,13 @@
 				font-size: 22rpx;
 				line-height: 32rpx;
 			}
+		}
+		
+		ul{
+			font-size: 28rpx;
+			line-height: 40rpx;
+			color: rgba(69, 90, 100, 0.6);
+			margin-bottom: 20rpx;
 		}
 
 		.content-wrap {
