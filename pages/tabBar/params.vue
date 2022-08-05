@@ -1,5 +1,5 @@
 <template>
-	<view class="container" :style="{paddingTop: navHeight+'px'}">
+	<view class="container">
 		<view class="title-wrap">
 			基础用法
 		</view>

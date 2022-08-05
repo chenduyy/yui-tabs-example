@@ -8,8 +8,7 @@
 		}, {
 			"path": "pages/tabBar/params",
 			"style": {
-				"navigationBarTitleText": "参数",
-				"navigationStyle": "custom"
+				"navigationBarTitleText": "参数用法"
 			}
 
 		}, {

@@ -237,10 +237,7 @@
 			// 监听tabs变化，重新初始化tabList
 			tabs: {
 				handler(val) {
-					this.initTabList() //初始化tabList
-					this.$nextTick(() => {
-						this.init() //初始化操作
-					})
+					this.updateTabList(); //更新tabList
 				},
 				deep: true
 			},
@@ -358,13 +355,36 @@
 						tab.label = item.label
 						tab.slot = isNull(item.slot) ? tab.slot : item.slot
 						tab.titleSlot = isNull(item.titleSlot) ? tab.titleSlot : item.titleSlot
-						tab.badge = !isNull(item.badge) ? item.badge : null
 						tab.dot = isNull(item.dot) ? tab.dot : item.dot
-						if (tab.dot) tab.badge = ""
+						tab.badge = !isNull(item.badge) && !tab.dot ? item.badge : ""
 					} else {
 						tab.label = item
 					}
 					return tab
+				})
+			},
+			// 更新tabList
+			updateTabList() {
+				// 如果长度有变化,表示tabs有删除或新增,重新init一次
+				if (this.tabs.length != this.dataLen) {
+					this.initTabList() //初始化tabList
+				} else {
+					// 否则仅仅更改label,badge,dot值
+					this.tabs.forEach((item, i) => {
+						const tab = this.tabList[i]
+						// 读取标签对象值
+						if (isObject(item)) {
+							this.$set(tab, "label", item.label)
+							this.$set(tab, "dot", isNull(item.dot) ? tab.dot : item.dot)
+							this.$set(tab, "badge", !isNull(item.badge) && !tab.dot ? item.badge : "")
+						} else {
+							this.$set(tab, "label", item)
+						}
+					})
+				}
+
+				this.$nextTick(() => {
+					this.init() //初始化操作
 				})
 			},
 			// 标签点击事件
