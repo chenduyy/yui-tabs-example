@@ -3,6 +3,7 @@
 + [Tips](#tips)
 + [支持的平台](#supportPlatform)
 + [使用示例](#useExamples)
++ [tabs数组参数](#tabsAttr)
 + [Tabs Props](#tabsProps)
 + [Tabs Events](#tabsEvents)
 + [Tabs Slots](#tabsSlots)
@@ -10,11 +11,11 @@
 
 <div id="tips">Tips</div>
 
-+ 请保证HBuilderX版本为 3.5.0 alpha，不然动态插槽名在app-vue上无效。
++ 请保证HBuilderX正式版为 v3.4.18、Alpha版为 v3.5.1，否则用于渲染tab内容的动态插槽无效。
 + 该插件使用的预编译，需要自行安装less插件。
 + 如果发现组件有bug或者不完善可以留言交流。
-+ 测试demo请移步git地址：<https://github.com/chenduyy/yui-demo>
-+ 最新的代码请下载示例项目ZIP,在项目的components/yui-tabs下，插件ZIP并非最新的代码
++ 如需查看效果，请下载示例项目ZIP运行(标签页组件在uni_modules/yui-tabs下)。
++ 以往版本放在uni_modules/yui-tabs/version中。
 
 
 
@@ -50,11 +51,7 @@
  </view>
 </template>
 <script>
-	import yuiTabs from '@/components/yui-tabs/index'
 	export default {
-		components: {
-			yuiTabs,
-		},
 		data() {
 			return {
 				tabs: Array.from({
@@ -85,7 +82,7 @@
 | 参数      | 类型		| 描述										| 默认值										
 | ---------	| -------	| ---------------------------------------	| ---------------------------------------	
 | v-model   | string | 绑定当前选中标签的标识符（即tabs中选中项的下标） | 0 
-| tabs   | [stirng,object] | 标签页数据，支持字符串类型与对象类型的数组结构(对象类型需符合{label:'标签1',slot:'slotName'}这样的格式，slot为自定义的标签内容插槽名，否则插槽名默认为"pane"+tab下标的命名) | - 
+| tabs   | [stirng,object] | 标签页数据，支持字符串类型与对象类型的数组结构(对象类型需符合{label:'标签1',slot:'slotName'}这样的格式，slot为自定义的标签内容插槽名，否则插槽名默认为"pane"+tab下标的命名),见下文"tabs数组参数" | - 
 | color | string | 标签主题色 | #0022AB 
 | background    | string | 标签栏背景色  | #fff 
 | title-active-color    | string | 标题选中态颜色  | - 
@@ -96,15 +93,27 @@
 | animated    | boolean | 是否开启切换标签内容时的转场动画  | false 
 | ellipsis    | boolean | 是否省略过长的标题文字,标签数量未超过导航标签滚动阈值时才生效  | true 
 | swipeable    | boolean | 是否开启手势滑动切换 |  false 
+| swipe-animated（v1.0.6） | boolean | 是否开启标签内容的拖动动画（该属性依赖于animated、swipeable、is-lazy-render的开启;该属性开启时考虑给包裹内容的容器增加一个min-height，因为开启该属性后，其他未显示出来的标签内容会沿用当前显示的高度，拖动切换后由于高度不一致会有回弹）
 | is-lazy-render    | boolean | 是否开启延迟渲染（首次切换到标签时才触发内容渲染）  | true 
 | swipeThreshold    | number、string | 导航标签滚动阈值，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动  | 5 
-| scrollThreshold    | number、string | 滚动阈值，手指滑动页面触发切换的阈值,单位为px，表示横向滑动整个可视区域的多少px时才切换标签内容  | 50 
+| scrollThreshold    | number、string | 滚动阈值，手指滑动页面触发切换的阈值,单位为px；表示开启手势滑动时，横向滑动整个可视区域的多少px时才切换标签内容  | 50 
 | visible   | boolean | 标签栏可见性，结合fixed使用，用于模拟滚动吸顶 | true 
 | fixed    | boolean | 标签页是否滚动吸顶  | false 
 | offset-top    | number | 滚动吸顶下与顶部的最小距离，默认 px  | 0 
 | z-index    | number | 滚动吸顶下，标签栏的z-index值  | 99 
 
 
+<div id="tabsAttr">tabs数组参数</div>
+
+| 参数      | 类型		| 描述										| 默认值										
+| ---------	| -------	| ---------------------------------------	| ---------------------------------------	
+| label | string | 标题 | -
+| slot | string | 标签内容插槽名 | -
+| titleSlot | number/string | 标题插槽名 | -
+| dot | boolean | 是否在标题右上角显示小红点（优先级高于badge） | false
+| badge | number/string | 图标右上角徽标的内容 | -
+
+label:'标签1',slot:'slotName'
 
 <div id="tabsEvents">Tabs Events</div>
 
@@ -119,4 +128,5 @@
  | 名称      | 说明
  | --------- | -------
  | extra  | 标签栏右侧额外内容
- | pane+下标  | 标签内容插槽，否则插槽名默认为"pane"+tab下标的命名，如果tabs中通过slot设置了插槽名，则是slot中的命名
+ | pane+下标  | 标签内容插槽，插槽名默认为"pane"+tab下标，如果tabs中通过slot设置了插槽名，则使用slot的值
+ | title+下标  | 标签标题插槽，插槽名默认为"title"+tab下标，如果tabs中通过titleSlot设置了插槽名，则使用titleSlot的值

@@ -1,6 +1,9 @@
 <template>
 	<!-- 顶部轮播区域 -->
 	<view class="banner-wrapper">
+		<!-- <view v-for="(item,index) in 3" :key="index">
+			<slot :name="'title'+index" :content="{name:'标题'+index}">标题{{index}}</slot>
+		</view> -->
 		<uni-swiper-dot :info="swiperList" :current="current" field="content" mode="round" :dots-styles="dotsStyles">
 			<swiper class="swiper-box" :autoplay="autoplay" :interval="interval" :duration="duration"
 				@change="handleChange">

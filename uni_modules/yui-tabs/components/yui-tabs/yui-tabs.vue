@@ -3,28 +3,21 @@
 		<!-- 标签区域 -->
 		<view class="yui-tabs__wrap" :style="[wrapStyle,innerWrapStyle]">
 			<!-- scrollX为true，表示允许横向滚动 -->
-			<scroll-view v-if="scrollX" class="yui-tabs__scroll" :scroll-x="scrollX" :scroll-anchoring="true"
-				enable-flex :scroll-into-view="scrollId" scroll-with-animation @scroll="handleScroll"
+			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX"
+				:scroll-anchoring="true" enable-flex :scroll-into-view="scrollId" scroll-with-animation
 				:style="[scrollStyle]">
 				<view class="yui-tabs__nav">
 					<view class="yui-tab" v-for="(tab,index) in tabList" :key="index" @click="handleClick(index)"
 						:id="`tab_${index}`" :class="[tabClass(index, tab)]" :style="[tabStyle(tab)]">
-						<view class="yui-tab__text" :class="{'yui-tab__text--ellipsis':ellipsis}">
-							{{tab.label}}
+						<view class="yui-tab__text">
+							<slot :name="tab.titleSlot">{{tab.label}}</slot>
+							<text :class="[infoClass(tab)]" v-if="tab.badge || tab.dot">{{tab.badge}}</text>
 						</view>
 					</view>
 					<view class="yui-tabs__line" :style="[lineStyle,lineAnimatedStyle]"></view>
 				</view>
 			</scroll-view>
-			<view v-else class="yui-tabs__nav">
-				<view class="yui-tab" v-for="(tab,index) in tabList" :key="index" @click="handleClick(index)"
-					:id="`tab_${index}`" :class="[tabClass(index, tab)]" :style="[tabStyle(tab)]">
-					<view class="yui-tab__text" :class="{'yui-tab__text--ellipsis':ellipsis}">
-						{{tab.label}}
-					</view>
-				</view>
-				<view class="yui-tabs__line" :style="[lineStyle,lineAnimatedStyle]"></view>
-			</view>
+			<!-- 标签栏额外内容 -->
 			<view class="yui-tabs__extra">
 				<slot name="extra"></slot>
 			</view>
@@ -32,15 +25,11 @@
 		<!-- 标签内容 -->
 		<view class="yui-tabs__content" :class="{'yui-tabs__content--animated':animated}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
-				<view class="yui-tab__pane" v-for="(tab,index) in tabList" :key="index" :style="[paneStyle(tab)]"
-					@touchstart="touchStart" @touchend="touchEnd($event,index)">
+				<view class="yui-tab__pane" :class="[paneClass(tab,index)]" v-for="(tab,index) in tabList" :key="index"
+					:style="[tab.paneStyle]" @touchstart.stop="touchStart" @touchmove.stop="touchMove($event,index)"
+					@touchend.stop="touchEnd($event,index)">
 					<view v-if="tab.rendered ? true :value == index">
-						<!-- #ifdef H5 || APP-PLUS -->
 						<slot :name="tab.slot"></slot>
-						<!-- #endif -->
-						<!-- #ifdef MP -->
-						<slot name="{{tab.slot}}"></slot>
-						<!-- #endif -->
 					</view>
 				</view>
 			</view>
@@ -49,6 +38,10 @@
 </template>
 
 <script>
+	// 考虑是否增加标签插槽（动态插槽名不支持绑定attribute），以及标签角标
+	// 考虑是否增加标签页样式风格,line、card
+	// 滚动导航
+
 	import {
 		isNull,
 		addUnit,
@@ -134,6 +127,11 @@
 				type: Boolean,
 				default: false,
 			},
+			// 是否开启标签内容的拖动动画（该属性依赖于swipeable、is-lazy-render的开启;该属性开启时考虑给包裹内容的容器增加一个min-height，因为开启该属性后，其他未显示出来的标签内容会沿用当前显示的高度，拖动切换后由于高度不一致会有回弹）
+			swipeAnimated: {
+				type: Boolean,
+				default: false,
+			},
 			// 滚动阈值，手指滑动页面触发切换的阈值,单位为px，表示横向滑动整个可视区域的多少px时才切换标签内容
 			scrollThreshold: {
 				type: [Number, String],
@@ -142,20 +140,22 @@
 		},
 		data() {
 			return {
-				tabList: [],
+				tabList: [], //标签页数据
 				scrollId: 'tab_0',
-				scrollLeft: 0, //滚动left值
 				extraWidth: 0, //标签栏右侧额外区域宽度
-				contentWidth: 0, //标签内容区域的宽度
+				contentWidth: 0, //标签内容宽度
 				trackStyle: null, //标签内容滑动轨道样式
 				touchInfo: {
 					inited: false, //标记左右滑动时的初始化状态
 					startX: null, //记录touch位置的横坐标
-					startY: null //记录touch位置的纵坐标
+					startY: null, //记录touch位置的纵坐标
+					moved: false, //用来判断是否是一次移动
+					deltaX: 0, //记录拖动的横坐标距离
+					isLeftSide: false, //标记是左滑还是右滑
 				},
 				// 标签栏底部线条动画相关
 				translateX: null,
-				lineAnimated: false, //是否开启标签栏动画
+				lineAnimated: false, //是否开启标签栏动画（用于首次初始化时取消底部线条动画）
 				lineAnimatedStyle: {
 					transform: `translateX(-100%) translateX(-50%)`,
 					transitionDuration: `0s`
@@ -163,14 +163,6 @@
 			}
 		},
 		computed: {
-			// 容器样式
-			containerStyle() {
-				return {
-					position: this.fixed ? 'fixed' : 'relative',
-					top: this.top,
-					zIndex: this.fixed ? this.zIndex : undefined,
-				}
-			},
 			// 导航区域包裹层样式
 			innerWrapStyle() {
 				const style = {
@@ -213,6 +205,9 @@
 			scrollX() {
 				return this.tabs.length > this.swipeThreshold
 			},
+			dataLen() {
+				return this.tabList.length
+			}
 		},
 		watch: {
 			// 监听选中标识符变化
@@ -226,18 +221,11 @@
 			tabs: {
 				handler(val) {
 					this.initTabList() //初始化tabList
-					this.changeStyle() // 样式切换
+					this.$nextTick(() => {
+						this.init() //初始化操作
+					})
 				},
 				deep: true
-			},
-			// 可见时也需要计算translateX
-			visible: {
-				handler() {
-					this.lineAnimated = false //是否开启标签栏动画
-					this.$nextTick(() => {
-						this.changeStyle() // 样式切换
-					})
-				}
 			},
 			// 监听translateX，设置标签栏底部线条动画
 			translateX: {
@@ -253,22 +241,30 @@
 			this.initTabList() // 初始化tabList
 		},
 		mounted() {
-			this.$nextTick(() => {
-				this.init() //初始化操作
-				this.changeStyle() // 样式切换
-			})
+			this.init() //初始化操作
 		},
 		methods: {
 			// 获取元素位置信息
 			getRect(select) {
 				return new Promise((res, rej) => {
 					if (!select) rej('Parameter is empty');
-					uni.createSelectorQuery().in(this).select(select).boundingClientRect(rect => res(rect)).exec();
+					let query
+					// #ifdef MP-ALIPAY
+					query = uni.createSelectorQuery()
+					// #endif
+					// #ifndef MP-ALIPAY
+					query = uni.createSelectorQuery().in(this)
+					// #endif
+					query.select(select).boundingClientRect(rect => res(rect)).exec();
 				})
 			},
 			// 标签项class
 			tabClass(index, tab) {
-				return `yui-tab_${index} ${tab.active?'yui-tab--active':''} ${tab.disabled?'yui-tab--disabled':''}`
+				return `yui-tab_${index} ${tab.active?'yui-tab--active':''} ${tab.disabled?'yui-tab--disabled':''} ${this.ellipsis && !this.scrollX?'yui-tab__ellipsis':''}`
+			},
+			// 标签内容class
+			paneClass(index, tab) {
+				return `yui-tab_pane${index} ${tab.active?'yui-pane--active':''} ${tab.disabled?'yui-tab--disabled':''}`
 			},
 			// 标签项style
 			tabStyle(tab) {
@@ -276,51 +272,64 @@
 					color: tab.active ? this.titleActiveColor : this.titleInactiveColor
 				}
 			},
-			// 标签内容style
-			paneStyle(tab) {
-				if (this.animated) {
-					return {
-						visibility: tab.show ? 'visible' : 'hidden',
-						height: tab.show ? 'auto' : '0px'
-					}
-				}
-				return {
-					display: tab.show ? 'block' : 'none'
-				}
+			// 标题右上角信息class
+			infoClass(tab) {
+				return `yui-tab__info ${tab.dot?'yui-tab__info--dot':''}`
 			},
 			// 初始化操作 
 			async init() {
 				//获取额外区域的宽度
 				let rect = await this.getRect('.yui-tabs__extra')
-				if (rect) this.extraWidth = rect.width
+				this.extraWidth = rect ? rect.width : 0
+
 				//获取标签内容区域的宽度
 				rect = await this.getRect('.yui-tabs__content')
-				if (rect) this.contentWidth = rect.width
-			},
-			// scroll-view组件滚动时触发
-			handleScroll(e) {
-				this.scrollLeft = e.detail.scrollLeft
+				this.contentWidth = rect ? rect.width : 0
+
+				//获取标签容器距离视口左侧的left值
+				rect = await this.getRect('.yui-tabs')
+				const parentLeft = rect ? rect.left : 0
+				// 保存每个tab的translateX
+				this.tabList.forEach(async (tab, index) => {
+					const rect = await this.getRect('.yui-tab_' + index);
+					tab.translateX = rect.left + rect.width / 2 - parentLeft
+					if (index === this.value) this.changeStyle() // 样式切换
+				})
 			},
 			// 初始化tabList
 			initTabList() {
 				const tabs = this.tabs.filter(o => !isNull(o))
 				this.tabList = tabs.map((item, index) => {
 					const isCurr = this.value == index
-					let obj = {
+					const tab = {
 						label: '', //标签名称
-						slot: 'pane' + index, //标签内容的插槽名称,默认以"pane"+标签下标命名
+						slot: 'pane' + index, //标签内容的插槽名称，默认以"pane"+标签下标命名
+						titleSlot: 'title' + index, //标签标题的插槽名称，默认以"title"+标签下标命名
 						disabled: false, //是否禁用标签
 						active: isCurr, //是否选中
 						rendered: isCurr || !this.isLazyRender, //标记是否渲染过
-						show: isCurr // this.animated ? true : isCurr //是否显示内容(标签内容转场动画不使用v-show控制显隐,直接显示)
+						show: isCurr, // this.animated ? true : isCurr //是否显示内容(标签内容转场动画不使用v-show控制显隐,直接显示)
+						dot: false, //是否在标题右上角显示小红点
 					}
+
+					tab.paneStyle = this.animated ? {
+						visibility: tab.show ? 'visible' : 'visible',
+						height: tab.show ? 'auto' : '0px'
+					} : {
+						display: tab.show ? 'block' : 'none'
+					};
+					// 读取标签对象值
 					if (isObject(item)) {
-						obj.label = item.label
-						obj.slot = isNull(item.slot) ? obj.slot : item.slot
+						tab.label = item.label
+						tab.slot = isNull(item.slot) ? tab.slot : item.slot
+						tab.titleSlot = isNull(item.titleSlot) ? tab.titleSlot : item.titleSlot
+						tab.badge = !isNull(item.badge) ? item.badge : null
+						tab.dot = isNull(item.dot) ? tab.dot : item.dot
+						if (tab.dot) tab.badge = ""
 					} else {
-						obj.label = item
+						tab.label = item
 					}
-					return obj
+					return tab
 				})
 			},
 			// 标签点击事件
@@ -331,7 +340,6 @@
 				const oldValue = this.value //获取旧的index
 				//更新v-model绑定的值
 				this.$emit('input', index) //更新v-model绑定的值
-				// this.tabChange(index, oldValue)
 			},
 			// 标签切换
 			tabChange(value, oldValue) {
@@ -342,34 +350,22 @@
 				currTab.active = true
 				currTab.rendered = true //标记渲染过
 
-				// 转场动画时不需要
-				// if (!this.animated) {
 				oldTab.show = false //隐藏旧内容区域
 				currTab.show = true //隐藏当前tab对应的内容区域
-				// }
-
 				// 触发change事件
 				this.$emit('change', value, this.tabs[value])
 			},
 			// 样式切换
 			changeStyle() {
-				this.scrollId = ""
-				this.$nextTick(() => {
-					this.scrollId = `tab_${this.value-1}`; //设置scroll-into-view
-					this.setTranslateX() //设置translateX
-					this.changeTrackStyle(false, this.duration) //改变标签内容滑动轨道样式
-				})
+				this.scrollId = `tab_${this.value-1}`; //设置scroll-into-view
+				this.setTranslateX() //设置translateX
+				this.changeTrackStyle(false, this.duration) //改变标签内容滑动轨道样式
+				this.changePaneStyle() //改变标签内容样式
 			},
 			// 设置translateX，用于改变标签栏底部线条位置
-			async setTranslateX() {
+			setTranslateX() {
 				if (this.tabList[this.value].disabled) return
-				const parentRect = await this.getRect('.yui-tabs')
-				const parentLeft = parentRect ? parentRect.left : 0
-				const rect = await this.getRect('.yui-tab_' + this.value)
-				// 需要减去顶级容器的left，才能保证线条位置正确
-				if (rect) this.translateX = this.scrollLeft + rect.left - parentLeft + rect.width / 2
-
-
+				this.translateX = this.tabList[this.value].translateX
 
 				this.$nextTick(() => {
 					this.lineAnimated = true //是否开启标签栏动画
@@ -384,6 +380,23 @@
 					'transition': `transform ${duration}s ease-in-out`
 				}
 			},
+			// 改变标签内容样式
+			changePaneStyle() {
+				this.getRect('.yui-tab__pane' + this.value).then(rect => {
+					// 有拖动动画时，隐藏的标签内容高度取显示的标签内容高度
+					const height = rect && this.swipeAnimated ? rect.height : 0
+					this.tabList.forEach(tab => {
+						const paneStyle = this.animated ? {
+							// 有拖动动画时或指定标签内容显示时，为visible
+							visibility: this.swipeAnimated || tab.show ? 'visible' : 'hidden',
+							height: tab.show ? 'auto' : height + 'px'
+						} : {
+							display: tab.show ? 'block' : 'none'
+						};
+						this.$set(tab, "paneStyle", paneStyle)
+					})
+				})
+			},
 			touchStart(e) {
 				// 禁止滑动
 				if (!this.swipeable) return
@@ -392,8 +405,10 @@
 				// 记录touch位置的横坐标与纵坐标
 				this.touchInfo.startX = touch.pageX
 				this.touchInfo.startY = touch.pageY
+
+				this.touchInfo.moved = false //用来判断是否是一次移动
 			},
-			touchEnd(e, index) {
+			touchMove(e, index) {
 				if (!this.touchInfo.inited) return
 				const {
 					pageX,
@@ -413,17 +428,30 @@
 
 				// 标记是左滑还是右滑
 				const isLeftSide = deltaX >= 0
-				const len = this.tabList.length
 				// 如果当前为第一页内容，则不允许左滑；最后一页内容，则不允许右滑
-				if ((isLeftSide && index == 0) || (!isLeftSide && index == len - 1)) {
+				if ((isLeftSide && index == 0) || (!isLeftSide && index == this.dataLen - 1)) {
 					return
 				}
-
+				this.touchInfo.isLeftSide = isLeftSide
+				this.touchInfo.moved = true
+				this.touchInfo.deltaX = Math.abs(deltaX)
+				// 改变标签内容的样式，模拟拖动动画效果
+				if (this.swipeAnimated) {
+					const offsetWidth = this.contentWidth * this.value * -1 + deltaX
+					this.changeTrackStyle(true, 0, offsetWidth)
+				}
+			},
+			touchEnd(e, index) {
+				if (!this.touchInfo.moved) return
+				const {
+					isLeftSide,
+					deltaX
+				} = this.touchInfo || {}
 				// 移动的横坐标偏移量大于指定的滚动阈值时,则切换显示状态,否则还原
 				if (Math.abs(deltaX) > Number(this.scrollThreshold)) {
 					// 根据是否为左滑查找需要滑动到的标签内容页下标，切换标签内容
 					index = index + (isLeftSide ? -1 : 1)
-					if (index > -1 && index < len) this.handleClick(index)
+					if (index > -1 && index < this.dataLen) this.handleClick(index)
 				} else {
 					this.changeTrackStyle(false, this.duration)
 				}
@@ -442,6 +470,8 @@
 
 		// 开启粘性定位布局
 		&--fixed {
+
+			// 导航区域包裹层
 			.yui-tabs__wrap {
 				position: fixed;
 				top: 0;
@@ -464,24 +494,37 @@
 		// 导航区域包裹层
 		&__wrap {
 			position: relative;
-			// display: flex;
+			display: flex;
 			background-color: #fff;
 			align-items: center;
-			display: none;
+			overflow: hidden;
+			visibility: hidden;
+			height: 0;
+
 		}
 
-		// 导航区域可见
-		&--visible .yui-tabs__wrap {
-			display: flex;
+		// 标签页可见
+		&--visible {
+
+			// 导航区域包裹层
+			.yui-tabs__wrap {
+				visibility: visible;
+				height: auto;
+			}
 		}
+
 
 
 		// scroll-view组件样式
 		&__scroll {
 			position: relative;
-			white-space: nowrap; // 使用横向滚动时，需要给<scroll-view>添加white-space: nowrap;样式
 			width: 100%;
 			height: 80rpx;
+
+			// 允许滚动
+			&.enable-sroll {
+				white-space: nowrap; // 使用横向滚动时，需要给<scroll-view>添加white-space: nowrap;样式
+			}
 		}
 
 
@@ -519,15 +562,50 @@
 
 				// 标题文字
 				&__text {
+					position: relative;
+					display: inline;
+				}
 
-					// 省略过长的标题文字
-					&--ellipsis {
-						display: -webkit-box; //定义为盒子显示
-						overflow: hidden;
-						text-overflow: ellipsis; //文本溢出隐藏为省略号
-						-webkit-line-clamp: 1; // 限制一个块元素显示的文本行数
-						-webkit-box-orient: vertical; //盒模型子元素排列： vertical（竖排）orhorizontal（横排）
-					}
+
+				// 文字省略
+				&__ellipsis {
+					display: -webkit-box; //定义为盒子显示
+					overflow: hidden;
+					text-overflow: ellipsis; //文本溢出隐藏为省略号
+					-webkit-line-clamp: 1; // 限制一个块元素显示的文本行数
+					-webkit-box-orient: vertical; //盒模型子元素排列： vertical（竖排）orhorizontal（横排）
+				}
+
+				// 标签文字右上角徽标的内容
+				&__info {
+					display: inline-block;
+					position: absolute;
+					top: 0;
+					right: 0;
+					box-sizing: border-box;
+					min-width: 36rpx;
+					padding: 0 4rpx;
+					color: #fff;
+					font-weight: 500;
+					font-size: 18rpx;
+					line-height: 26rpx;
+					text-align: center;
+					background-color: #e53935;
+					border: 2rpx solid #fff;
+					border-radius: 36rpx;
+					transform: translate(50%, -50%);
+					transform-origin: 100%;
+					text-align: center;
+				}
+
+				&__info--dot {
+					line-height: unset;
+					padding: 0;
+					width: 12rpx;
+					min-width: 0;
+					height: 12rpx;
+					background-color: #e53935;
+					border-radius: 100%;
 				}
 			}
 		}
@@ -557,6 +635,7 @@
 		&__content {
 			background-color: #fff;
 			overflow: hidden;
+			// display: none;
 
 			.yui-tab__pane {
 				flex-shrink: 0;
@@ -579,7 +658,7 @@
 			position: relative;
 			display: flex;
 			width: 100%;
-			height: 100%;
+			height: unset;
 			will-change: left;
 			background-color: #fff;
 		}

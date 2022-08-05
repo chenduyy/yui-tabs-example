@@ -4,8 +4,7 @@
 		<view class="yui-tabs__wrap" :style="[wrapStyle,innerWrapStyle]">
 			<!-- scrollX为true，表示允许横向滚动 -->
 			<scroll-view v-if="scrollX" class="yui-tabs__scroll" :scroll-x="scrollX" :scroll-anchoring="true"
-				enable-flex :scroll-into-view="scrollId" scroll-with-animation @scroll="handleScroll"
-				:style="[scrollStyle]">
+				enable-flex :scroll-into-view="scrollId" scroll-with-animation :style="[scrollStyle]">
 				<view class="yui-tabs__nav">
 					<view class="yui-tab" v-for="(tab,index) in tabList" :key="index" @click="handleClick(index)"
 						:id="`tab_${index}`" :class="[tabClass(index, tab)]" :style="[tabStyle(tab)]">
@@ -35,12 +34,7 @@
 				<view class="yui-tab__pane" v-for="(tab,index) in tabList" :key="index" :style="[paneStyle(tab)]"
 					@touchstart="touchStart" @touchend="touchEnd($event,index)">
 					<view v-if="tab.rendered ? true :value == index">
-						<!-- #ifdef H5 || APP-PLUS -->
 						<slot :name="tab.slot"></slot>
-						<!-- #endif -->
-						<!-- #ifdef MP -->
-						<slot name="{{tab.slot}}"></slot>
-						<!-- #endif -->
 					</view>
 				</view>
 			</view>
@@ -144,9 +138,7 @@
 			return {
 				tabList: [],
 				scrollId: 'tab_0',
-				scrollLeft: 0, //滚动left值
 				extraWidth: 0, //标签栏右侧额外区域宽度
-				contentWidth: 0, //标签内容区域的宽度
 				trackStyle: null, //标签内容滑动轨道样式
 				touchInfo: {
 					inited: false, //标记左右滑动时的初始化状态
@@ -163,14 +155,6 @@
 			}
 		},
 		computed: {
-			// 容器样式
-			containerStyle() {
-				return {
-					position: this.fixed ? 'fixed' : 'relative',
-					top: this.top,
-					zIndex: this.fixed ? this.zIndex : undefined,
-				}
-			},
 			// 导航区域包裹层样式
 			innerWrapStyle() {
 				const style = {
@@ -234,9 +218,7 @@
 			visible: {
 				handler() {
 					this.lineAnimated = false //是否开启标签栏动画
-					this.$nextTick(() => {
-						this.changeStyle() // 样式切换
-					})
+					// this.init() //初始化操作
 				}
 			},
 			// 监听translateX，设置标签栏底部线条动画
@@ -253,17 +235,21 @@
 			this.initTabList() // 初始化tabList
 		},
 		mounted() {
-			this.$nextTick(() => {
-				this.init() //初始化操作
-				this.changeStyle() // 样式切换
-			})
+			this.init() //初始化操作
 		},
 		methods: {
 			// 获取元素位置信息
 			getRect(select) {
 				return new Promise((res, rej) => {
 					if (!select) rej('Parameter is empty');
-					uni.createSelectorQuery().in(this).select(select).boundingClientRect(rect => res(rect)).exec();
+					let query
+					// #ifdef MP-ALIPAY
+					query = uni.createSelectorQuery()
+					// #endif
+					// #ifndef MP-ALIPAY
+					query = uni.createSelectorQuery().in(this)
+					// #endif
+					query.select(select).boundingClientRect(rect => res(rect)).exec();
 				})
 			},
 			// 标签项class
@@ -292,14 +278,17 @@
 			async init() {
 				//获取额外区域的宽度
 				let rect = await this.getRect('.yui-tabs__extra')
-				if (rect) this.extraWidth = rect.width
-				//获取标签内容区域的宽度
-				rect = await this.getRect('.yui-tabs__content')
-				if (rect) this.contentWidth = rect.width
-			},
-			// scroll-view组件滚动时触发
-			handleScroll(e) {
-				this.scrollLeft = e.detail.scrollLeft
+				this.extraWidth = rect ? rect.width : 0
+
+				//获取标签容器距离视口左侧的left值
+				rect = await this.getRect('.yui-tabs')
+				const parentLeft = rect ? rect.left : 0
+				// 保存每个tab的translateX
+				this.tabList.forEach(async (tab, index) => {
+					const rect = await this.getRect('.yui-tab_' + index);
+					tab.translateX = rect.left + rect.width / 2 - parentLeft
+					if (index === this.value) this.changeStyle() // 样式切换
+				})
 			},
 			// 初始化tabList
 			initTabList() {
@@ -331,7 +320,6 @@
 				const oldValue = this.value //获取旧的index
 				//更新v-model绑定的值
 				this.$emit('input', index) //更新v-model绑定的值
-				// this.tabChange(index, oldValue)
 			},
 			// 标签切换
 			tabChange(value, oldValue) {
@@ -342,34 +330,22 @@
 				currTab.active = true
 				currTab.rendered = true //标记渲染过
 
-				// 转场动画时不需要
-				// if (!this.animated) {
 				oldTab.show = false //隐藏旧内容区域
 				currTab.show = true //隐藏当前tab对应的内容区域
-				// }
 
 				// 触发change事件
 				this.$emit('change', value, this.tabs[value])
 			},
 			// 样式切换
 			changeStyle() {
-				this.scrollId = ""
-				this.$nextTick(() => {
-					this.scrollId = `tab_${this.value-1}`; //设置scroll-into-view
-					this.setTranslateX() //设置translateX
-					this.changeTrackStyle(false, this.duration) //改变标签内容滑动轨道样式
-				})
+				this.scrollId = `tab_${this.value-1}`; //设置scroll-into-view
+				this.setTranslateX() //设置translateX
+				this.changeTrackStyle(false, this.duration) //改变标签内容滑动轨道样式
 			},
 			// 设置translateX，用于改变标签栏底部线条位置
-			async setTranslateX() {
+			setTranslateX() {
 				if (this.tabList[this.value].disabled) return
-				const parentRect = await this.getRect('.yui-tabs')
-				const parentLeft = parentRect ? parentRect.left : 0
-				const rect = await this.getRect('.yui-tab_' + this.value)
-				// 需要减去顶级容器的left，才能保证线条位置正确
-				if (rect) this.translateX = this.scrollLeft + rect.left - parentLeft + rect.width / 2
-
-
+				this.translateX = this.tabList[this.value].translateX
 
 				this.$nextTick(() => {
 					this.lineAnimated = true //是否开启标签栏动画
@@ -464,15 +440,19 @@
 		// 导航区域包裹层
 		&__wrap {
 			position: relative;
-			// display: flex;
+			display: flex;
 			background-color: #fff;
 			align-items: center;
-			display: none;
+			overflow: hidden;
+			visibility: hidden;
+			height: 0;
+
 		}
 
 		// 导航区域可见
 		&--visible .yui-tabs__wrap {
-			display: flex;
+			visibility: visible;
+			height: auto;
 		}
 
 

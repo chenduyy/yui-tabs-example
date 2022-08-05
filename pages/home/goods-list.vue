@@ -240,54 +240,53 @@
 					saleNum: 300,
 				}]
 				
-				const list4 = []
-				// const list4 = [{
-				// 	title: '瑞幸×阿华田 田蜜小确幸礼盒',
-				// 	img: this.$imgUrl + `goods/goods27.png`,
-				// 	price: 129,
-				// 	organPrice: 149,
-				// 	saleNum: 2,
-				// }, {
-				// 	title: '【买一送一顺丰直发】【雅觅】宫廷扁桃仁桃酥',
-				// 	img: this.$imgUrl + `goods/goods28.png`,
-				// 	price: 29.9,
-				// 	saleNum: 1700,
-				// 	isFullMinus: true
-				// }, {
-				// 	title: '【顺丰直发】【雅觅】雪花酥抹茶草莓芒果玫瑰火龙果多口味',
-				// 	img: this.$imgUrl + `goods/goods29.png`,
-				// 	price: 49.9,
-				// 	saleNum: 62,
-				// 	isFullMinus: true
-				// }, {
-				// 	title: '【顺丰直发】【雅觅】交响乳酪茉莉花饼',
-				// 	img: this.$imgUrl + `goods/goods30.png`,
-				// 	price: 39.9,
-				// 	saleNum: 80,
-				// 	isFullMinus: true
-				// }, {
-				// 	title: '【顺丰直发】【雅觅】南瓜能量小方',
-				// 	img: this.$imgUrl + `goods/goods31.png`,
-				// 	price: 33.9,
-				// 	saleNum: 83,
-				// 	isFullMinus: true
-				// }, {
-				// 	title: '【顺丰直发】【雅觅】奶皮松仁酥240g',
-				// 	img: this.$imgUrl + `goods/goods32.png`,
-				// 	price: 29.9,
-				// 	saleNum: 200,
-				// 	isFullMinus: true
-				// }, {
-				// 	title: '【顺丰直发】【雅觅】心形拔丝蛋糕500g',
-				// 	img: this.$imgUrl + `goods/goods33.png`,
-				// 	price: 34.9,
-				// 	saleNum: 100,
-				// }, {
-				// 	title: '【顺丰直发】【雅觅】“小情歌” 花饼礼盒630g',
-				// 	img: this.$imgUrl + `goods/goods34.png`,
-				// 	price: 108,
-				// 	saleNum: 29,
-				// }]
+				const list4 = [{
+					title: '瑞幸×阿华田 田蜜小确幸礼盒',
+					img: this.$imgUrl + `goods/goods27.png`,
+					price: 129,
+					organPrice: 149,
+					saleNum: 2,
+				}, {
+					title: '【买一送一顺丰直发】【雅觅】宫廷扁桃仁桃酥',
+					img: this.$imgUrl + `goods/goods28.png`,
+					price: 29.9,
+					saleNum: 1700,
+					isFullMinus: true
+				}, {
+					title: '【顺丰直发】【雅觅】雪花酥抹茶草莓芒果玫瑰火龙果多口味',
+					img: this.$imgUrl + `goods/goods29.png`,
+					price: 49.9,
+					saleNum: 62,
+					isFullMinus: true
+				}, {
+					title: '【顺丰直发】【雅觅】交响乳酪茉莉花饼',
+					img: this.$imgUrl + `goods/goods30.png`,
+					price: 39.9,
+					saleNum: 80,
+					isFullMinus: true
+				}, {
+					title: '【顺丰直发】【雅觅】南瓜能量小方',
+					img: this.$imgUrl + `goods/goods31.png`,
+					price: 33.9,
+					saleNum: 83,
+					isFullMinus: true
+				}, {
+					title: '【顺丰直发】【雅觅】奶皮松仁酥240g',
+					img: this.$imgUrl + `goods/goods32.png`,
+					price: 29.9,
+					saleNum: 200,
+					isFullMinus: true
+				}, {
+					title: '【顺丰直发】【雅觅】心形拔丝蛋糕500g',
+					img: this.$imgUrl + `goods/goods33.png`,
+					price: 34.9,
+					saleNum: 100,
+				}, {
+					title: '【顺丰直发】【雅觅】“小情歌” 花饼礼盒630g',
+					img: this.$imgUrl + `goods/goods34.png`,
+					price: 108,
+					saleNum: 29,
+				}]
 				return [
 					list1, list2, list3, list4
 				]
