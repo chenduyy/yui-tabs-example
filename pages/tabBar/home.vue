@@ -1,13 +1,12 @@
 <template>
 	<view class="page-container">
 		<banner />
-		<yui-tabs :tabs="tabs" v-model="activeIndex" animated :background="background" swipeable swipeAnimated
-			:isLazyRender="false" sticky :wrapStyle="wrapStyle" :offsetTop="offsetTop" :stickyThreshold="navHeight"
-			@scroll="handleScroll">
+		<yui-tabs :tabs="tabs" v-model="activeIndex" animated background="transparent" swipeable swipeAnimated :isLazyRender="false" sticky
+			:wrapStyle="wrapStyle" :offsetTop="offsetTop" :stickyThreshold="navHeight" @scroll="handleScroll">
 			<!-- 标签栏右侧额外内容 -->
 			<template #extra>
 				<view class="extra-wrapper">
-					<text>更多</text>
+					<text class="text">更多</text>
 					<uni-icons type="right" :color="'#5e6d82'" size="14" />
 				</view>
 			</template>
@@ -45,14 +44,11 @@
 			wrapStyle() {
 				return {
 					// 吸顶时给定一个等于导航高度的paddingTop值，用于遮住透明的导航+状态栏区域
-					paddingTop: this.isFixed ? this.navHeight + 'px' : 0
+					paddingTop: this.isFixed ? this.navHeight + 'px' : 0,
+					// 吸顶时背景色为白色，否则为灰色
+					background: this.isFixed ? "#FFF" : "#F5F5F5"
 				}
 			},
-			// 标签栏背景色
-			background() {
-				// 吸顶时标签栏背景色为白色，否则为灰色
-				return this.isFixed ? "#FFF" : "#F5F5F5"
-			}
 		},
 		mounted() {
 			this.getNavHeight() // 获取导航高度
@@ -68,12 +64,12 @@
 				let statusBarH = 0,
 					navBarH = 0
 				// 获取状态栏的高度+导航栏的高度
-		
+
 				// #ifdef MP-WEIXIN || APP-PLUS
 				// 微信小程序、APP获取状态栏高度 
 				statusBarH = uni.getSystemInfoSync().statusBarHeight
 				// #endif
-		
+
 				// #ifdef MP-WEIXIN
 				// 微信小程序获取胶囊位置信息
 				const menuBtnInfo = uni.getMenuButtonBoundingClientRect()
@@ -84,7 +80,7 @@
 						(menuBtnInfo.top - statusBarH)
 				}
 				// #endif
-		
+
 				//状态栏的高度+导航栏的高度
 				this.navHeight = navBarH + statusBarH
 			},
@@ -112,5 +108,10 @@
 		height: 80rpx;
 		display: flex;
 		align-items: center;
+
+		.text {
+			display: inline-block;
+			white-space: nowrap;
+		}
 	}
 </style>

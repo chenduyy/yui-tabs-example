@@ -14,9 +14,11 @@
 			</uni-collapse>
 		</view>
 
-		<banner class="depend-wrapper" />
+		<view class="depend-wrapper">
+			<banner />
+		</view>
 		<!-- 用于滚动吸顶的标签页 -->
-		<yui-tabs :visible="isFixed" :tabs="tabs" v-model="activeIndex" animated fixed :wrapStyle="wrapStyle" :offsetTop="offsetTop" />
+		<yui-tabs :visible="isFixed" :tabs="tabs" v-model="activeIndex" animated fixed :offsetTop="offsetTop" />
 		<!-- 用于默认显示的标签页 -->
 		<yui-tabs :visible="!isFixed" :tabs="tabs" v-model="activeIndex" animated background="#f5f5f5" />
 		<goods-list :activeIndex="activeIndex" />
@@ -43,18 +45,9 @@
 				//tabs:['618返场', '颜值水杯', '家居日用', '冲调零食', '生鲜水果', '鞋子服饰', '钻石珠宝', '生活用品'],
 				activeIndex: 0, // 标签页当前选择项的下标
 				// 标签页滚动吸顶相关
-				navHeight: 0, //顶部导航高度
 				isFixed: false, //用于标记标签页是否滚动到顶固定
 				time: 0, //时间戳的值，用于控制滚动触发事件中的逻辑不频繁执行
 				offsetTop: 0, //粘性定位布局下与顶部的最小距离
-			}
-		},
-		computed: {
-			// 固定的标签页的标签栏样式
-			wrapStyle() {
-				return {
-					paddingTop: this.isFixed ? this.navHeight + 'px' : 0
-				}
 			}
 		},
 		mounted() {
@@ -85,14 +78,14 @@
 				dependNode = uni.createSelectorQuery().in(this)
 				// #endif
 				dependEl = dependNode.select('.depend-wrapper')
-				
+
 				uni.getSystemInfo({
 					success: (e) => {
 						let offsetTop = 0
 						// #ifdef H5
 						offsetTop = 43
 						// #endif
-				
+
 						this.offsetTop = offsetTop;
 					}
 				})
@@ -113,8 +106,8 @@
 		padding: 12px;
 		font-size: 26rpx;
 	}
-	
-	.collapse-content{
+
+	.collapse-content {
 		padding-left: 10rpx;
 	}
 </style>

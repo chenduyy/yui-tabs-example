@@ -26,14 +26,40 @@
 
 
 		<view class="title-wrap">
-			设置标签栏相关颜色及线条
+			样式风格
 			<view class="title-wrap__desc">
-				自定义标签主题色(color)、标题文字默认/选中颜色(titleInactiveColor/titleActiveColor)、标签栏背景色(background)、底部线条宽度(lineWidth)、
+				默认为line，可选：text、card
 			</view>
 		</view>
+		<yui-tabs :tabs="tabs" :type="styleType" v-model="activeIndex13" lineWidth="20" color="#ee0a24">
+			<!-- 标签内容 -->
+			<view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs" :key="index">
+				<view>内容{{index+1}}</view>
+			</view>
+		</yui-tabs>
+		<radio-group class="uni-list" @change="styleChange">
+			<view v-for="(item, index) in styles" :key="index" class="uni-list-item">
+				<view class="uni-list-item__container">
+					<view class="uni-list-item__content">
+						<text class="uni-list-item__content-title">{{ item.text }}</text>
+					</view>
+					<view class="uni-list-item__extra">
+						<radio :value="item.value" :checked="item.checked" />
+					</view>
+				</view>
+			</view>
+		</radio-group>
+
+		<view class="title-wrap">
+			设置标签栏相关颜色及线条
+			<view class="title-wrap__desc">1、自定义标签主题色(color)</view>
+			<view class="title-wrap__desc">2、标题文字默认/选中颜色(titleInactiveColor/titleActiveColor)</view>
+			<view class="title-wrap__desc">3、标签栏背景色(background)</view>
+			<view class="title-wrap__desc">4、底部线条宽度/高度(lineWidth/lineHeight)</view>
+		</view>
 		<view style="padding: 20px;">
-			<yui-tabs :tabs="tabs" v-model="activeIndex2" lineWidth="20" color="#ee0a24" background="#fff"
-				titleActiveColor="#ee0a24" titleInactiveColor="#333">
+			<yui-tabs :tabs="tabs" v-model="activeIndex2" lineWidth="20" lineHeight="3" color="#ee0a24"
+				background="#fff" titleActiveColor="#ee0a24" titleInactiveColor="#333">
 				<!-- 标签内容 -->
 				<view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs" :key="index">
 					<view>内容{{index+1}}</view>
@@ -88,8 +114,9 @@
 			滑动切换
 			<view class="title-wrap__desc">通过swipeable开启手势滑动切换</view>
 		</view>
-		<yui-tabs :tabs="tabs" v-model="activeIndex7" animated swipeable :isLazyRender="false">
+		<yui-tabs :tabs="tabs" v-model="activeIndex7" animated swipeable swipeAnimated :isLazyRender="false">
 			<!-- 标签内容 -->
+
 			<view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs" :key="index">
 				<view v-for="(item,subIndex) in (index+1)*5" :key="subIndex">内容{{index+1}}</view>
 			</view>
@@ -165,12 +192,38 @@
 
 		<view class="title-wrap" style="padding-bottom: 10rpx;">
 			滚动吸顶
-			<view class="title-wrap__desc">提供了两种方式(可在示例中查看):</view>
+			<view class="title-wrap__desc">提供了两种方式(下载示例ZIP运行项目查看):</view>
+			<view class="title-wrap__desc">1、fixed模式,采用了两个标签页的场景模拟该效果</view>
+			<view class="title-wrap__desc">2、sticky模式(推荐)</view>
 		</view>
-		<ul>
-			<li>fixed模式,采用了两个标签页的场景模拟该效果</li>
-			<li>sticky模式(推荐)</li>
-		</ul>
+
+
+		<view class="title-wrap" style="padding-bottom: 10rpx;">
+			组件相关事件
+			<view class="title-wrap__desc">1、click：点击标签时触发(请查看控制台打印)</view>
+			<view class="title-wrap__desc">2、change：当前激活的标签改变时触发</view>
+			<view class="title-wrap__desc">3、rendered：标签内容首次渲染时触发（仅在开启延迟渲染后触发）</view>
+		</view>
+		<yui-tabs :tabs="tabs" v-model="activeIndex11" animated @click="handleClick" @change="handleChange"
+			@rendered="handleRendered">
+			<view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs" :key="index">
+				<view>内容{{index+1}}</view>
+			</view>
+		</yui-tabs>
+
+		<view class="title-wrap">
+			组件实例方法resize
+			<view class="title-wrap__desc">外层元素大小或组件显示状态变化时，可以调用此方法来触发重绘
+			</view>
+		</view>
+		<button size="mini" type="primary" style="margin: 0 0 10rpx 30rpx;" @click="handleResize">调用resize</button>
+		<view :style="{paddingLeft:paddingLeft+'px'}">
+			<yui-tabs ref="tabs" :tabs="tabs" v-model="activeIndex12" animated>
+				<view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs" :key="index">
+					<view>内容{{index+1}}</view>
+				</view>
+			</yui-tabs>
+		</view>
 	</view>
 </template>
 
@@ -190,6 +243,7 @@
 				activeIndex10: 0,
 				activeIndex11: 0,
 				activeIndex12: 0,
+				activeIndex13: 0,
 				tabs: Array.from({
 					length: 5
 				}, (o, i) => `标签${i+1}`),
@@ -238,6 +292,22 @@
 					}
 				],
 				imgUrl: require('@/static/image/goods1.png'),
+				paddingLeft: 0,
+				styleType: 'line',
+				styles: [{
+						value: 'line',
+						text: '线条',
+						checked: true
+					},
+					{
+						value: 'text',
+						text: '文字'
+					},
+					{
+						value: 'card',
+						text: '卡片'
+					}
+				],
 			}
 		},
 		methods: {
@@ -254,7 +324,26 @@
 				this.customTabs.forEach((tab, i) => {
 					if (tab.badge) this.$set(tab, 'badge', (Math.random() * 10 + 5).toFixed(0))
 				})
-			}
+			},
+			// 调用组件实例方法
+			handleResize() {
+				this.paddingLeft = this.paddingLeft === 20 ? 0 : 20
+				this.$refs.tabs.resize()
+			},
+			handleClick(index) {
+				console.log("click：", index);
+			},
+			handleChange(index) {
+				console.log("change：", index);
+			},
+			handleRendered(index) {
+				console.log("rendered：", index);
+			},
+			styleChange(e) {
+				if (this.styleType !== e.detail.value) {
+					this.styleType = e.detail.value
+				}
+			},
 		}
 	}
 </script>
@@ -286,8 +375,8 @@
 				line-height: 32rpx;
 			}
 		}
-		
-		ul{
+
+		ul {
 			font-size: 28rpx;
 			line-height: 40rpx;
 			color: rgba(69, 90, 100, 0.6);
@@ -331,6 +420,38 @@
 				border-radius: 8rpx;
 				margin-left: 4rpx;
 			}
+		}
+
+		.uni-list {
+			flex: 1;
+			margin-top: 15px;
+		}
+
+		.uni-list-item {
+			display: flex;
+			flex: 1;
+			flex-direction: row;
+			background-color: #FFFFFF;
+		}
+
+
+		.uni-list-item__container {
+			padding: 12px 15px;
+			width: 100%;
+			flex: 1;
+			position: relative;
+			display: flex;
+			box-sizing: border-box;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom-style: solid;
+			border-bottom-width: 1px;
+			border-bottom-color: #eee;
+		}
+
+		.uni-list-item__content-title {
+			font-size: 14px;
 		}
 
 	}

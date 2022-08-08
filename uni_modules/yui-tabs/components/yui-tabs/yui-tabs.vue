@@ -8,7 +8,7 @@
 			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX"
 				:scroll-anchoring="true" enable-flex :scroll-into-view="scrollId" scroll-with-animation
 				:style="[scrollStyle]">
-				<view class="yui-tabs__nav">
+				<view class="yui-tabs__nav" :class="[navClass]" :style=[navStyle]>
 					<view class="yui-tab" v-for="(tab,index) in tabList" :key="index" @click="handleClick(index)"
 						:id="`tab_${index}`" :class="[tabClass(index, tab)]" :style="[tabStyle(tab)]">
 						<view class="yui-tab__text">
@@ -16,7 +16,7 @@
 							<text :class="[infoClass(tab)]" v-if="tab.badge || tab.dot">{{tab.badge}}</text>
 						</view>
 					</view>
-					<view class="yui-tabs__line" :style="[lineStyle,lineAnimatedStyle]"></view>
+					<view v-if="isLine" class="yui-tabs__line" :style="[lineStyle,lineAnimatedStyle]"></view>
 				</view>
 			</scroll-view>
 			<!-- 标签栏额外内容 -->
@@ -27,7 +27,7 @@
 		<!-- 标签内容 -->
 		<view class="yui-tabs__content" :class="{'yui-tabs__content--animated':animated}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
-				<view class="yui-tab__pane" :class="[paneClass(tab,index)]" v-for="(tab,index) in tabList" :key="index"
+				<view class="yui-tab__pane" :class="[paneClass(index,tab)]" v-for="(tab,index) in tabList" :key="index"
 					:style="[tab.paneStyle]" @touchstart.stop="touchStart" @touchmove.stop="touchMove($event,index)"
 					@touchend.stop="touchEnd($event,index)">
 					<view v-if="tab.rendered ? true :value == index">
@@ -53,7 +53,7 @@
 	} from "@/common/uitls.js"
 	export default {
 		name: "yui-tabs",
-		emits: ['input', 'change', 'click', 'scroll'],
+		emits: ['input', 'change', 'click', 'rendered', 'scroll'],
 		// uni-app自定义v-model需要按照如下的规范，直接用value和input，否则在微信小程序上会失效
 		model: {
 			prop: 'value',
@@ -66,6 +66,26 @@
 			lineHeight: [Number, String], //底部条高度，默认单位为px,默认值为3px
 			titleActiveColor: String, //标题选中态颜色
 			titleInactiveColor: String, //标题默认态颜色
+			// 标签栏样式
+			wrapStyle: {
+				type: [Object, null],
+				default: () => {}
+			},
+			// 动画时间，单位秒
+			duration: {
+				type: [Number, String],
+				default: 0.3,
+			},
+			// 样式风格类型，可选值为 card
+			type: {
+				type: String,
+				default: "line"
+			},
+			// v-model绑定属性，绑定当前选中标签的标识符（标签的下标）
+			value: {
+				type: Number,
+				default: -1
+			},
 			// 标签页数据，支持字符串类型与对象类型的数组结构
 			// 对象类型需符合{label:'标签1',slot:'slotName'}这样的格式，slot为自定义的标签内容插槽名，否则插槽名默认为"pane"+tab下标的命名
 			tabs: {
@@ -87,17 +107,17 @@
 				type: Boolean,
 				default: true
 			},
-			// v-model绑定属性，绑定当前选中标签的标识符（标签的下标）
-			value: {
-				type: Number,
-				default: -1
-			},
 			// 标签页是否滚动吸顶
 			fixed: Boolean,
 			// 滚动吸顶下与顶部的最小距离，默认 px
 			offsetTop: {
 				type: Number,
 				default: 0
+			},
+			// 滚动吸顶/粘性布局下，标签栏的z-index值
+			zIndex: {
+				type: Number,
+				default: 99
 			},
 			// 是否使用粘性定位布局
 			sticky: Boolean,
@@ -106,23 +126,8 @@
 				type: Number,
 				default: 0
 			},
-			// 滚动吸顶下，标签栏的z-index值
-			zIndex: {
-				type: Number,
-				default: 99
-			},
-			// 标签栏样式
-			wrapStyle: {
-				type: [Object, null],
-				default: () => {}
-			},
-			// 动画时间，单位秒
-			duration: {
-				type: [Number, String],
-				default: 0.3,
-			},
-			// 导航标签滚动阈值，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动
-			swipeThreshold: {
+			// 导航标签的滚动阈值，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动
+			scrollThreshold: {
 				type: [Number, String],
 				default: 5
 			},
@@ -141,8 +146,8 @@
 				type: Boolean,
 				default: false,
 			},
-			// 滚动阈值，手指滑动页面触发切换的阈值,单位为px，表示横向滑动整个可视区域的多少px时才切换标签内容
-			scrollThreshold: {
+			// 滑动切换的滑动距离阈值，手指滑动页面触发切换的阈值,单位为px，表示横向滑动整个可视区域的多少px时才切换标签内容
+			swipeThreshold: {
 				type: [Number, String],
 				default: 50,
 			},
@@ -173,19 +178,29 @@
 			}
 		},
 		computed: {
+			// 样式风格是否为line
+			isLine() {
+				return this.type === "line"
+			},
 			// 标签页容器class
 			tabsClass() {
-				return `
-				${this.visible?'yui-tabs--visible':''}  
-				${this.fixed || this.isFixed?'yui-tabs--fixed':''}
-				`
+				return `yui-tabs--${this.type} ${this.visible?'yui-tabs--visible':''} ${this.fixed || this.isFixed?'yui-tabs--fixed':''} `
 			},
-			// 导航区域包裹层样式
-			innerWrapStyle() {
+			// 标签栏class
+			navClass() {
+				return `yui-tabs__nav--${this.type}`
+			},
+			// 标签栏style
+			navStyle() {
 				const style = {
 					backgroundColor: this.background,
 				}
-
+				if (this.type === "card") style.borderColor = this.color
+				return style
+			},
+			// 标签栏包裹层样式
+			innerWrapStyle() {
+				const style = {}
 				// 滚动吸顶下
 				if (this.fixed || this.isFixed) {
 					style.top = this.offsetTop + "px"
@@ -220,7 +235,7 @@
 			},
 			// 是否允许横向滚动
 			scrollX() {
-				return this.tabs.length > this.swipeThreshold
+				return this.tabs.length > this.scrollThreshold
 			},
 			dataLen() {
 				return this.tabList.length
@@ -250,6 +265,12 @@
 					this.$set(this.lineAnimatedStyle, 'transitionDuration', duration)
 				}
 			},
+			// 类型切换为line时，需要resize
+			isLine:{
+				handler(val) {
+					 if(val) this.resize()
+				}
+			},
 		},
 		created() {
 			this.initTabList() // 初始化tabList
@@ -275,21 +296,35 @@
 			},
 			// 标签项class
 			tabClass(index, tab) {
-				return `yui-tab_${index} ${tab.active?'yui-tab--active':''} ${tab.disabled?'yui-tab--disabled':''} ${this.ellipsis && !this.scrollX?'yui-tab__ellipsis':''}`
+				return `yui-tab_${index} ${tab.active?'yui-tab--active':''} ${this.ellipsis && !this.scrollX?'yui-tab__ellipsis':''}`
 			},
 			// 标签内容class
 			paneClass(index, tab) {
-				return `yui-tab_pane${index} ${tab.active?'yui-pane--active':''} ${tab.disabled?'yui-tab--disabled':''}`
+				return `yui-tab_pane${index} ${tab.active?'yui-pane--active':''}`
 			},
 			// 标签项style
 			tabStyle(tab) {
+				let activeColor = this.titleActiveColor
+				let inactiveColor = this.titleInactiveColor
+				let background = ""
+				// 样式风格为text的标题颜色，选中时使用主题色
+				if (this.type === "text" && isNull(activeColor)) {
+					activeColor = this.color
+				}
+
+				// 样式风格为card的标题颜色，未选中时使用主题色
+				if (this.type === "card") {
+					background = this.color
+					if (isNull(inactiveColor)) inactiveColor = this.color
+				}
 				return {
-					color: tab.active ? this.titleActiveColor : this.titleInactiveColor
+					color: tab.active ? activeColor : inactiveColor,
+					background: tab.active ? background : "",
 				}
 			},
 			// 标题右上角信息class
 			infoClass(tab) {
-				return `yui-tab__info ${tab.dot?'yui-tab__info--dot':''}`
+				return ` yui-tab__info ${tab.dot?'yui-tab__info--dot':''}`
 			},
 			// 监听事件
 			listenEvent() {
@@ -325,7 +360,10 @@
 				this.tabList.forEach(async (tab, index) => {
 					const rect = await this.getRect('.yui-tab_' + index);
 					tab.translateX = rect.left + rect.width / 2 - parentLeft
-					if (index === this.value) this.changeStyle() // 样式切换
+					if (index === this.value) {
+						this.tabChange(this.value, -1) //标签切换
+						this.changeStyle(); //样式切换
+					}
 				})
 			},
 			// 初始化tabList
@@ -338,9 +376,9 @@
 						slot: 'pane' + index, //标签内容的插槽名称，默认以"pane"+标签下标命名
 						titleSlot: 'title' + index, //标签标题的插槽名称，默认以"title"+标签下标命名
 						disabled: false, //是否禁用标签
-						active: isCurr, //是否选中
-						rendered: isCurr || !this.isLazyRender, //标记是否渲染过
-						show: isCurr, // this.animated ? true : isCurr //是否显示内容(标签内容转场动画不使用v-show控制显隐,直接显示)
+						active: false, //是否选中
+						rendered: !this.isLazyRender, //标记是否渲染过
+						show: false, // 是否显示内容
 						dot: false, //是否在标题右上角显示小红点
 					}
 
@@ -362,6 +400,7 @@
 					}
 					return tab
 				})
+
 			},
 			// 更新tabList
 			updateTabList() {
@@ -398,17 +437,22 @@
 			},
 			// 标签切换
 			tabChange(value, oldValue) {
-				const oldTab = this.tabList[oldValue] //上一个tab
+				const oldTab = this.tabList[oldValue] || {} //上一个tab
 				const currTab = this.tabList[value] //当前tab
 				// 设置选中态
 				oldTab.active = false
 				currTab.active = true
+
+				// 触发rendered事件
+				if (this.isLazyRender && !currTab.rendered) {
+					this.$emit('rendered', value, this.tabs[value])
+				}
 				currTab.rendered = true //标记渲染过
 
 				oldTab.show = false //隐藏旧内容区域
-				currTab.show = true //隐藏当前tab对应的内容区域
+				currTab.show = true //显示当前tab对应的内容区域
 				// 触发change事件
-				this.$emit('change', value, this.tabs[value])
+				if (oldValue !== -1) this.$emit('change', value, this.tabs[value])
 			},
 			// 样式切换
 			changeStyle() {
@@ -419,7 +463,7 @@
 			},
 			// 设置translateX，用于改变标签栏底部线条位置
 			setTranslateX() {
-				if (this.tabList[this.value].disabled) return
+				if (!this.isLine) return
 				this.translateX = this.tabList[this.value].translateX
 
 				this.$nextTick(() => {
@@ -503,7 +547,7 @@
 					deltaX
 				} = this.touchInfo || {}
 				// 移动的横坐标偏移量大于指定的滚动阈值时,则切换显示状态,否则还原
-				if (Math.abs(deltaX) > Number(this.scrollThreshold)) {
+				if (Math.abs(deltaX) > Number(this.swipeThreshold)) {
 					// 根据是否为左滑查找需要滑动到的标签内容页下标，切换标签内容
 					index = index + (isLeftSide ? -1 : 1)
 					if (index > -1 && index < this.dataLen) this.handleClick(index)
@@ -513,11 +557,17 @@
 				// 一次touch完成后,重置touchInfo对象尚未初始化状态
 				this.touchInfo.inited = false
 			},
+			// 外层元素大小或组件显示状态变化时，可以调用此方法来触发重绘
+			resize() {
+				this.init()
+			},
 		}
 	}
 </script>
 
 <style lang="less" scoped>
+	@themeColor: #0022AB;
+
 	.yui-tabs {
 		position: relative;
 		width: 100%;
@@ -544,8 +594,8 @@
 		// 不显示滚动条
 		::-webkit-scrollbar {
 			display: none;
-			width: 0 !important;
-			height: 0 !important;
+			width: 0;
+			height: 0;
 			-webkit-appearance: none;
 			background: transparent;
 			color: transparent;
@@ -555,7 +605,6 @@
 		&__wrap {
 			position: relative;
 			display: flex;
-			background-color: #fff;
 			align-items: center;
 			overflow: hidden;
 			visibility: hidden;
@@ -596,6 +645,8 @@
 			height: 80rpx;
 			flex: 1;
 			display: flex;
+			background-color: #fff;
+
 
 			// 导航标签
 			.yui-tab {
@@ -668,6 +719,23 @@
 					border-radius: 100%;
 				}
 			}
+
+			&--card {
+				box-sizing: border-box;
+				margin: 0 32rpx;
+				border: 2rpx solid @themeColor;
+				border-radius: 8rpx;
+
+				.yui-tab {
+					color: @themeColor;
+
+					&--active {
+						background-color: @themeColor;
+						color: #fff;
+					}
+				}
+			}
+
 		}
 
 
@@ -685,7 +753,7 @@
 			left: 0;
 			width: 20px;
 			height: 3px;
-			background-color: #0022AB;
+			background-color: @themeColor;
 			border-radius: 3px;
 			transform: translateX(-100%) translateX(-50%);
 			// transition-duration: 0.3s;

@@ -52,6 +52,12 @@
 				"navigationBarTitleText": "透明导航栏下的滚动吸顶(fixed方式)",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/example/slide_switch",
+			"style": {
+				"navigationBarTitleText": "滑动切换"
+			}
 		}
 	],
 	"globalStyle": {

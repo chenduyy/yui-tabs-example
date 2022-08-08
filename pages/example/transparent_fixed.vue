@@ -16,12 +16,14 @@
 			</uni-collapse>
 		</view>
 
-		<banner class="depend-wrapper" />
+		<view class="depend-wrapper">
+			<banner />
+		</view>
 		<!-- 用于滚动吸顶的标签页 -->
-		<yui-tabs :visible="isFixed" :tabs="tabs" v-model="activeIndex" animated fixed :wrapStyle="wrapStyle">
+		<yui-tabs :visible="isFixed" :tabs="tabs" v-model="activeIndex" animated fixed background="transparent" :wrapStyle="wrapStyle">
 			<template #extra>
 				<view class="extra-wrapper">
-					<text>更多</text>
+					<text class="text">更多</text>
 					<uni-icons type="right" :color="'#5e6d82'" size="14" />
 				</view>
 			</template>
@@ -31,7 +33,7 @@
 			<!-- 标签栏右侧额外内容 -->
 			<template #extra>
 				<view class="extra-wrapper">
-					<text>更多</text>
+					<text class="text">更多</text>
 					<uni-icons type="right" :color="'#5e6d82'" size="14" />
 				</view>
 			</template>
@@ -77,7 +79,9 @@
 			// 固定的标签页的标签栏样式
 			wrapStyle() {
 				return {
-					paddingTop: this.isFixed ? this.navHeight + 'px' : 0
+					paddingTop: this.isFixed ? this.navHeight + 'px' : 0,
+					// 吸顶时背景色为白色，否则为灰色
+					background: this.isFixed ? "#FFF" : "#F5F5F5"
 				}
 			}
 		},
@@ -150,6 +154,11 @@
 			height: 80rpx;
 			display: flex;
 			align-items: center;
+			
+			.text{
+				display: inline-block;
+				white-space:nowrap;
+			}
 		}
 
 		.info-wrap {
