@@ -165,11 +165,10 @@
 					startY: null, //记录touch位置的纵坐标
 					moved: false, //用来判断是否是一次移动
 					deltaX: 0, //记录拖动的横坐标距离
-					isLeftSide: false, //标记是左滑还是右滑
+					isLeftSide: false, //标记是否为左滑
 				},
 				// 标签栏底部线条动画相关
-				translateX: null,
-				lineAnimated: false, //是否开启标签栏动画（用于首次初始化时取消底部线条动画）
+				lineAnimated: false, //是否开启标签栏底部线条动画（首次不开启）
 				lineAnimatedStyle: {
 					transform: `translateX(-100%) translateX(-50%)`,
 					transitionDuration: `0s`
@@ -192,15 +191,15 @@
 			},
 			// 标签栏style
 			navStyle() {
-				const style = {
-					backgroundColor: this.background,
-				}
+				const style = {}
 				if (this.type === "card") style.borderColor = this.color
 				return style
 			},
 			// 标签栏包裹层样式
 			innerWrapStyle() {
-				const style = {}
+				const style = {
+					backgroundColor: this.background,
+				}
 				// 滚动吸顶下
 				if (this.fixed || this.isFixed) {
 					style.top = this.offsetTop + "px"
@@ -256,19 +255,10 @@
 				},
 				deep: true
 			},
-			// 监听translateX，设置标签栏底部线条动画
-			translateX: {
-				handler(val) {
-					const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
-					const duration = `${this.lineAnimated?this.duration:'0'}s`
-					this.$set(this.lineAnimatedStyle, 'transform', transform)
-					this.$set(this.lineAnimatedStyle, 'transitionDuration', duration)
-				}
-			},
 			// 类型切换为line时，需要resize
-			isLine:{
+			isLine: {
 				handler(val) {
-					 if(val) this.resize()
+					if (val) this.resize()
 				}
 			},
 		},
@@ -457,14 +447,19 @@
 			// 样式切换
 			changeStyle() {
 				this.scrollId = `tab_${this.value-1}`; //设置scroll-into-view
-				this.setTranslateX() //设置translateX
+				this.changeLineStyle() //改变标签栏底部线条位置
 				this.changeTrackStyle(false, this.duration) //改变标签内容滑动轨道样式
 				this.changePaneStyle() //改变标签内容样式
 			},
-			// 设置translateX，用于改变标签栏底部线条位置
-			setTranslateX() {
+			// 改变标签栏底部线条位置
+			changeLineStyle() {
+				// 仅在 type="line" 时有效
 				if (!this.isLine) return
-				this.translateX = this.tabList[this.value].translateX
+				const val = this.tabList[this.value].translateX
+				const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
+				const duration = `${this.lineAnimated?this.duration:'0'}s`
+				this.$set(this.lineAnimatedStyle, 'transform', transform)
+				this.$set(this.lineAnimatedStyle, 'transitionDuration', duration)
 
 				this.$nextTick(() => {
 					this.lineAnimated = true //是否开启标签栏动画
@@ -473,7 +468,7 @@
 			// 改变标签内容滑动轨道样式
 			changeTrackStyle(isSlide = false, duration = 0, offsetWidth = 0) {
 				if (!this.animated) return
-				// isSlide标记是否为左右滑动时，否则为点击标签的动画转场
+				// isSlide为true，表示左右滑动；false表示点击标签的转场动画
 				this.trackStyle = {
 					'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` : `translateX(${-100 * this.value}%)`,
 					'transition': `transform ${duration}s ease-in-out`
@@ -566,7 +561,14 @@
 </script>
 
 <style lang="less" scoped>
-	@themeColor: #0022AB;
+	@bgColor: #fff; //背景色
+	@themeColor: #0022AB; //主题色
+	@inactiveColor: #646566; //标题未选中颜色
+	@activeColor: #323233; //标题选中颜色
+	@cardActiveColor: #fff; //type=="card"下的标题选中颜色
+	@disabledColor: #c8c9cc; //禁用颜色
+	@dotColor: #e53935; //小红点、徽标背景色
+	@badgeColor: #fff; //徽标内容颜色
 
 	.yui-tabs {
 		position: relative;
@@ -609,7 +611,7 @@
 			overflow: hidden;
 			visibility: hidden;
 			height: 0;
-
+			background-color: @bgColor;
 		}
 
 		// 标签页可见
@@ -622,6 +624,14 @@
 			}
 		}
 
+		// 卡片风格
+		&--card {
+			// 导航区域包裹层
+			.yui-tabs__wrap {
+				margin: 0 32rpx;
+				border-radius: 8rpx;
+			}
+		}
 
 
 		// scroll-view组件样式
@@ -645,7 +655,6 @@
 			height: 80rpx;
 			flex: 1;
 			display: flex;
-			background-color: #fff;
 
 
 			// 导航标签
@@ -653,20 +662,22 @@
 				display: inline-block;
 				line-height: 80rpx;
 				font-size: 28rpx;
-				color: #333;
+				color: @inactiveColor;
 				text-align: center;
 				padding: 0 8rpx;
 				flex: 1;
 				cursor: pointer;
 				-webkit-tap-highlight-color: transparent;
 
+				// 选中状态
 				&--active {
-					color: #212121;
+					color: @activeColor;
 					font-weight: 500;
 				}
 
+				// 禁用状态
 				&--disabled {
-					color: #c8c9cc;
+					color: @disabledColor;
 					cursor: not-allowed;
 				}
 
@@ -696,13 +707,12 @@
 					box-sizing: border-box;
 					min-width: 36rpx;
 					padding: 0 4rpx;
-					color: #fff;
+					color: @badgeColor;
 					font-weight: 500;
 					font-size: 18rpx;
 					line-height: 26rpx;
 					text-align: center;
-					background-color: #e53935;
-					border: 2rpx solid #fff;
+					background-color: @dotColor;
 					border-radius: 36rpx;
 					transform: translate(50%, -50%);
 					transform-origin: 100%;
@@ -715,14 +725,13 @@
 					width: 12rpx;
 					min-width: 0;
 					height: 12rpx;
-					background-color: #e53935;
+					background-color: @dotColor;
 					border-radius: 100%;
 				}
 			}
 
 			&--card {
 				box-sizing: border-box;
-				margin: 0 32rpx;
 				border: 2rpx solid @themeColor;
 				border-radius: 8rpx;
 
@@ -731,7 +740,7 @@
 
 					&--active {
 						background-color: @themeColor;
-						color: #fff;
+						color: @cardActiveColor;
 					}
 				}
 			}
@@ -749,21 +758,31 @@
 		// 底部线条
 		&__line {
 			position: absolute;
-			bottom: 3px;
+			bottom: 6rpx;
 			left: 0;
-			width: 20px;
-			height: 3px;
+			width: 40rpx;
+			height: 6rpx;
 			background-color: @themeColor;
-			border-radius: 3px;
+			border-radius: 6rpx;
 			transform: translateX(-100%) translateX(-50%);
 			// transition-duration: 0.3s;
 		}
 
+
+		// 标签内容的滑动轨道容器
+		&__track {
+			position: relative;
+			display: flex;
+			width: 100%;
+			height: unset;
+			will-change: left;
+			background-color: @bgColor;
+		}
+
 		// 标签内容
 		&__content {
-			background-color: #fff;
+			background-color: @bgColor;
 			overflow: hidden;
-			// display: none;
 
 			.yui-tab__pane {
 				flex-shrink: 0;
@@ -779,16 +798,6 @@
 			.yui-tab__pane {
 				transition-duration: 0.3s;
 			}
-		}
-
-		// 标签内容的滑动轨道容器
-		&__track {
-			position: relative;
-			display: flex;
-			width: 100%;
-			height: unset;
-			will-change: left;
-			background-color: #fff;
 		}
 	}
 </style>
