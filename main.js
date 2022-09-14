@@ -1,8 +1,8 @@
-
+import './static/iconfont/iconfont.css'
 // #ifndef VUE3
 import Vue from 'vue'
 import App from './App'
-import './static/iconfont/iconfont.css'
+
 
 Vue.config.productionTip = false
 Vue.prototype.$imgUrl = 'https://file-resource-1312729391.cos.ap-guangzhou.myqcloud.com/'
@@ -19,6 +19,7 @@ import { createSSRApp } from 'vue'
 import App from './App.vue'
 export function createApp() {
   const app = createSSRApp(App)
+  app.config.globalProperties.$imgUrl = 'https://file-resource-1312729391.cos.ap-guangzhou.myqcloud.com/'
   return {
     app
   }

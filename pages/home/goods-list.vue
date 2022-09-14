@@ -1,6 +1,6 @@
 <template>
 	<view class="goods-list-container">
-		<no-data v-show="isEmpty" description="抱歉,没有您想要的商品~~" padding="100rpx 0"></no-data>
+		<no-data v-if="isEmpty" description="抱歉,没有您想要的商品~~" padding="100rpx 0"></no-data>
 		<uni-grid v-show="!isEmpty" :column="2" :showBorder="false">
 			<uni-grid-item v-for="(item,index) in dataList" :key="index">
 				<view class="image-wrapper">
@@ -65,7 +65,7 @@
 				return this.dataSource[this.activeIndex]
 			},
 			isEmpty() {
-				return  !this.dataList || this.dataList.length == 0
+				return !this.dataList || this.dataList.length == 0
 			},
 			dataSource() {
 				const list1 = [{
@@ -191,6 +191,32 @@
 					price: 129,
 					saleNum: 1400,
 					isGift: true, //赠品
+				}, {
+					title: '【49纯主义5件】真燕麦小方面包600克++',
+					img: this.$imgUrl + `goods/goods3.png`,
+					price: 39.9,
+					saleNum: 26,
+					isGift: true, //赠品
+					isRebate: true //返券
+				}, {
+					title: '云感棉柔洗脸巾9包装',
+					img: this.$imgUrl + `goods/goods4.png`,
+					price: 44.9,
+					saleNum: 28,
+					isFullMinus: true, //是否满减
+				}, {
+					title: '【senz】手工夹心巧克力礼盒装',
+					img: this.$imgUrl + `goods/goods5.png`,
+					price: 89,
+					saleNum: 2000,
+					isRebate: true //返券
+				}, {
+					title: '特美刻大肚杯1250ML',
+					img: this.$imgUrl + `goods/goods6.png`,
+					price: 99,
+					organPrice: 109,
+					saleNum: 100,
+					isRebate: true //返券
 				}]
 
 				const list3 = [{
@@ -238,8 +264,41 @@
 					img: this.$imgUrl + `goods/goods26.png`,
 					price: 159,
 					saleNum: 300,
+				}, {
+					title: '【49CHALI5件】蜜桃乌龙原叶水果茶',
+					img: this.$imgUrl + `goods/goods2.png`,
+					price: 98,
+					saleNum: 6600,
+					isGift: true, //赠品
+					isRebate: true //返券
+				}, {
+					title: '【49纯主义5件】真燕麦小方面包600克++',
+					img: this.$imgUrl + `goods/goods3.png`,
+					price: 39.9,
+					saleNum: 26,
+					isGift: true, //赠品
+					isRebate: true //返券
+				}, {
+					title: '云感棉柔洗脸巾9包装',
+					img: this.$imgUrl + `goods/goods4.png`,
+					price: 44.9,
+					saleNum: 28,
+					isFullMinus: true, //是否满减
+				}, {
+					title: '【senz】手工夹心巧克力礼盒装',
+					img: this.$imgUrl + `goods/goods5.png`,
+					price: 89,
+					saleNum: 2000,
+					isRebate: true //返券
+				}, {
+					title: '特美刻大肚杯1250ML',
+					img: this.$imgUrl + `goods/goods6.png`,
+					price: 99,
+					organPrice: 109,
+					saleNum: 100,
+					isRebate: true //返券
 				}]
-				
+
 				const list4 = [{
 					title: '瑞幸×阿华田 田蜜小确幸礼盒',
 					img: this.$imgUrl + `goods/goods27.png`,
@@ -286,9 +345,35 @@
 					img: this.$imgUrl + `goods/goods34.png`,
 					price: 108,
 					saleNum: 29,
+				}, {
+					title: '【49纯主义5件】真燕麦小方面包600克++',
+					img: this.$imgUrl + `goods/goods3.png`,
+					price: 39.9,
+					saleNum: 26,
+					isGift: true, //赠品
+					isRebate: true //返券
+				}, {
+					title: '云感棉柔洗脸巾9包装',
+					img: this.$imgUrl + `goods/goods4.png`,
+					price: 44.9,
+					saleNum: 28,
+					isFullMinus: true, //是否满减
+				}, {
+					title: '【senz】手工夹心巧克力礼盒装',
+					img: this.$imgUrl + `goods/goods5.png`,
+					price: 89,
+					saleNum: 2000,
+					isRebate: true //返券
+				}, {
+					title: '特美刻大肚杯1250ML',
+					img: this.$imgUrl + `goods/goods6.png`,
+					price: 99,
+					organPrice: 109,
+					saleNum: 100,
+					isRebate: true //返券
 				}]
 				return [
-					list1, list2, list3, list4
+					list1, list2, list3, list4, list1, list2, list3
 				]
 			}
 		},

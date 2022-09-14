@@ -11,7 +11,7 @@
 			<!-- 标签栏右侧额外内容 -->
 			<template #extra>
 				<view class="extra-wrapper">
-					<text>更多</text>
+					<text class="text">更多</text>
 					<uni-icons type="right" :color="'#5e6d82'" size="14" />
 				</view>
 			</template>
@@ -113,5 +113,10 @@
 		height: 80rpx;
 		display: flex;
 		align-items: center;
+		
+		.text {
+			display: inline-block;
+			white-space: nowrap;
+		}
 	}
 </style>

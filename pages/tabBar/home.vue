@@ -1,8 +1,9 @@
 <template>
 	<view class="page-container">
 		<banner />
-		<yui-tabs :tabs="tabs" v-model="activeIndex" animated background="transparent" swipeable swipeAnimated :isLazyRender="false" sticky
-			:wrapStyle="wrapStyle" :offsetTop="offsetTop" :stickyThreshold="navHeight" @scroll="handleScroll">
+		<yui-tabs :tabs="tabs" v-model="activeIndex" animated background="transparent" swipeable swipeAnimated
+			:isLazyRender="false" sticky :wrapStyle="wrapStyle" :offsetTop="offsetTop" :stickyThreshold="navHeight"
+			@scroll="handleScroll">
 			<!-- 标签栏右侧额外内容 -->
 			<template #extra>
 				<view class="extra-wrapper">
@@ -64,13 +65,13 @@
 				let statusBarH = 0,
 					navBarH = 0
 				// 获取状态栏的高度+导航栏的高度
-
-				// #ifdef MP-WEIXIN || APP-PLUS
+				
+				// #ifdef MP-WEIXIN || APP-PLUS ||  MP-BAIDU
 				// 微信小程序、APP获取状态栏高度 
 				statusBarH = uni.getSystemInfoSync().statusBarHeight
 				// #endif
 
-				// #ifdef MP-WEIXIN
+				// #ifdef MP-WEIXIN || MP-QQ || MP-BAIDU
 				// 微信小程序获取胶囊位置信息
 				const menuBtnInfo = uni.getMenuButtonBoundingClientRect()
 				//navHeight的值为状态栏的高度+导航栏的高度
@@ -83,12 +84,12 @@
 
 				//状态栏的高度+导航栏的高度
 				this.navHeight = navBarH + statusBarH
+				
+				console.log(navBarH);
 			},
 			// 滚动时触发，仅在 sticky 模式下生效
-			handleScroll({
-				isFixed
-			}) {
-				this.isFixed = isFixed
+			handleScroll(res) {
+				this.isFixed = res.isFixed
 			},
 			touchStart(e) {
 				e.stopPropagation()

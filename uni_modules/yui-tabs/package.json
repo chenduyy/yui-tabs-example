@@ -1,23 +1,20 @@
 {
 	"id": "yui-tabs",
 	"displayName": "Tabs标签页 灵活配置 简单易用(仿vant的tabs)",
-	"version": "1.0.6",
+	"version": "1.0.8",
 	"description": "tab标签页，支持标签栏滚动、滑动切换、滚动吸顶、标题超出隐藏、标题徽标",
 	"keywords": [
         "tabs标签页",
         "tab切换",
-        "左右滑动"
+        "左右滑动",
+        "标签栏滚动"
     ],
-	"repository": "https://github.com/chenduyy/yui-demo",
+	"repository": "",
 	"engines": {
 		"HBuilderX": "^3.5.1"
 	},
-	"dcloudext": {
-		"category": [
-			"前端组件",
-			"通用组件"
-		],
-		"sale": {
+    "dcloudext": {
+        "sale": {
 			"regular": {
 				"price": "0.00"
 			},
@@ -33,7 +30,8 @@
 			"data": "无",
 			"permissions": "无"
 		},
-		"npmurl": ""
+        "npmurl": "",
+        "type": "component-vue"
 	},
 	"uni_modules": {
 		"dependencies": [],
@@ -54,23 +52,23 @@
 				},
 				"H5-mobile": {
 					"Safari": "u",
-					"Android Browser": "u",
-					"微信浏览器(Android)": "u",
-					"QQ浏览器(Android)": "u"
+					"Android Browser": "y",
+					"微信浏览器(Android)": "y",
+					"QQ浏览器(Android)": "y"
 				},
 				"H5-pc": {
 					"Chrome": "y",
 					"IE": "u",
 					"Edge": "y",
 					"Firefox": "y",
-					"Safari": "u"
+					"Safari": "y"
 				},
 				"小程序": {
 					"微信": "y",
 					"阿里": "y",
-					"百度": "u",
-					"字节跳动": "u",
-					"QQ": "u",
+					"百度": "y",
+					"字节跳动": "y",
+					"QQ": "y",
 					"钉钉": "y",
 					"快手": "u",
 					"飞书": "u",

@@ -48,6 +48,8 @@
 				activeIndex: 0, // 标签页当前选择项的下标
 			}
 		},
+		methods:{
+		}
 	}
 </script>
 <style lang="less" scoped>
@@ -57,6 +59,11 @@
 	}
 
 	.content-wrap {
+		/* #ifdef APP-PLUS */
+		height: calc(100vh - 80rpx);
+		/* #endif */
+		/* #ifndef APP-PLUS */
 		height: calc(100vh - 168rpx);
+		/* #endif */
 	}
 </style>

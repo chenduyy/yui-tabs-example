@@ -7,6 +7,7 @@
 			<uni-list-item title="滚动吸顶(fixed方式)" showArrow clickable @click="onClick('fixed')" />
 			<uni-list-item title="透明导航栏下的滚动吸顶(fixed方式)" showArrow clickable @click="onClick('transparent_fixed')" />
 			<uni-list-item title="滑动切换" showArrow clickable @click="onClick('slide_switch')" />
+			<uni-list-item title="滑动切换(使用swiper组件实现)" showArrow clickable @click="onClick('swiper_switch')" />
 		</uni-list>
 	</view>
 </template>

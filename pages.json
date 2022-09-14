@@ -58,6 +58,12 @@
 			"style": {
 				"navigationBarTitleText": "滑动切换"
 			}
+		},
+		{
+			"path": "pages/example/swiper_switch",
+			"style": {
+				"navigationBarTitleText": "swiper方式"
+			}
 		}
 	],
 	"globalStyle": {

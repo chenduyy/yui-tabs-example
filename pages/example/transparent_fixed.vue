@@ -6,11 +6,12 @@
 			<uni-collapse>
 				<uni-collapse-item title="吸顶实现原理">
 					<view class="collapse-content">
-							<view>1.在导航栏+状态栏透明的场景下的标签栏吸顶。</view>
-							<view>2.本案例在微信小程序中，未吸顶时，标签栏背景色为灰色，且没有paddingTop值;吸顶时，标签栏背景色为白色，有paddingTop值，paddingTop撑开了透明的状态栏+导航栏区域
-							</view>
-							<view>3.通过fixed属性开启吸顶，在自定义导航栏的情况下，采用了两个标签页的场景模拟该效果</view>
-							<view>4.让具备fixed属性的标签页通过visible隐藏，显示不固定的标签页，通过监听页面滚动事件，计算一个边界值，处理两个标签页的显隐</view>
+						<view>1.在导航栏+状态栏透明的场景下的标签栏吸顶。</view>
+						<view>
+							2.本案例在微信小程序中，未吸顶时，标签栏背景色为灰色，且没有paddingTop值;吸顶时，标签栏背景色为白色，有paddingTop值，paddingTop撑开了透明的状态栏+导航栏区域
+						</view>
+						<view>3.通过fixed属性开启吸顶，在自定义导航栏的情况下，采用了两个标签页的场景模拟该效果</view>
+						<view>4.让具备fixed属性的标签页通过visible隐藏，显示不固定的标签页，通过监听页面滚动事件，计算一个边界值，处理两个标签页的显隐</view>
 					</view>
 				</uni-collapse-item>
 			</uni-collapse>
@@ -20,7 +21,8 @@
 			<banner />
 		</view>
 		<!-- 用于滚动吸顶的标签页 -->
-		<yui-tabs :visible="isFixed" :tabs="tabs" v-model="activeIndex" animated fixed background="transparent" :wrapStyle="wrapStyle">
+		<yui-tabs :visible="isFixed" :tabs="tabs" v-model="activeIndex" animated fixed background="transparent"
+			:wrapStyle="wrapStyle">
 			<template #extra>
 				<view class="extra-wrapper">
 					<text class="text">更多</text>
@@ -117,13 +119,13 @@
 				let statusBarH = 0,
 					navBarH = 0
 				// 获取状态栏的高度+导航栏的高度
-
-				// #ifdef MP-WEIXIN || APP-PLUS
+				
+				// #ifdef MP-WEIXIN || APP-PLUS ||  MP-BAIDU
 				// 微信小程序、APP获取状态栏高度 
 				statusBarH = uni.getSystemInfoSync().statusBarHeight
 				// #endif
 
-				// #ifdef MP-WEIXIN
+				// #ifdef MP-WEIXIN || MP-QQ || MP-BAIDU
 				// 微信小程序获取胶囊位置信息
 				const menuBtnInfo = uni.getMenuButtonBoundingClientRect()
 				//navHeight的值为状态栏的高度+导航栏的高度
@@ -136,7 +138,6 @@
 
 				//状态栏的高度+导航栏的高度
 				this.navHeight = navBarH + statusBarH
-				console.log(this.navHeight);
 			},
 			fabClick() {
 				uni.navigateBack({
@@ -154,10 +155,10 @@
 			height: 80rpx;
 			display: flex;
 			align-items: center;
-			
-			.text{
+
+			.text {
 				display: inline-block;
-				white-space:nowrap;
+				white-space: nowrap;
 			}
 		}
 
@@ -165,15 +166,15 @@
 			padding: 24rpx;
 			font-size: 24rpx;
 			line-height: 40rpx;
-			
+
 			.collapse-content {
 				padding-left: 20rpx;
 				font-size: 24rpx;
 			}
 		}
-		
 
-		::v-deep.fab-circle-icon {
+
+		::v-deep .uni-fab__circle {
 			transform: rotate(135deg);
 		}
 	}

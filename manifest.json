@@ -1,21 +1,17 @@
 {
-    "name" : "yui-demo",
-    "appid" : "__UNI__791F3C9",
+    "name" : "Tabs标签页 灵活配置 简单易用(仿vant的tabs)示例",
+    "appid" : "__UNI__806A80E",
     "description" : "",
     "versionName" : "1.0.2",
     "versionCode" : 102,
     "transformPx" : false,
     "app-plus" : {
-        /* 5+App特有相关 */
         "usingComponents" : true,
         "nvueCompiler" : "uni-app",
         "nvueStyleCompiler" : "uni-app",
         "modules" : {},
-        /* 模块配置 */
         "distribute" : {
-            /* 应用发布信息 */
             "android" : {
-                /* android打包配置 */
                 "permissions" : [
                     "<uses-permission android:name=\"android.permission.CHANGE_NETWORK_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.MOUNT_UNMOUNT_FILESYSTEMS\"/>",
@@ -37,15 +33,12 @@
             "ios" : {
                 "dSYMs" : false
             },
-            /* ios打包配置 */
             "sdkConfigs" : {
                 "ad" : {}
             }
         }
     },
-    /* SDK配置 */
     "quickapp" : {},
-    /* 快应用特有相关 */
     "mp-weixin" : {
         "appid" : "wx5d4ea76e593b09c3",
         "setting" : {
@@ -55,5 +48,5 @@
         },
         "usingComponents" : true
     },
-    "vueVersion" : "2"
+    "vueVersion" : "3"
 }

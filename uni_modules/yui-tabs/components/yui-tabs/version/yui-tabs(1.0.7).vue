@@ -26,7 +26,7 @@
 				<slot name="extra"></slot>
 			</view>
 		</view>
-		<view v-if="isFixed" class="yui-tabs__placeholder" :style="[{height:placeholderHeight+'px'}]"></view>
+		<view v-show="isFixed" class="yui-tabs__placeholder" :style="[{height:placeholderHeight+'px'}]"></view>
 		<!-- 标签内容：普通实现 -->
 		<view v-if="!swiper" class="yui-tabs__content" :class="{'yui-tabs__content--animated':animated}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
@@ -56,7 +56,6 @@
 <script>
 	// 1.优化滑动切换与上下滚动互相影响的bug。
 	// 2.考虑是否增加滚动导航
-	// * 微信小程序中调试基础库为2.25.0
 	import {
 		isNull,
 		addUnit,
@@ -65,13 +64,16 @@
 		getDirection
 	} from "../yui-tabs/utils/uitls"
 	import {
-		emits,
-		props,
-		valueField
+		props
 	} from "../yui-tabs/utils/const"
 	export default {
 		name: "yui-tabs",
-		emits,
+		emits: ['input', 'change', 'click', 'rendered', 'scroll'],
+		// uni-app自定义v-model需要按照如下的规范，直接用value和input，否则在微信小程序上会失效
+		model: {
+			prop: 'value',
+			event: 'input'
+		},
 		// shared:表示页面 wxss 样式将影响到自定义组件
 		options: {
 			styleIsolation: 'shared'
@@ -100,7 +102,7 @@
 					transitionDuration: `0s`
 				}, //标签栏底部线条动画样式
 				isFixed: false, //是否吸顶
-				current: this[valueField], //当前显示的滚动卡片
+				current: this.value, //当前显示的滚动卡片
 				isTabClick: false, //是否为标签标题点击
 				placeholderHeight: 0, //标题栏占位高度
 			}
@@ -175,6 +177,14 @@
 			},
 		},
 		watch: {
+			// 监听选中标识符变化
+			value: {
+				handler(val, oldVal) {
+					this.current = val
+					this.tabChange(val, oldVal) //标签切换
+					this.changeStyle() // 样式切换
+				}
+			},
 			// 监听tabs变化，重新初始化tabList
 			tabs: {
 				handler(val) {
@@ -184,13 +194,6 @@
 			},
 		},
 		created() {
-			// 监听选中标识符变化
-			this.$watch(valueField, (val, oldVal) => {
-				this.current = val
-				this.tabChange(val, oldVal) //标签切换
-				this.changeStyle() // 样式切换
-			})
-
 			this.initTabList() // 初始化tabList
 		},
 		mounted() {
@@ -314,8 +317,8 @@
 					tab.translateX = rect ? rect.left + rect.width / 2 - parentLeft : 0
 					tab.scrollLeft = tab.translateX - halfWrapWidth
 					if (tab.scrollLeft < 0) tab.scrollLeft = 0
-					if (index === this[valueField]) {
-						this.tabChange(this[valueField], -1) //标签切换
+					if (index === this.value) {
+						this.tabChange(this.value, -1) //标签切换
 						this.changeStyle(); //样式切换
 					}
 				})
@@ -324,7 +327,7 @@
 			initTabList() {
 				const tabs = this.tabs.filter(o => !isNull(o))
 				this.tabList = tabs.map((item, index) => {
-					const isCurr = this[valueField] == index
+					const isCurr = this.value == index
 					const tab = {
 						label: '', //标签名称
 						slot: 'pane' + index, //标签内容的插槽名称，默认以"pane"+标签下标命名
@@ -387,8 +390,9 @@
 				this.isTabClick = isTabClick // 是否为标签标题点击
 				// if (this.tabList[index].disabled) return //禁用时不允许切换
 				this.$emit('click', index, this.tabs[index], this.isTabClick) // 标签点击事件
-				if (this[valueField] == index) return //不允许重复切换同一标签
-				this.$emit(emits[0], index) //更新v-model绑定的值
+				if (this.value == index) return //不允许重复切换同一标签
+				//更新v-model绑定的值
+				this.$emit('input', index) //更新v-model绑定的值
 
 				//标签点击时页面是否滚动回到顶部
 				if (this.tabClickScrollTop) {
@@ -425,10 +429,10 @@
 				if (this.scrollX) {
 					if (this.scrollToCenter) {
 						// 设置横向滚动条位置，当前标签滚动到中心位置
-						this.scrollLeft = this.tabList[this[valueField]].scrollLeft
+						this.scrollLeft = this.tabList[this.value].scrollLeft
 					} else {
 						//设置scroll-into-view
-						this.scrollId = `tab_${this[valueField]-1}`;
+						this.scrollId = `tab_${this.value-1}`;
 					}
 				}
 				this.changeLineStyle() //改变标签栏底部线条位置
@@ -443,7 +447,7 @@
 			changeLineStyle() {
 				// 仅在 type="line" 时有效
 				if (!this.isLine) return
-				const val = this.tabList[this[valueField]].translateX
+				const val = this.tabList[this.value].translateX
 				const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
 				const duration = `${this.lineAnimated?this.duration:'0'}s`
 				this.$set(this.lineAnimatedStyle, 'transform', transform)
@@ -458,14 +462,13 @@
 				if (!this.animated) return
 				// isSlide为true，表示左右滑动；false表示点击标签的转场动画
 				this.trackStyle = {
-					'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` :
-						`translateX(${-100 * this[valueField]}%)`,
+					'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` : `translateX(${-100 * this.value}%)`,
 					'transition': `transform ${duration}s ease-in-out`
 				}
 			},
 			// 改变标签内容样式
 			changePaneStyle() {
-				this.getRect('.yui-tab__pane' + this[valueField]).then(rect => {
+				this.getRect('.yui-tab__pane' + this.value).then(rect => {
 					// 有拖动动画时，隐藏的标签内容高度取显示的标签内容高度
 					const height = rect && this.swipeAnimated ? rect.height : 0
 					this.tabList.forEach(tab => {
@@ -532,7 +535,7 @@
 				this.touchInfo.deltaX = Math.abs(deltaX)
 				// 改变标签内容的样式，模拟拖动动画效果
 				if (this.swipeAnimated) {
-					const offsetWidth = this.contentWidth * this[valueField] * -1 + deltaX
+					const offsetWidth = this.contentWidth * this.value * -1 + deltaX
 					this.changeTrackStyle(true, 0, offsetWidth)
 				}
 			},
@@ -562,5 +565,343 @@
 </script>
 
 <style lang="less" scoped>
-	@import url("css/index.less");
+	@bgColor: #fff; //背景色
+	@themeColor: #0022AB; //主题色
+	@inactiveColor: #646566; //标题未选中颜色
+	@activeColor: #323233; //标题选中颜色
+	@cardActiveColor: #fff; //type=="card"下的标题选中颜色
+	@disabledColor: #c8c9cc; //禁用颜色
+	@dotColor: #e53935; //小红点、徽标背景色
+	@badgeColor: #fff; //徽标内容颜色
+
+	.yui-tabs {
+		position: relative;
+		width: 100%;
+
+		.depend-wrap {
+			position: absolute;
+			top: 0;
+		}
+
+		&__placeholder {
+			width: 100%;
+		}
+
+
+		// 开启粘性定位布局
+		&--fixed {
+
+			// 导航区域包裹层
+			.yui-tabs__wrap {
+				position: fixed;
+				top: 0;
+				right: 0;
+				left: 0;
+				z-index: 99;
+			}
+		}
+
+
+		// 导航区域包裹层
+		&__wrap {
+			position: relative;
+			display: flex;
+			align-items: center;
+			overflow: hidden;
+			visibility: hidden;
+			height: 0;
+			background: @bgColor;
+
+			// 不显示滚动条
+			::-webkit-scrollbar {
+				display: none;
+				width: 0;
+				height: 0;
+				-webkit-appearance: none;
+				background: transparent;
+				color: transparent;
+			}
+		}
+
+		// 标签页可见
+		&--visible {
+
+			// 导航区域包裹层
+			.yui-tabs__wrap {
+				visibility: visible;
+				height: auto;
+			}
+		}
+
+		// 卡片风格
+		&--card {
+
+			// 导航区域包裹层
+			.yui-tabs__wrap {
+				margin: 0 32rpx;
+				border-radius: 8rpx;
+			}
+		}
+
+		// scroll-view组件样式
+		&__scroll {
+			position: relative;
+			width: 100%;
+			height: 80rpx;
+
+			// 允许滚动
+			&.enable-sroll {
+				white-space: nowrap; // 使用横向滚动时，需要给<scroll-view>添加white-space: nowrap;样式
+
+				.yui-tab__text {
+					white-space: nowrap;
+				}
+			}
+		}
+
+
+		// 导航区域
+		&__nav {
+			position: relative;
+			box-sizing: content-box;
+			user-select: none;
+			height: 80rpx;
+			flex: 1;
+			display: flex;
+
+
+			// 导航标签
+			.yui-tab {
+				position: relative;
+				display: inline-block;
+				line-height: 80rpx;
+				font-size: 28rpx;
+				color: @inactiveColor;
+				text-align: center;
+				padding: 0 8rpx;
+				flex: 1;
+				cursor: pointer;
+				-webkit-tap-highlight-color: transparent;
+				transition-property: color background-color border-color;
+				transition-duration: 0.2s;
+
+				// 选中状态
+				&--active {
+					color: @activeColor;
+					font-weight: 500;
+				}
+
+				// 禁用状态
+				&--disabled {
+					color: @disabledColor;
+					cursor: not-allowed;
+				}
+
+
+				// 标题文字
+				&__text {
+					position: relative;
+					display: inline;
+				}
+
+
+				// 文字省略
+				&__ellipsis {
+					display: -webkit-box; //定义为盒子显示
+					overflow: hidden;
+					text-overflow: ellipsis; //文本溢出隐藏为省略号
+					-webkit-line-clamp: 1; // 限制一个块元素显示的文本行数
+					-webkit-box-orient: vertical; //盒模型子元素排列： vertical（竖排）orhorizontal（横排）
+				}
+
+				// 标签文字右上角徽标的内容
+				&__info {
+					display: inline-block;
+					position: absolute;
+					top: 0;
+					left: 100%;
+					box-sizing: border-box;
+					min-width: 36rpx;
+					padding: 0 4rpx;
+					color: @badgeColor;
+					font-weight: 500;
+					font-size: 18rpx;
+					line-height: 26rpx;
+					text-align: center;
+					background-color: @dotColor;
+					border-radius: 36rpx;
+					transform: translateY(-50%);
+					transform-origin: 100%;
+					text-align: center;
+				}
+
+				&__info--dot {
+					line-height: unset;
+					padding: 0;
+					width: 12rpx;
+					min-width: 0;
+					height: 12rpx;
+					background-color: @dotColor;
+					border-radius: 100%;
+				}
+			}
+
+			// 文本风格
+			&--text {
+
+				.yui-tab {
+					&--active {
+						color: @themeColor;
+					}
+				}
+			}
+
+			// 卡片风格
+			&--card {
+				box-sizing: border-box;
+				border: 2rpx solid @themeColor;
+				border-radius: 8rpx;
+
+				.yui-tab {
+					color: @themeColor;
+
+					&--active {
+						background-color: @themeColor;
+						color: @cardActiveColor;
+					}
+				}
+			}
+
+			// 按钮风格
+			&--button {
+				.yui-tab {
+					height: 50rpx;
+					line-height: 50rpx;
+					margin-top: 15rpx;
+					flex: auto;
+					border-radius: 50rpx;
+					padding: 0 20rpx;
+					margin-left: 10rpx;
+
+					&:last-child {
+						margin-right: 10rpx;
+					}
+
+					&--active {
+						background-color: @themeColor;
+						color: @cardActiveColor;
+					}
+				}
+			}
+
+			// 线性按钮风格
+			&--line-button {
+				.yui-tab {
+					height: 50rpx;
+					line-height: 50rpx;
+					margin-top: 15rpx;
+					flex: auto;
+					border: 2rpx solid transparent;
+					border-radius: 50rpx;
+					padding: 0 20rpx;
+					margin-left: 10rpx;
+
+					&:last-child {
+						margin-right: 10rpx;
+					}
+
+					&--active {
+						border-color: @themeColor;
+						color: @themeColor;
+					}
+				}
+			}
+
+		}
+
+
+		// 标签右侧的补充区域
+		&__extra {
+			position: relative;
+			display: inline-flex;
+			white-space: nowrap;
+		}
+
+		// 底部线条
+		&__line {
+			position: absolute;
+			bottom: 6rpx;
+			left: 0;
+			width: 40rpx;
+			height: 6rpx;
+			background-color: @themeColor;
+			border-radius: 6rpx;
+			transform: translateX(-100%) translateX(-50%);
+			// transition-duration: 0.3s;
+		}
+
+
+		// 标签内容的滑动轨道容器
+		&__track {
+			position: relative;
+			display: flex;
+			width: 100%;
+			height: unset;
+			will-change: left;
+			background-color: @bgColor;
+		}
+
+		// 标签内容
+		&__content {
+			background-color: @bgColor;
+			overflow: hidden;
+
+			.yui-tab__pane {
+				flex-shrink: 0;
+				box-sizing: border-box;
+				width: 100%;
+			}
+		}
+
+		// 标签内容转场动画样式
+		&__content--animated {
+			overflow: hidden;
+
+			.yui-tab__pane {
+				transition-duration: 0.3s;
+			}
+		}
+
+		// 使用swpier组件进行左右滑动
+		&--swiper {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			box-sizing: border-box;
+			overflow: hidden;
+		}
+
+		// 承载标签内容的滑动容器
+		&__swiper {
+			flex: 1;
+			box-sizing: border-box;
+
+			.yui-tabs__swiper--item {
+				flex: 1;
+				flex-direction: column;
+				box-sizing: border-box;
+			}
+
+			.yui-tabs__swiper--wrap {
+				position: absolute;
+				left: 0;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				box-sizing: border-box;
+				display: flex;
+				flex: 1;
+			}
+		}
+	}
 </style>

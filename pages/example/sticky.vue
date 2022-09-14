@@ -6,9 +6,18 @@
 			<view>需在页面生命周期onPageScroll中调用uni.$emit('onPageScroll', e),否则无法吸顶</view>
 		</view>
 		<yui-tabs :tabs="tabs" v-model="activeIndex" animated :background="'#fff'" swipeable swipeAnimated
-			:isLazyRender="false" sticky :offsetTop="offsetTop">
-			<view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs" :key="index">
-				<goods-list :activeIndex="index" />
+			:isLazyRender="false" sticky :offsetTop="offsetTop" tab-click-scroll-top>
+			<view class="content-wrap" slot="pane0">
+				<goods-list :activeIndex="0" />
+			</view>
+			<view class="content-wrap" slot="pane1">
+				<goods-list :activeIndex="1" />
+			</view>
+			<view class="content-wrap" slot="pane2">
+				<goods-list :activeIndex="2" />
+			</view>
+			<view class="content-wrap" slot="pane3">
+				<goods-list :activeIndex="3" />
 			</view>
 		</yui-tabs>
 	</view>
@@ -48,7 +57,8 @@
 			//页面滚动事件
 			uni.$emit('onPageScroll', e)
 		},
-		methods: {}
+		methods: {
+		}
 	}
 </script>
 <style lang="less" scoped>

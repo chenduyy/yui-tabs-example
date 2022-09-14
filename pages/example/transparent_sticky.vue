@@ -12,6 +12,7 @@
 						<view>原理：结合页面生命周期onPageScroll监听页面滚动，并在滚动时获取依赖元素的bottom值，该依赖元素的作用是判断标签栏何时需要吸顶。</view>
 						<view>何时吸顶? </view>
 						<view>
+
 							吸顶与依赖元素的rect.bottom值息息相关；该元素放在标签页组件顶部，跟随页面滚动时，bottom值会变化，当bottom值小于等于0时，就说明不在视口可见区域，那么此时标签栏就可以吸顶了。
 						</view>
 						<view>
@@ -24,13 +25,20 @@
 				</uni-collapse-item>
 			</uni-collapse>
 		</view>
-
-
 		<yui-tabs :tabs="tabs" v-model="activeIndex" animated :background="background" swipeable swipeAnimated
 			:isLazyRender="false" sticky :wrapStyle="wrapStyle" :offsetTop="offsetTop" :stickyThreshold="navHeight"
 			@scroll="handleScroll">
-			<view class="content-wrap" :slot="'pane'+index" v-for="(tab,index) in tabs" :key="index">
-				<goods-list :activeIndex="index" />
+			<view class="content-wrap" slot="pane0">
+				<goods-list :activeIndex="0" />
+			</view>
+			<view class="content-wrap" slot="pane1">
+				<goods-list :activeIndex="1" />
+			</view>
+			<view class="content-wrap" slot="pane2">
+				<goods-list :activeIndex="2" />
+			</view>
+			<view class="content-wrap" slot="pane3">
+				<goods-list :activeIndex="3" />
 			</view>
 		</yui-tabs>
 	</view>
@@ -93,12 +101,12 @@
 					navBarH = 0
 				// 获取状态栏的高度+导航栏的高度
 
-				// #ifdef MP-WEIXIN || APP-PLUS
+				// #ifdef MP-WEIXIN || APP-PLUS ||  MP-BAIDU
 				// 微信小程序、APP获取状态栏高度 
 				statusBarH = uni.getSystemInfoSync().statusBarHeight
 				// #endif
 
-				// #ifdef MP-WEIXIN
+				// #ifdef MP-WEIXIN || MP-QQ || MP-BAIDU
 				// 微信小程序获取胶囊位置信息
 				const menuBtnInfo = uni.getMenuButtonBoundingClientRect()
 				//navHeight的值为状态栏的高度+导航栏的高度
@@ -139,20 +147,20 @@
 			display: flex;
 			align-items: center;
 		}
-		
-		
+
+
 		.info-wrap {
 			padding: 24rpx;
 			font-size: 24rpx;
 			line-height: 40rpx;
-			
+
 			.collapse-content {
 				padding-left: 20rpx;
 				font-size: 24rpx;
 			}
 		}
 
-		::v-deep.fab-circle-icon {
+		::v-deep .uni-fab__circle {
 			transform: rotate(135deg);
 		}
 	}
