@@ -49,6 +49,17 @@ export function isString(val) {
 }
 
 
+export function noop() {}
+
+export function isFunction(val) {
+	return typeof val === 'function';
+}
+
+
+export function isPromise(val) {
+	return isObject(val) && isFunction(val.then) && isFunction(val.catch);
+}
+
 
 
 // 添加单位
@@ -91,4 +102,26 @@ export function getDirection(startx, starty, endx, endy) {
 	return result;
 }
 
- 
+
+
+
+export function callInterceptor(options) {
+	const {
+		interceptor,
+		args,
+		done
+	} = options;
+
+	if (interceptor) {
+		const returnVal = interceptor(...args);
+		if (isPromise(returnVal)) {
+			returnVal.then((value) => {
+				if (value) done();
+			}).catch(noop);
+		} else if (returnVal) {
+			done();
+		}
+	} else {
+		done();
+	}
+}
