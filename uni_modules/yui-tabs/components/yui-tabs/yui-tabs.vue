@@ -433,12 +433,14 @@
 					interceptor: this.beforeChange,
 					args: [this.tabs[index]],
 					done: () => {
-						this.$emit(emits[0], index) //更新v-model绑定的值
+						// 不允许重复切换同一标签
+						if (this[valueField] !== index) {
+							this.$emit(emits[0], index) // 更新v-model绑定的值
+						}
 					},
 				});
 
 				this.$emit('click', index, this.tabs[index], this.isTabClick) // 标签点击事件
-				if (this[valueField] == index) return //不允许重复切换同一标签
 
 				this.$nextTick(() => {
 					this.scrollToTop() //滚动回到顶部
