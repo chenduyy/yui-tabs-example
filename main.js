@@ -1,4 +1,3 @@
-import './static/iconfont/iconfont.css'
 // #ifndef VUE3
 import Vue from 'vue'
 import App from './App'

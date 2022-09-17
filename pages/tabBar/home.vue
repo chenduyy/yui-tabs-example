@@ -84,8 +84,6 @@
 
 				//状态栏的高度+导航栏的高度
 				this.navHeight = navBarH + statusBarH
-				
-				console.log(navBarH);
 			},
 			// 滚动时触发，仅在 sticky 模式下生效
 			handleScroll(res) {

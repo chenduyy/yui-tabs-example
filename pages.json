@@ -65,7 +65,29 @@
 				"navigationBarTitleText": "swiper方式"
 			}
 		}
-	],
+	    ,{
+            "path" : "pages/example/scrollspy",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "滚动导航",
+                "enablePullDownRefresh": false
+            }
+        },{
+            "path" : "pages/example/news/index",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "新闻列表",
+                "enablePullDownRefresh": false
+            }
+        },{
+            "path" : "pages/example/news/detail",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "新闻详情",
+                "enablePullDownRefresh": false
+            }
+        }
+    ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",

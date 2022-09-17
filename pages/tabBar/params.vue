@@ -7,7 +7,7 @@
 		<view class="title-wrap">
 			基础用法
 		</view>
-		<yui-tabs :tabs="tabs" v-model="activeIndex1" :isLazyRender="false" animated>
+		<yui-tabs :tabs="tabs" v-model="activeIndex1" :isLazyRender="false" animated >
 			<template #pane0>
 				<view class="content-wrap">内容1</view>
 			</template>
@@ -375,6 +375,54 @@
 		</yui-tabs>
 
 		<view class="title-wrap" style="padding-bottom: 10rpx;">
+			滚动导航
+			<view class="title-wrap__desc">通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示。。</view>
+			<view class="title-wrap__desc">滚动导航的开启依赖于sticky，需要设置uni.$emit('onPageScroll', e)。</view>
+			<view class="title-wrap__desc">由于上面的标签页组件太多，导致内部计算有误，该演示不正确，请查看示例中的滚动导航</view>
+		</view>
+		<yui-tabs :tabs="tabs" v-model="activeIndex16" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy>
+			<template #pane0>
+				<view class="scrollspy-content-wrap bg-red">标签1</view>
+			</template>
+			<template #pane1>
+				<view class="scrollspy-content-wrap bg-orange">标签2</view>
+			</template>
+			<template #pane2>
+				<view class="scrollspy-content-wrap bg-blue">标签3</view>
+			</template>
+			<template #pane3>
+				<view class="scrollspy-content-wrap bg-green">标签4</view>
+			</template>
+			<template #pane4>
+				<view class="scrollspy-content-wrap bg-grey">标签5</view>
+			</template>
+		</yui-tabs>
+
+		<view class="title-wrap" style="padding-bottom: 10rpx;">
+			异步切换
+			<view class="title-wrap__desc">通过 before-change 属性可以在切换标签前执行特定的逻辑。</view>
+			<view class="title-wrap__desc">返回 false 可阻止切换，支持返回 Promise。</view>
+		</view>
+		<yui-tabs :tabs="tabs" v-model="activeIndex15" animated :before-change="beforeChange">
+			<template #pane0>
+				<view class="content-wrap">内容1</view>
+			</template>
+			<template #pane1>
+				<view class="content-wrap">内容2</view>
+			</template>
+			<template #pane2>
+				<view class="content-wrap">内容3</view>
+			</template>
+			<template #pane3>
+				<view class="content-wrap">内容4</view>
+			</template>
+			<template #pane4>
+				<view class="content-wrap">内容5</view>
+			</template>
+		</yui-tabs>
+
+
+		<view class="title-wrap" style="padding-bottom: 10rpx;">
 			滚动吸顶
 			<view class="title-wrap__desc">在特定的场景下实现，提供了两种方式，在示例项目中:</view>
 			<view class="title-wrap__desc">1、fixed模式,采用了两个标签页的场景模拟该效果</view>
@@ -408,6 +456,7 @@
 				<view class="content-wrap">内容5</view>
 			</template>
 		</yui-tabs>
+
 
 		<view class="title-wrap">
 			组件实例方法resize
@@ -455,6 +504,8 @@
 				activeIndex12: 0,
 				activeIndex13: 0,
 				activeIndex14: 0,
+				activeIndex15: 0,
+				activeIndex16: 0,
 				tabs: Array.from({
 					length: 5
 				}, (o, i) => `标签${i+1}`),
@@ -526,7 +577,25 @@
 						text: '线性按钮'
 					}
 				],
+				offsetTop: 0, //粘性定位布局下与顶部的最小距离
 			}
+		},
+		mounted() {
+			uni.getSystemInfo({
+				success: (e) => {
+					let offsetTop = 0
+					// #ifdef H5
+					offsetTop = 43
+					// #endif
+
+					this.offsetTop = offsetTop;
+				}
+			})
+		},
+		// 页面滚动触发事件
+		onPageScroll(e) {
+			//页面滚动事件
+			uni.$emit('onPageScroll', e)
 		},
 		methods: {
 			// 标签点击事件
@@ -569,6 +638,19 @@
 						this.$refs.styleTabs.resize()
 					})
 				}
+			},
+			beforeChange(index) {
+				console.log("beforeChange：",index);
+				// 返回 false 表示阻止此次切换
+				if (index === 1) {
+					return false;
+				}
+
+				// 返回 Promise 来执行异步逻辑
+				return new Promise((resolve) => {
+					// 在 resolve 函数中返回 true 或 false
+					resolve(index !== 3);
+				});
 			},
 		}
 	}
@@ -699,5 +781,31 @@
 
 		}
 
+	}
+
+	.scrollspy-content-wrap {
+		height: 33vh;
+		color: #fff;
+	}
+
+	.bg-red {
+		background-color: #F56C6C;
+	}
+
+
+	.bg-orange {
+		background-color: #FF9900;
+	}
+
+	.bg-blue {
+		background-color: #409EFF;
+	}
+
+	.bg-green {
+		background-color: #67C23A;
+	}
+
+	.bg-grey {
+		background-color: #c0c0c0;
 	}
 </style>

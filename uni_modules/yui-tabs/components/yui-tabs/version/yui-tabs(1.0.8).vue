@@ -27,7 +27,7 @@
 		</view>
 		<view v-if="isFixed" class="yui-tabs__placeholder" :style="[{height:placeholderHeight+'px'}]"></view>
 		<!-- 标签内容：普通实现 -->
-		<view v-if="!noRenderConent && !swiper" class="yui-tabs__content"
+		<view v-if="!swiper" class="yui-tabs__content"
 			:class="{'yui-tabs__content--animated':animated,'yui-tabs__content--scrollspy':scrollspy}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
 				<view class="yui-tab__pane" :class="[paneClass(index,tab)]" v-for="(tab,index) in tabList" :key="index"
@@ -41,7 +41,7 @@
 		</view>
 
 		<!-- 标签内容：使用swiper组件实现左右滑动 -->
-		<swiper v-if="!noRenderConent && swiper" class="yui-tabs__swiper" :current="current" :duration="swiperDuration"
+		<swiper v-if="swiper" class="yui-tabs__swiper" :current="current" :duration="swiperDuration"
 			@change="onSwiperChange">
 			<swiper-item class="yui-tabs__swiper--item" v-for="(tab,index) in tabList" :key="index"
 				@touchmove="stopTouchMove">
@@ -54,6 +54,9 @@
 </template>
 
 <script>
+	// 1.优化滑动切换与上下滚动互相影响的bug。
+	// 2.考虑是否增加滚动导航
+	// * 微信小程序中调试基础库为2.25.0
 	import {
 		isNull,
 		addUnit,
@@ -78,7 +81,6 @@
 		props,
 		data() {
 			return {
-				currentIndex: null,
 				tabList: [], //标签页数据
 				scrollId: 'tab_0', //值应为某子元素id（id不能以数字开头）。设置哪个方向可滚动，则在哪个方向滚动到该元素
 				scrollLeft: 0, //设置横向滚动条位置
@@ -101,7 +103,7 @@
 					transitionDuration: `0s`
 				}, //标签栏底部线条动画样式
 				isFixed: false, //是否吸顶
-				current: this.currentIndex, //当前显示的滚动卡片
+				current: this[valueField], //当前显示的滚动卡片
 				isTabClick: false, //是否为标签标题点击
 				placeholderHeight: 0, //标题栏占位高度
 				windowHeight: 0, //屏幕高度
@@ -184,31 +186,20 @@
 		watch: {
 			// 监听tabs变化，重新初始化tabList
 			tabs: {
-				handler() {
+				handler(val) {
 					this.updateTabList(); //更新tabList
-				},
-				deep: true
-			},
-			currentIndex: {
-				handler(newIdx, oldIdx) {
-					this.current = newIdx
-					this.tabChange(newIdx, oldIdx) //标签切换
-					this.changeStyle() // 样式切换
 				},
 				deep: true
 			},
 		},
 		created() {
 			// 监听选中标识符变化
-			this.$watch(valueField, (index) => {
-				if (index !== this.currentIndex) {
-					this.setCurrentIndex(index) //设置当前下标
-					setTimeout(() => {
-						this.scrollToTop() //滚动到顶 
-						this.scrollToCurrContent() //滚动到当前标签内容
-					}, 0)
-				}
+			this.$watch(valueField, (val, oldVal) => {
+				this.current = val
+				this.tabChange(val, oldVal) //标签切换
+				this.changeStyle() // 样式切换
 			})
+
 			this.initTabList() // 初始化tabList
 		},
 		mounted() {
@@ -266,18 +257,30 @@
 				if (this.type === "line") {
 					if (isNull(activeColor)) activeColor = "#646566"
 					if (isNull(inactiveColor)) inactiveColor = "#323233"
-				} else if (this.type === "text") { // type="text" 时，选中时使用主题色
+				}
+
+				// type="text" 时，选中时使用主题色
+				if (this.type === "text") {
 					if (isNull(activeColor)) activeColor = this.color
 					if (isNull(inactiveColor)) inactiveColor = "#323233"
-				} else if (this.type === "card") { // type="card" 时，未选中则使用主题色
+				}
+
+				// type="card" 时，未选中则使用主题色
+				if (this.type === "card") {
 					background = this.color
 					if (isNull(activeColor)) activeColor = "#fff"
 					if (isNull(inactiveColor)) inactiveColor = this.color
-				} else if (this.type === "button") { // type="button" 时
+				}
+
+				// type="button" 时
+				if (this.type === "button") {
 					background = this.color
 					if (isNull(activeColor)) activeColor = "#fff"
 					if (isNull(inactiveColor)) inactiveColor = "#323233"
-				} else if (this.type === "line-button") { // type="line-button" 时
+				}
+
+				// type="line-button" 时
+				if (this.type === "line-button") {
 					borderColor = this.color
 					if (isNull(activeColor)) activeColor = this.color
 					if (isNull(inactiveColor)) inactiveColor = "#323233"
@@ -297,15 +300,9 @@
 				const that = this
 				if (that.sticky || that.scrollspy) {
 					uni.$on('onPageScroll', function(e) {
-						const {
-							stickyThreshold,
-							offsetTop,
-							scrollspy,
-							lockedScrollspy,
-						} = that
 						// 粘性定位布局的吸顶处理
 						that.getRect('.depend-wrap').then((rect) => {
-							that.isFixed = rect.bottom - stickyThreshold <= offsetTop
+							that.isFixed = rect.bottom - that.stickyThreshold <= that.offsetTop
 							// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
 							that.$emit("scroll", {
 								scrollTop: e.scrollTop,
@@ -314,7 +311,7 @@
 						})
 
 						// 滚动导航模式下对选中标签的处理
-						if (scrollspy && !lockedScrollspy) {
+						if (that.scrollspy && !that.lockedScrollspy) {
 							that.getCurrIndexOnScroll().then(index => {
 								that.setCurrentIndex(index) //设置当前下标
 							})
@@ -327,6 +324,7 @@
 				return new Promise((resolve, rejct) => {
 					const selectors = this.tabList.map((o, i) => '.yui-tab_pane' + i)
 					this.getRect(...selectors).then(res => {
+						if (res.length === 0) return
 						// 标签内容的top小于标题栏的top，则说明已经与标题栏部分重合
 						let index = res.reduce((idx, o, i) => o.top < this.scrollOffset ? i : idx, 0)
 						// 判断最后一个标签内容是否完整显示在底部，是则默认选中
@@ -340,7 +338,7 @@
 			initTabList() {
 				const tabs = this.tabs.filter(o => !isNull(o))
 				this.tabList = tabs.map((item, index) => {
-					const isCurr = this.currentIndex == index
+					const isCurr = this[valueField] == index
 					const tab = {
 						label: '', //标签名称
 						slot: 'pane' + index, //标签内容的插槽名称，默认以"pane"+标签下标命名
@@ -417,7 +415,6 @@
 				const halfWrapWidth = rect ? rect.width / 2 : 0
 				this.placeholderHeight = rect ? rect.height : 0
 
-
 				//获取标签容器距离视口左侧的left值
 				rect = await this.getRect('.yui-tabs')
 				const parentLeft = rect ? rect.left : 0
@@ -436,36 +433,42 @@
 					tab.scrollLeft = tab.translateX - halfWrapWidth //标签相对于屏幕左侧的距离值
 					if (isSpy) tab.paneTop = r2 ? r2.top : 0; //标签内容相对于屏幕顶部的距离值
 				})
-				this.setCurrentIndex(this[valueField]) //设置当前下标
+
+				const currIdx = this[valueField]
+				this.setCurrentIndex(currIdx, false) //设置当前选中的下标
+				this.tabChange(currIdx, -1) //标签切换
+				this.changeStyle(); //样式切换
 			},
 			// 标签点击事件
 			onClick(index, isTabClick = false) {
 				this.isTabClick = isTabClick // 是否为标签标题点击
-				if (isTabClick) this.$emit('click', index, this.tabs[index], this.isTabClick) // 标签点击事件
+				this.$emit('click', index, this.tabs[index], this.isTabClick) // 标签点击事件
+				// if (this.tabList[index].disabled) return //禁用时不允许切换
 				callInterceptor({
 					interceptor: this.beforeChange,
 					args: [index],
 					done: () => {
+						// 不允许重复切换同一标签
+						// if (this[valueField] === index) return
 						this.setCurrentIndex(index) //设置当前下标
 						setTimeout(() => {
 							this.scrollToTop() //滚动到顶 
 							this.scrollToCurrContent() //滚动到当前标签内容
-						}, 0)
+						})
 					},
 				});
 			},
 			// 设置当前下标
-			setCurrentIndex(newIdx) {
-				const shouldEmit = this.currentIndex !== newIdx
-				const shouldEmitChange = this.currentIndex !== null
+			setCurrentIndex(newIdx, shouldEmitChange = true) {
+				const oldIdx = this[valueField]
+				const shouldEmit = oldIdx !== newIdx;
 				const currTab = this.tabList[newIdx] //当前tab
 				// 非滚动导航模式下,触发rendered事件
 				if (this.isLazyRender && !this.scrollspy && !currTab.rendered) {
 					this.$emit('rendered', newIdx, this.tabs[newIdx])
 				}
 
-				this.currentIndex = newIdx
-				if (shouldEmit) { //禁止重复切换
+				if (shouldEmit) { //不允许重复切换同一标签
 					this.$emit(emits[0], newIdx) // 更新v-model绑定的值
 
 					if (shouldEmitChange) {
@@ -491,7 +494,7 @@
 					const duration = immediate ? 0 : this.duration * 1000
 					this.lockedScrollspy = true
 					uni.pageScrollTo({
-						scrollTop: this.tabList[this.currentIndex].paneTop,
+						scrollTop: this.tabList[this[valueField]].paneTop,
 						duration,
 					});
 					setTimeout(() => {
@@ -500,9 +503,11 @@
 				}
 			},
 			// 标签切换
-			tabChange(newIdx, oldIdx) {
-				const oldTab = this.tabList[oldIdx] || {} //上一个tab
-				const currTab = this.tabList[newIdx] || {} //当前tab
+			tabChange(value, oldValue) {
+				console.log("currIdx:", value);
+				const oldTab = this.tabList[oldValue] || {} //上一个tab
+				const currTab = this.tabList[value] //当前tab
+
 				// 设置选中态
 				oldTab.active = false
 				currTab.active = true
@@ -527,36 +532,33 @@
 			// 将活动的tab滚动到视图中
 			scrollIntoView() {
 				// 标签栏允许滚动:设置横向滚动条位置，scrollToCenter为true，当前标签则滚动至中心位置
-				if (this.scrollX) {
-					if (this.scrollToCenter) this.scrollLeft = this.tabList[this.currentIndex].scrollLeft
-					else this.scrollId = `tab_${this.currentIndex-1}`;
-				}
+				if (!this.scrollX) return
+				if (this.scrollToCenter) this.scrollLeft = this.tabList[this[valueField]].scrollLeft
+				else this.scrollId = `tab_${this[valueField]-1}`;
 			},
 			// 设置标签栏底部线条位置
 			setLine() {
-				if (this.isLine) { // 仅在 type="line" 时有效
-					const val = this.tabList[this.currentIndex].translateX
-					const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
-					const duration = `${this.lineAnimated?this.duration:'0'}s`
-					this.$set(this.lineAnimatedStyle, 'transform', transform)
-					this.$set(this.lineAnimatedStyle, 'transitionDuration', duration)
-					this.lineAnimated = true //是否开启标签栏动画
-				}
+				if (!this.isLine) return // 仅在 type="line" 时有效
+				const val = this.tabList[this[valueField]].translateX
+				const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
+				const duration = `${this.lineAnimated?this.duration:'0'}s`
+				this.$set(this.lineAnimatedStyle, 'transform', transform)
+				this.$set(this.lineAnimatedStyle, 'transitionDuration', duration)
+				this.lineAnimated = true //是否开启标签栏动画
 			},
 			// 改变标签内容滑动轨道样式
 			changeTrackStyle(isSlide = false, duration = 0, offsetWidth = 0) {
-				if (this.animated) {
-					// isSlide为true，表示左右滑动；false表示点击标签的转场动画
-					this.trackStyle = {
-						'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` :
-							`translateX(${-100 * this.currentIndex}%)`,
-						'transition': `transform ${duration}s ease-in-out`
-					}
+				if (!this.animated) return
+				// isSlide为true，表示左右滑动；false表示点击标签的转场动画
+				this.trackStyle = {
+					'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` :
+						`translateX(${-100 * this[valueField]}%)`,
+					'transition': `transform ${duration}s ease-in-out`
 				}
 			},
 			// 改变标签内容样式
 			changePaneStyle() {
-				this.getRect('.yui-tab__pane' + this.currentIndex).then(rect => {
+				this.getRect('.yui-tab__pane' + this[valueField]).then(rect => {
 					// 有拖动动画时，隐藏的标签内容高度取显示的标签内容高度
 					const height = rect && this.swipeAnimated ? rect.height : 0
 					this.tabList.forEach(tab => {
@@ -580,20 +582,17 @@
 				this.setCurrentIndex(e.target.current || e.detail.current) //设置当前下标
 			},
 			touchStart(e) {
-				if (this.swipeable) { // 允许滑动
-					this.touchInfo.inited = true //touch开始时,将touchInfo对象设置为已初始化状态
-					const touch = e.touches[0];
-					// 记录touch位置的横坐标与纵坐标
-					this.touchInfo.startX = touch.pageX
-					this.touchInfo.startY = touch.pageY
-					this.touchInfo.moved = false //用来判断是否是一次移动
-				}
+				// 禁止滑动
+				if (!this.swipeable) return
+				this.touchInfo.inited = true //touch开始时,将touchInfo对象设置为已初始化状态
+				const touch = e.touches[0];
+				// 记录touch位置的横坐标与纵坐标
+				this.touchInfo.startX = touch.pageX
+				this.touchInfo.startY = touch.pageY
+				this.touchInfo.moved = false //用来判断是否是一次移动
 			},
 			touchMove(e, index) {
-				if (!this.touchInfo.inited) {
-					return
-				}
-
+				if (!this.touchInfo.inited && this.touchInfo.upDown) return
 				const {
 					pageX,
 					pageY
@@ -607,6 +606,7 @@
 				const direction = getDirection(startX, startY, pageX, pageY)
 				if (direction != 3 && direction != 4) {
 					e.stopPropagation()
+
 					return
 				}
 
@@ -629,9 +629,7 @@
 				}
 			},
 			touchEnd(e, index) {
-				if (!this.touchInfo.moved) {
-					return
-				}
+				if (!this.touchInfo.moved) return
 				const {
 					isLeftSide,
 					deltaX

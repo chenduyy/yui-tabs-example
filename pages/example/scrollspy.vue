@@ -1,11 +1,9 @@
 <template>
 	<view class="container">
-		<!-- <test-comp>
-			<template #test1>ssdfsdf</template>
-			<template #test2>ssdfsdf</template>
-		</test-comp> -->
+		<button @click="activeIndex=2">切换到第三个标签项</button>
 		<view class="placeholder-block">滚动导航</view>
-		<yui-tabs :tabs="tabs" v-model="activeIndex" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy>
+		<yui-tabs :tabs="tabs" v-model="activeIndex" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy
+			@click="handleClick">
 			<template #pane0>
 				<view class="content-wrap bg-red"></view>
 			</template>
@@ -26,11 +24,7 @@
 </template>
 
 <script>
-	import testComp from "./test.vue"
 	export default {
-		components: {
-			testComp
-		},
 		data() {
 			return {
 				tabs: ['618返场', '颜值水杯', '家居日用', '冲调零食', '美味小吃'],
@@ -55,13 +49,17 @@
 			//页面滚动事件
 			uni.$emit('onPageScroll', e)
 		},
-		methods: {}
+		methods: {
+			handleClick(index) {
+				console.log("index:",index);
+			},
+		}
 	}
 </script>
 
 <style lang="less" scoped>
 	.placeholder-block {
-		height: 10vh;
+		height: 110vh;
 		padding: 20rpx;
 		color: #FF9900;
 	}

@@ -8,6 +8,7 @@
 + [Tabs Props](#tabsProps)
 + [Tabs Events](#tabsEvents)
 + [Tabs Slots](#tabsSlots)
++ [注意事项及常见问题](#beCareful)
 
 
 <div id="tips" style="color:#4fc08d;">Tips</div>
@@ -16,7 +17,7 @@
 + 请保证HBuilderX正式版为 v3.4.18、Alpha版为 v3.5.1，否则用于渲染tab内容的动态插槽无效。
 + 该插件使用的预编译，需要自行安装less插件。
 + 如果发现组件有bug或者不完善可以留言交流。
-+ 如需查看效果，请下载示例项目ZIP运行(标签页组件在uni_modules/yui-tabs下)。
++ 如需详细的了解本组件，请下载示例项目ZIP运行查看效果(标签页组件在uni_modules/yui-tabs下)。
 + 旧版本放在uni_modules/yui-tabs/version中。
 + 关于标签栏滚动吸顶提供了两种实现方式,具体可查看示例项目中的演示。
 
@@ -26,6 +27,7 @@
 
 + H5、app-vue、微信、支付宝、钉钉、百度、字节、QQ小程序可用，其他的小程序平台可自行测试。
 + 暂不支持nvue。
++ 目前vue3版本仅支持H5、app-vue。
 
 
 
@@ -163,8 +165,11 @@
 	<tr><td> scroll-threshold    </td><td> number、string </td><td> 标签栏的滚动阈值(仅在ellipsis="false"且type不为"card"下时有效)，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动(切换时会自动将当前标签居中)  </td><td> 5 </td></tr>
 	<tr><td> is-lazy-render    </td><td> boolean </td><td> 是否开启延迟渲染（首次切换到标签时才触发内容渲染）  </td><td> true </td></tr>
 	<tr><td> animated    </td><td> boolean </td><td> 是否开启切换标签内容时的转场动画  </td><td> false </td></tr>
+	<tr><td> tab-click-scroll-top （v.1.0.8）   </td><td> boolean </td><td> 在点击标签标题时，页面是否会滚动回到顶部 </td><td>  false </td></tr>
+	<tr><td> no-render-conent（v.1.0.9）    </td><td> boolean </td><td> 对于只想使用标题栏功能而不关注标签内容，可使用该属性关闭标签内容的渲染  </td><td> false </td></tr>
+	<tr><td> before-change （v.1.0.9）   </td><td> (index) => boolean | Promise </td><td> 切换标签前的回调函数，返回 false 可阻止切换，支持返回 Promise</td><td> - </td></tr>
+	<tr><td> scrollspy（v.1.0.9）    </td><td> boolean </td><td> 是否开启滚动导航；该模式下，内容将会平铺展示  </td><td> false </td></tr>
 	<tr><td> swipeable    </td><td> boolean </td><td> 是否开启手势滑动切换 </td><td>  false </td></tr>
-	<tr><td> tab-click-scroll-top    </td><td> boolean </td><td> 在点击标签标题时，页面是否会滚动回到顶部 </td><td>  false </td></tr>
 	<tr><td> swiper（v1.0.7） </td><td> boolean </td><td> 标签内容的滑动切换是否使用swiper组件实现(为false时是默认实现,swiper以下的所有prop都属于默认实现)；注意：该方式是为了解决默认的左右滑动切换不友好的情况，因此无法兼容uni自身的上拉加载与下拉刷新事件，请到插件市场寻找类似的组件  </td><td> false </td></tr>
 	<tr><td colspan="4"> -- </td></tr>
 	<tr><td colspan="4"> 以下prop,仅在swiper="false"时有效</td></tr>
@@ -222,3 +227,15 @@
  | 方法名      | 说明		| 参数		| 返回值													
  | ---------	| -------	| --------	| --------
  | resize   | 外层元素大小或组件显示状态变化时，可以调用此方法来触发重绘 | - | -
+ 
+  <div id="beCareful" style="color:#4fc08d;">注意事项及常见问题</div>
+  1. 关于swiper属性对于标签内容左右滑动的实现方式，何时使用swpier组件实现，何时使用默认方式实现？
+  
+  * 默认实现下，如果启用swipe-animated拖动动画，在左右滑动时极易触发上下滑动，建议如下：
+	* 想保留页面级的上拉加载与下拉刷新事件
+	* 或者只想要标题栏部分的切换功能，不使用插槽渲染出标签内容，自己去实现具体的展示内容
+
+  * swpier组件实现下，由于该组件是absolute定位，需要给定标签内容具体的高度，无法触发页面级的上拉加载与下拉刷新事件，建议如下：
+	* 想有良好的左右滑动效果，每个标签内容卡片中互不影响，各自使用scroll-view组件承载内容
+	* 由于无法触发页面级的上拉加载与下拉刷新事件，因此需要去插件市场找类似的插件
+ 

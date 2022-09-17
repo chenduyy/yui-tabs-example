@@ -65,6 +65,12 @@ const props = {
 		type: Boolean,
 		default: false
 	},
+	// 对于只想使用标题栏功能而不关注标签内容，可使用该属性关闭标签内容的渲染
+	noRenderConent: Boolean,
+	// 滚动导航: 通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示。
+	scrollspy: Boolean,
+	// 切换标签前的回调函数，返回 false 可阻止切换，支持返回 Promise
+	beforeChange: Function,
 	// 滑动切换是否使用swiper组件实现
 	swiper: {
 		type: Boolean,
@@ -109,10 +115,6 @@ const props = {
 		type: Number,
 		default: 0
 	},
-	// 滚动导航: 通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示。
-	scrollspy: Boolean,
-	// 切换标签前的回调函数，返回 false 可阻止切换，支持返回 Promise
-	beforeChange: Function,
 }
 //  v-model绑定属性，绑定当前选中标签的标识符（标签的下标）
 props[valueField] = {

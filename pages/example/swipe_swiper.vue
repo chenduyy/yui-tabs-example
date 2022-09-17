@@ -95,6 +95,7 @@
 			}) {
 				this.isFixed = isFixed
 			},
+			
 			touchStart(e) {
 				e.stopPropagation()
 			}

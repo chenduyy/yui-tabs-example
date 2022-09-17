@@ -40,22 +40,22 @@ export function isNumeric(val) {
 
 // 是一个对象
 export function isObject(val) {
-	return Object.prototype.toString.call(val) === "[object Object]"
+	return val !== null && typeof val === 'object';
 }
-
 // 是一个字符串
 export function isString(val) {
 	return Object.prototype.toString.call(val) === "[object String]"
 }
 
-
+// 空操作
 export function noop() {}
 
+// 是一个函数
 export function isFunction(val) {
 	return typeof val === 'function';
 }
 
-
+// 是一个promise对象
 export function isPromise(val) {
 	return isObject(val) && isFunction(val.then) && isFunction(val.catch);
 }
@@ -102,9 +102,7 @@ export function getDirection(startx, starty, endx, endy) {
 	return result;
 }
 
-
-
-
+// 调用拦截器
 export function callInterceptor(options) {
 	const {
 		interceptor,
@@ -125,3 +123,4 @@ export function callInterceptor(options) {
 		done();
 	}
 }
+
