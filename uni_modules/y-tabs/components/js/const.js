@@ -1,9 +1,9 @@
-const emits = ['input', 'change', 'click', 'rendered', 'scroll']
-let valueField = "value" // v-model绑定属性名
-// #ifdef VUE3
-emits.splice(0, 1, 'update:modelValue')
-valueField = "modelValue"
-// #endif
+const emits = ['update:active', 'change', 'click', 'rendered', 'scroll']
+// let valueField = "active" // v-model绑定属性名
+// // #ifdef VUE3
+// emits.splice(0, 1, 'update:active')
+// valueField = "modelValue"
+// // #endif
 
 
 const props = {
@@ -23,21 +23,24 @@ const props = {
 		type: [Number, String],
 		default: 0.3,
 	},
+	// 主键,必填,用于区分不同的标签页
+	pKey: {
+		type: [Number, String],
+		required: true,
+	},
+	active: {
+		type: [Number, String],
+		default: 0,
+	},
 	// 样式风格类型，可选值为 text、card、button、line-button
 	type: {
 		type: String,
 		default: "line"
 	},
-	// 标签页数据，支持字符串类型与对象类型的数组结构
-	// 对象类型需符合{label:'标签1',slot:'slotName'}这样的格式，slot为自定义的标签内容插槽名，否则插槽名默认为"pane"+tab下标的命名
-	tabs: {
-		type: Array,
-		default: () => []
-	},
 	// 是否省略过长的标题文字
 	ellipsis: {
 		type: Boolean,
-		default: true,
+		default: false,
 	},
 	// 标签栏滚动时当前标签居中
 	scrollToCenter: {
@@ -49,7 +52,6 @@ const props = {
 		type: [Number, String],
 		default: 5
 	},
-
 	// 是否开启延迟渲染（首次切换到标签时才触发内容渲染）
 	isLazyRender: {
 		type: Boolean,
@@ -91,23 +93,6 @@ const props = {
 		type: [Number, String],
 		default: 50,
 	},
-	// 保证组件的可见性，主要用于处理选中标签的底部线条位置
-	visible: {
-		type: Boolean,
-		default: true
-	},
-	// 标签页是否滚动吸顶
-	fixed: Boolean,
-	// 滚动吸顶下与顶部的最小距离，默认 px
-	offsetTop: {
-		type: Number,
-		default: 0
-	},
-	// 滚动吸顶/粘性布局下，标签栏的z-index值
-	zIndex: {
-		type: Number,
-		default: 99
-	},
 	// 是否使用粘性定位布局
 	sticky: Boolean,
 	// 粘性布局的判断阈值
@@ -115,15 +100,25 @@ const props = {
 		type: Number,
 		default: 0
 	},
+	// 粘性布局下与顶部的最小距离，默认 px
+	offsetTop: {
+		type: Number,
+		default: 0
+	},
+	// 粘性布局下标签栏的z-index值
+	zIndex: {
+		type: Number,
+		default: 99
+	},
 }
 //  v-model绑定属性，绑定当前选中标签的标识符（标签的下标）
-props[valueField] = {
-	type: Number,
-	default: -1
-}
+// props[valueField] = {
+// 	type: Number,
+// 	default: -1
+// }
 
 export {
 	emits,
 	props,
-	valueField
+	// valueField
 }

@@ -121,7 +121,7 @@
 				"pagePath": "pages/tabBar/params",
 				"iconPath": "static/image/tabBar/menu.png",
 				"selectedIconPath": "static/image/tabBar/menu-active.png",
-				"text": "参数"
+				"text": "YuiTabs"
 			}, {
 				"pagePath": "pages/tabBar/example",
 				"iconPath": "static/image/tabBar/order.png",

@@ -9,7 +9,7 @@
 			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX"
 				:scroll-anchoring="true" enable-flex :scroll-left="scrollLeft"
 				:scroll-into-view="!scrollToCenter?scrollId:''" scroll-with-animation :style="[scrollStyle]">
-				<view class="yui-tabs__nav" :class="[navClass]" :style=[navStyle]>
+				<view class="yui-tabs__nav" :class="[navClass]" :style="[navStyle]">
 					<view class="yui-tab" v-for="(tab,index) in tabList" :key="index" @tap.stop="onClick(index,true)"
 						:id="`tab_${index}`" :class="[tabClass(index, tab)]" :style="[tabStyle(tab)]">
 						<view class="yui-tab__text">

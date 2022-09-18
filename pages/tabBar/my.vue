@@ -1,9 +1,10 @@
 <template>
 	<view class="container">
-		<!-- <test-comp>
-			<template #test1>ssdfsdf</template>
-			<template #test2>ssdfsdf</template>
-		</test-comp> -->
+		<test-comp>
+			<template #test1>1111</template>
+			<template #test2>2222</template>
+			<template #test3>2222</template>
+		</test-comp>
 		<view class="placeholder-block">滚动导航</view>
 		<yui-tabs :tabs="tabs" v-model="activeIndex" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy>
 			<template #pane0>
