@@ -92,7 +92,6 @@
 					moved: false, //用来判断是否是一次移动
 					deltaX: 0, //记录拖动的横坐标距离
 					isLeftSide: false, //标记是否为左滑
-					upDown: false,
 				},
 				// 标签栏底部线条动画相关
 				lineAnimated: false, //是否开启标签栏底部线条动画（首次不开启）

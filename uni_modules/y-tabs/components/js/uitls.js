@@ -123,12 +123,3 @@ export function callInterceptor(options) {
 		done();
 	}
 }
-
-function createUidBuilders(){
-	let uid = 0;
-	return function(){
-		uid++
-		return uid;
-	}
-}
-export const getUid = createUidBuilders()

@@ -1,10 +1,27 @@
-const emits = ['update:active', 'change', 'click', 'rendered', 'scroll']
-// let valueField = "active" // v-model绑定属性名
-// // #ifdef VUE3
-// emits.splice(0, 1, 'update:active')
-// valueField = "modelValue"
-// // #endif
+const model = {
+	// #ifndef VUE3
+	prop: 'value',
+	event: 'input'
+	// #endif
+	// #ifdef VUE3
+	prop: 'modelValue',
+	event: 'update:modelValue'
+	// #endif
+}
+console.log(model);
 
+const emits = [
+	// #ifndef VUE3
+	"input",
+	// #endif
+	// #ifdef VUE3
+	'update:modelValue',
+	// #endif
+	'change',
+	'click',
+	'rendered',
+	'scroll'
+]
 
 const props = {
 	color: String, //标签主题色, 默认值为"#0022AB"
@@ -23,15 +40,19 @@ const props = {
 		type: [Number, String],
 		default: 0.3,
 	},
-	// 主键,必填,用于区分不同的标签页
-	pKey: {
-		type: [Number, String],
-		required: true,
-	},
-	active: {
+	// v-model绑定属性，绑定当前选中标签的标识符（标签的下标）
+	// #ifndef VUE3
+	value: {
 		type: [Number, String],
 		default: 0,
 	},
+	// #endif
+	// #ifdef VUE3
+	modelValue: {
+		type: [Number, String],
+		default: 0,
+	},
+	// #endif
 	// 样式风格类型，可选值为 text、card、button、line-button
 	type: {
 		type: String,
@@ -40,14 +61,14 @@ const props = {
 	// 是否省略过长的标题文字
 	ellipsis: {
 		type: Boolean,
-		default: false,
+		default: true,
 	},
 	// 标签栏滚动时当前标签居中
 	scrollToCenter: {
 		type: Boolean,
 		default: true,
 	},
-	//  标签栏的滚动阈值(仅在ellipsis="false"且type不为"card"下时有效)，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动(切换时会自动将当前标签居中)
+	//  标签栏的滚动阈值(仅在ellipsis="false"且type不为"card"下时有效)，标签数量超过阈值时开始横向滚动(切换时会自动将当前标签居中)
 	scrollThreshold: {
 		type: [Number, String],
 		default: 5
@@ -67,17 +88,11 @@ const props = {
 		type: Boolean,
 		default: false
 	},
-	// 对于只想使用标题栏功能而不关注标签内容，可使用该属性关闭标签内容的渲染
-	noRenderConent: Boolean,
 	// 滚动导航: 通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示。
 	scrollspy: Boolean,
 	// 切换标签前的回调函数，返回 false 可阻止切换，支持返回 Promise
 	beforeChange: Function,
-	// 滑动切换是否使用swiper组件实现
-	swiper: {
-		type: Boolean,
-		default: false,
-	},
+	// ---------------------------------- 用于内容区域左右滑动的配置 ----------------------------------------
 	// 是否开启手势滑动切换
 	swipeable: {
 		type: Boolean,
@@ -93,6 +108,7 @@ const props = {
 		type: [Number, String],
 		default: 50,
 	},
+	// ---------------------------------- 用于滚动吸顶的配置 ----------------------------------------
 	// 是否使用粘性定位布局
 	sticky: Boolean,
 	// 粘性布局的判断阈值
@@ -111,14 +127,8 @@ const props = {
 		default: 99
 	},
 }
-//  v-model绑定属性，绑定当前选中标签的标识符（标签的下标）
-// props[valueField] = {
-// 	type: Number,
-// 	default: -1
-// }
-
 export {
+	model,
 	emits,
 	props,
-	// valueField
 }
