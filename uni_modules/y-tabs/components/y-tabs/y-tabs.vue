@@ -9,7 +9,7 @@
 				:scroll-into-view="!scrollToCenter?scrollId:''" scroll-with-animation :style="[scrollStyle]">
 				<view class="yui-tabs__nav" :class="[navClass]" :style="[navStyle]">
 					<view class="yui-tab" v-for="(tab,index) in tabs" :key="index" @tap.stop="onClick(index,true)"
-						:id="`tab_${index}`" :class="[tabClass(index),tab.titleClass]"
+						:id="`tab_${index}`" :class="[tabClass(index,tab),tab.titleClass]"
 						:style="[tabStyle(index),tab.titleStyle]">
 						<view class="yui-tab__text">
 							<!-- #ifndef VUE3 -->
@@ -41,6 +41,7 @@
 </template>
 <script>
 	/**
+	 * disabled,name需要处理
 	 * 滑动时半屏时通过setLine改变线条
 	 * 导航栏背景色渐变，需要控制格式
 	 */
@@ -203,6 +204,7 @@
 			})
 		},
 		methods: {
+			toJSON() {},
 			// @exposed-api
 			resize() {
 				// 外层元素大小或组件显示状态变化时，可以调用此方法来触发重绘
@@ -225,9 +227,9 @@
 				})
 			},
 			// 标签项class
-			tabClass(index) {
+			tabClass(index, tab) {
 				const activated = this.currentIndex === index
-				return `yui-tab_${index} ${activated?'yui-tab--active':''} ${this.ellipsis && !this.scrollX?'yui-tab__ellipsis':''}`
+				return `yui-tab_${index} ${activated?'yui-tab--active':''} ${this.ellipsis && !this.scrollX?'yui-tab__ellipsis':''}  ${tab.disabled?'yui-tab--disabled':''}`
 			},
 			// 标签项style
 			tabStyle(index) {
@@ -403,6 +405,11 @@
 			},
 			// 设置当前下标
 			setCurrentIndex(newIdx) {
+				newIdx = this.findAvailableTab(newIdx) //查询可用tab
+				if (!isDef(newIdx)) {
+					return;
+				}
+
 				const shouldEmit = this.currentIndex !== newIdx
 				const shouldEmitChange = this.currentIndex !== null
 				const currTab = this.tabs[newIdx] //当前tab
@@ -420,8 +427,15 @@
 					}
 				}
 			},
-			toJSON() {
-
+			// 查询可用tab
+			findAvailableTab(index) {
+				const diff = index < this.currentIndex ? -1 : 1;
+				while (index >= 0 && index < this.tabs.length) {
+					if (!this.tabs[index].disabled) {
+						return index;
+					}
+					index += diff;
+				}
 			},
 			// 设置底部线条位置
 			setLine() {
@@ -464,6 +478,7 @@
 			},
 			// 状态变更
 			changeStatus(newIdx, oldIdx) {
+				console.log("newIdx：", newIdx);
 				if (!this.scrollspy) { //非滚动导航模式下
 					(this.tabs[oldIdx] || {}).show = false; //隐藏旧tab的内容
 					(this.tabs[newIdx] || {}).show = true; //显示当前tab的内容

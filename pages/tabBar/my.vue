@@ -18,8 +18,8 @@
 				<view class="content-wrap bg-grey"></view>
 			</template>
 		</yui-tabs> -->
-		<y-tabs v-model="activeIndex" :isLazyRender="false" animated scrollspy :offsetTop="offsetTop">
-			<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
+		<y-tabs v-model="activeIndex" :isLazyRender="false" animated swipeable swipeAnimated>
+			<y-tab v-for="index in 5" :key="index" :title="'标签'+index" :disabled="index === 1">
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
 		</y-tabs>

@@ -156,12 +156,17 @@
 				const deltaX = pageX - startX
 				// 标记是左滑还是右滑
 				const isLeftSide = deltaX >= 0
-				const { dataLen, contentWidth, currentIndex } = this.parent
+				const { dataLen, contentWidth, currentIndex, tabs } = this.parent
 				// 如果当前为第一页内容，则不允许左滑；最后一页内容，则不允许右滑
 				if ((isLeftSide && this.index === 0) || (!isLeftSide && this.index === dataLen - 1)) {
 					return
 				}
-				this.touchInfo.isLeftSide = isLeftSide
+				const index = this.index + (isLeftSide ? -1 : 1)
+				if (tabs[index].disabled) { // 禁用
+					return
+				}
+
+				this.touchInfo.isLeftSide = isLeftSide //是否左侧滑动
 				this.touchInfo.moved = true
 				this.touchInfo.deltaX = Math.abs(deltaX)
 				// 改变标签内容的样式，模拟拖动动画效果
