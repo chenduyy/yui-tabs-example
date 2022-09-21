@@ -1,12 +1,7 @@
 <template>
 	<view class="container">
-		<test-comp>
-			<template #test1>1111</template>
-			<template #test2>2222</template>
-			<template #test3>2222</template>
-		</test-comp>
 		<view class="placeholder-block">滚动导航</view>
-		<yui-tabs :tabs="tabs" v-model="activeIndex" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy>
+		<!-- <yui-tabs :tabs="tabs" v-model="activeIndex" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy>
 			<template #pane0>
 				<view class="content-wrap bg-red"></view>
 			</template>
@@ -22,16 +17,17 @@
 			<template #pane4>
 				<view class="content-wrap bg-grey"></view>
 			</template>
-		</yui-tabs>
+		</yui-tabs> -->
+		<y-tabs v-model="activeIndex" :isLazyRender="false" animated scrollspy :offsetTop="offsetTop">
+			<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
+				<view class="content-wrap"> 内容{{index}} </view>
+			</y-tab>
+		</y-tabs>
 	</view>
 </template>
 
 <script>
-	import testComp from "./test.vue"
 	export default {
-		components: {
-			testComp
-		},
 		data() {
 			return {
 				tabs: ['618返场', '颜值水杯', '家居日用', '冲调零食', '美味小吃'],
@@ -68,6 +64,7 @@
 	}
 
 	.content-wrap {
+		padding: 20px;
 		height: 50vh;
 	}
 

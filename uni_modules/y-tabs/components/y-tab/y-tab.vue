@@ -43,7 +43,6 @@
 					moved: false, //用来判断是否是一次移动
 					deltaX: 0, //记录拖动的横坐标距离
 					isLeftSide: false, //标记是否为左滑
-					upDown: false,
 				},
 			}
 		},
@@ -71,7 +70,6 @@
 				this.parent.childrens.push(this);
 				this.parent.putTab({ newValue: { ...this.$props } })
 			}
-			// console.log(this.parent());
 		},
 		// #ifndef VUE3
 		destroyed() {
@@ -86,6 +84,28 @@
 		},
 		// #endif
 		methods: {
+			toJSON() {
+
+			},
+			// 获取查询节点信息的对象
+			getSelectorQuery() {
+				let query = null
+				// #ifdef MP-ALIPAY
+				query = uni.createSelectorQuery()
+				// #endif
+				// #ifndef MP-ALIPAY
+				query = uni.createSelectorQuery().in(this)
+				// #endif
+				return query
+			},
+			// 获取元素位置信息
+			getRect() {
+				return new Promise((resolve, reject) => {
+					this.getSelectorQuery().select(".yui-tab__pane").boundingClientRect().exec(rect => {
+						resolve(rect[0] || {})
+					});
+				})
+			},
 			// 卸载组件的处理
 			unInit() {
 				if (this.parent) {
@@ -107,7 +127,7 @@
 			},
 			// 内容class
 			paneClass() {
-				return `yui-tab_pane${this.index} ${this.active?'yui-pane--active':''}`
+				return `yui-tab__pane${this.index} ${this.active?'yui-tab__pane--active':''}`
 			},
 			touchStart(e) {
 				if (this.swipeable) { // 允许滑动
@@ -136,9 +156,9 @@
 				const deltaX = pageX - startX
 				// 标记是左滑还是右滑
 				const isLeftSide = deltaX >= 0
-				const { tabs, contentWidth, currentIndex } = this.parent
+				const { dataLen, contentWidth, currentIndex } = this.parent
 				// 如果当前为第一页内容，则不允许左滑；最后一页内容，则不允许右滑
-				if ((isLeftSide && this.index === 0) || (!isLeftSide && this.index === tabs.length - 1)) {
+				if ((isLeftSide && this.index === 0) || (!isLeftSide && this.index === dataLen - 1)) {
 					return
 				}
 				this.touchInfo.isLeftSide = isLeftSide
@@ -155,12 +175,12 @@
 					return
 				}
 				const { isLeftSide, deltaX } = this.touchInfo || {}
-				const { tabs, swipeThreshold } = this.parent
+				const { dataLen, swipeThreshold } = this.parent
 				// 移动的横坐标偏移量大于指定的滚动阈值时,则切换显示状态,否则还原
 				if (Math.abs(deltaX) > Number(swipeThreshold)) {
 					// 根据是否为左滑查找需要滑动到的标签内容页下标，切换标签内容
 					const index = this.index + (isLeftSide ? -1 : 1)
-					if (index > -1 && index < tabs.length) {
+					if (index > -1 && index < dataLen) {
 						this.parent.setCurrentIndex(index)
 					}
 				} else {

@@ -325,6 +325,7 @@
 			getCurrIndexOnScroll(res = []) {
 				return new Promise((resolve, rejct) => {
 					const selectors = this.tabList.map((o, i) => '.yui-tab_pane' + i)
+					console.log(selectors);
 					this.getRect(...selectors).then(res => {
 						// 标签内容的top小于标题栏的top，则说明已经与标题栏部分重合
 						let index = res.reduce((idx, o, i) => o.top < this.scrollOffset ? i : idx, 0)
@@ -425,7 +426,6 @@
 				const isSpy = this.scrollspy //是否滚动导航模式
 				const selectors = this.tabList.reduce((arr, tab, index) => {
 					arr.push('.yui-tab_' + index)
-					if (isSpy) arr.push('.yui-tab_pane' + index)
 					return arr
 				}, [])
 				const rects = await this.getRect(...selectors);

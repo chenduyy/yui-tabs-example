@@ -41,28 +41,10 @@
 </template>
 <script>
 	/**
-	 * 父组件监听$prop,使用prop监听器
-	 * watchEvent从父组件取
-	 * 销毁时的处理
-	 * 查看uni组件对于事件触发的处理（名称一样的事件）
 	 * 滑动时半屏时通过setLine改变线条
-	 * v-model绑定值，参考uni-forms的modelValue
 	 * 导航栏背景色渐变，需要控制格式
 	 */
 
-	/**
-	 * 获取父元素实例
-	 */
-	// getForm(name = 'uniForms') {
-	// 	let parent = this.$parent;
-	// 	let parentName = parent.$options.name;
-	// 	while (parentName !== name) {
-	// 		parent = parent.$parent;
-	// 		if (!parent) return false;
-	// 		parentName = parent.$options.name;
-	// 	}
-	// 	return parent;
-	// },
 	import {
 		isNull,
 		addUnit,
@@ -172,7 +154,7 @@
 			},
 			// 标签数量
 			dataLen() {
-				return this.tabList.length
+				return this.tabs.length
 			},
 			// 滑动动画时长(ms)
 			msDuration() {
@@ -184,6 +166,7 @@
 			},
 		},
 		watch: {
+			// 监听父组件的props，设置给子组件
 			$props: {
 				deep: true,
 				immediate: true,
@@ -231,6 +214,7 @@
 				if (this.timer) clearTimeout(this.timer);
 				this.timer = setTimeout(() => {
 					this.init() //初始化
+					this.bindListener(); //监听事件
 				}, 5)
 			},
 			// 更新tab
@@ -306,6 +290,46 @@
 					});
 				})
 			},
+			// 绑定监听事件
+			bindListener() {
+				const that = this
+				if (that.sticky || that.scrollspy) {
+					uni.$on('onPageScroll', function(e) {
+						const { stickyThreshold, offsetTop, scrollspy, lockedScrollspy } = that
+						// 粘性定位布局的吸顶处理
+						that.getRect('.depend-wrap').then((rect) => {
+							// TODO 优化触发边界值
+							that.isFixed = rect.bottom - stickyThreshold <= offsetTop
+							// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
+							that.$emit("scroll", {
+								scrollTop: e.scrollTop,
+								isFixed: that.isFixed
+							})
+						})
+
+						// 滚动导航模式下对选中标签的处理
+						if (scrollspy && !lockedScrollspy) {
+							that.getCurrIndexOnScroll().then(index => {
+								that.setCurrentIndex(index) //设置当前下标
+							})
+						}
+					})
+				}
+			},
+			// 滚动时获取要选中的下标
+			getCurrIndexOnScroll(res = []) {
+				return new Promise((resolve, rejct) => {
+					const promises = this.childrens.map(child => child.getRect())
+					Promise.all(promises).then(res => {
+						// 标签内容的top小于标题栏的top，则说明已经与标题栏部分重合
+						let index = res.reduce((idx, o, i) => o.top < this.scrollOffset ? i : idx, 0)
+						// 判断最后一个标签内容是否完整显示在底部，是则默认选中
+						// const lastRect = res[res.length - 1] //最后一个标签内容
+						// if (lastRect.bottom <= this.windowHeight) index = res.length - 1
+						resolve(index)
+					})
+				})
+			},
 			// 初始化操作
 			async init() {
 				//屏幕高度
@@ -338,20 +362,26 @@
 				})
 
 				// 计算每个tab的相关参数
-				const isSpy = this.scrollspy //是否滚动导航模式
 				const selectors = this.tabs.reduce((arr, tab, index) => {
 					arr.push(`.yui-tab_${index}`)
-					if (isSpy) arr.push(`.yui-tab_pane${index}`)
 					return arr
 				}, [])
 				const rects = await this.getRect(...selectors);
 				this.tabs.forEach((tab) => {
-					const [r1, r2] = rects.splice(0, isSpy ? 2 : 1)
-					const translateX = r1 ? r1.left + r1.width / 2 - parentLeft : 0
+					const [r] = rects.splice(0, 1)
+					const translateX = r ? r.left + r.width / 2 - parentLeft : 0
 					this.$set(tab, "translateX", translateX) //标签线条偏移量
 					this.$set(tab, "scrollLeft", translateX - halfWrapWidth) //标签相对于屏幕左侧的距离值
-					this.$set(tab, "paneTop", r2 ? r2.top : 0) //标签内容相对于屏幕顶部的距离值
 				})
+
+				if (this.scrollspy) { //滚动导航模式
+					const promises = this.childrens.map(child => child.getRect())
+					const res = await Promise.all(promises) || [];
+					res.forEach((r, index) => {
+						this.$set(this.tabs[index], "paneTop", r ? r.top : 0) //标签内容相对于屏幕顶部的距离值
+					})
+					console.log(this.tabs);
+				}
 
 				this.setCurrentIndex(this[model.prop]) //设置当前下标
 			},
@@ -390,10 +420,12 @@
 					}
 				}
 			},
+			toJSON() {
+
+			},
 			// 设置底部线条位置
 			setLine() {
 				if (this.isLine) { // 仅在 type="line" 时有效
-					// console.log(this.tabs[this.currentIndex]);
 					const val = this.tabs[this.currentIndex].translateX
 					const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
 					const duration = `${this.lineAnimated?this.duration:'0'}s`
@@ -464,7 +496,7 @@
 			},
 			// 改变标签内容样式
 			async changePaneStyle() {
-				const rect = await this.getRect('.yui-tab__pane' + this.currentIndex);
+				const rect = await this.childrens[this.currentIndex].getRect();
 				const height = rect && this.swipeAnimated ? rect.height : 0 //拖拽动画时才需要该高度
 				this.tabs.forEach((tab, index) => {
 					// 有拖动动画时或指定标签内容显示时，为visible

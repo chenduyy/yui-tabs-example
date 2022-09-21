@@ -5,21 +5,27 @@
 				"navigationBarTitleText": "首页",
 				"navigationStyle": "custom"
 			}
-		}, {
-			"path": "pages/tabBar/params",
-			"style": {
-				"navigationBarTitleText": "参数用法"
-			}
-
-		}, {
+		},  {
 			"path": "pages/tabBar/example",
 			"style": {
-				"navigationBarTitleText": "示例"
+				"navigationBarTitleText": "yuiTabs"
 			}
 		}, {
+			"path": "pages/tabBar/exampleYTabs",
+			"style": {
+				"navigationBarTitleText": "yTabs"
+			}
+		}, {
+
 			"path": "pages/tabBar/my",
 			"style": {
 				"navigationBarTitleText": "我的"
+			}
+		},
+		{
+			"path": "pages/example/params",
+			"style": {
+				"navigationBarTitleText": "yuiTabs基础用法"
 			}
 		}, {
 			"path": "pages/example/swipe_swiper",
@@ -64,30 +70,32 @@
 			"style": {
 				"navigationBarTitleText": "swiper方式"
 			}
+		}, {
+			"path": "pages/example/scrollspy",
+			"style": {
+				"navigationBarTitleText": "滚动导航",
+				"enablePullDownRefresh": false
+			}
+		}, {
+			"path": "pages/example/news/index",
+			"style": {
+				"navigationBarTitleText": "新闻列表",
+				"enablePullDownRefresh": false
+			}
+		}, {
+			"path": "pages/example/news/detail",
+			"style": {
+				"navigationBarTitleText": "新闻详情",
+				"enablePullDownRefresh": false
+			}
+		}, {
+			"path": "pages/exampleYTabs/params",
+			"style": {
+				"navigationBarTitleText": "yTabs基础用法",
+				"enablePullDownRefresh": false
+			}
 		}
-	    ,{
-            "path" : "pages/example/scrollspy",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "滚动导航",
-                "enablePullDownRefresh": false
-            }
-        },{
-            "path" : "pages/example/news/index",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "新闻列表",
-                "enablePullDownRefresh": false
-            }
-        },{
-            "path" : "pages/example/news/detail",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "新闻详情",
-                "enablePullDownRefresh": false
-            }
-        }
-    ],
+	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",
@@ -95,15 +103,6 @@
 		"backgroundColor": "#F8F8F8",
 		"app-plus": {
 			"background": "#efeff4"
-		}
-	},
-	"topWindow": {
-		"path": "pages/responsive/top-window.vue", // 指定 topWindow 页面文件
-		"style": {
-			"height": "44px"
-		},
-		"matchMedia": {
-			"minWidth": 768 //生效条件，当窗口宽度大于768px时显示
 		}
 	},
 	"tabBar": {
@@ -118,15 +117,16 @@
 				"text": "首页"
 			},
 			{
-				"pagePath": "pages/tabBar/params",
-				"iconPath": "static/image/tabBar/menu.png",
-				"selectedIconPath": "static/image/tabBar/menu-active.png",
-				"text": "YuiTabs"
-			}, {
 				"pagePath": "pages/tabBar/example",
 				"iconPath": "static/image/tabBar/order.png",
 				"selectedIconPath": "static/image/tabBar/order-active.png",
-				"text": "示例"
+				"text": "yuiTabs"
+			},
+			{
+				"pagePath": "pages/tabBar/exampleYTabs",
+				"iconPath": "static/image/tabBar/order.png",
+				"selectedIconPath": "static/image/tabBar/order-active.png",
+				"text": "yTabs"
 			}, {
 				"pagePath": "pages/tabBar/my",
 				"iconPath": "static/image/tabBar/my.png",

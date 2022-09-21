@@ -22,7 +22,7 @@
 		},
 		methods: {
 			onClick(name) {
-				const url = `/pages/example/${name}`
+				const url = `/pages/exampleYTabs/${name}`
 				console.log("页面路径：", url);
 				uni.navigateTo({
 					url,

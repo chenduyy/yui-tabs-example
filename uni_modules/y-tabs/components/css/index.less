@@ -287,57 +287,31 @@ uni-view , swiper-item, view{
 			flex-shrink: 0;
 			box-sizing: border-box;
 			width: 100%;
+			height: 0;
+				
+			&--active{
+				height: auto;
+			}
 		}
-	}
-
-	// 标签内容转场动画样式
-	&__content--animated {
-		overflow: hidden;
-
-		.yui-tab__pane {
-			transition-duration: 0.3s;
+		
+		// 标签内容转场动画样式
+		&--animated {
+			overflow: hidden;
+		
+			.yui-tab__pane {
+				transition-duration: 0.3s;
+			}
 		}
-	}
-	
-	// 滚动导航模式下
-	&__content--scrollspy {
-		overflow: hidden;
-	
-		.yui-tabs__track {
-			flex-direction: column;
-		}
-	}
-
-	// 使用swpier组件进行左右滑动
-	&--swiper {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		box-sizing: border-box;
-		overflow: hidden;
-	}
-
-	// 承载标签内容的滑动容器
-	&__swiper {
-		flex: 1;
-		box-sizing: border-box;
-
-		.yui-tabs__swiper--item {
-			flex: 1;
-			flex-direction: column;
-			box-sizing: border-box;
-		}
-
-		.yui-tabs__swiper--wrap {
-			position: absolute;
-			left: 0;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			box-sizing: border-box;
-			display: flex;
-			flex: 1;
-			min-height: 20vh;
-		}
+		
+		// 滚动导航模式
+		&--scrollspy{
+			.yui-tab__pane {
+				height: auto;
+			}
+			
+			.yui-tabs__track {
+				flex-direction: column;
+			}
+		} 
 	}
 }
