@@ -1,23 +1,11 @@
 <template>
 	<view class="container">
-		<button @click="activeIndex=2">切换到第三个标签项</button>
-		<view class="placeholder-block">滚动导航</view>
+		<banner />
 		<y-tabs v-model="activeIndex" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy
 			@click="handleClick">
-			<y-tab title="618返场">
-				<view class="content-wrap bg-red"></view>
-			</y-tab>
-			<y-tab title="颜值水杯">
-				<view class="content-wrap bg-orange"></view>
-			</y-tab>
-			<y-tab title="家居日用">
-				<view class="content-wrap bg-blue"></view>
-			</y-tab>
-			<y-tab title="冲调零食">
-				<view class="content-wrap bg-green"></view>
-			</y-tab>
-			<y-tab title="美味小吃">
-				<view class="content-wrap bg-grey"></view>
+			<y-tab v-for="(title, index) in tabs" :title="title" :key="index">
+				<view class="title-wrap">{{title}}</view>
+				<goods-list :activeIndex="index" />
 			</y-tab>
 		</y-tabs>
 		<view class="placeholder-block2"></view>
@@ -25,12 +13,19 @@
 </template>
 
 <script>
+	import banner from '@/pages/home/banner'
+	import goodsList from '@/pages/home/goods-list'
 	export default {
 		data() {
 			return {
+				tabs: ['618返场', '颜值水杯', '家居日用', '冲调零食'],
 				activeIndex: 0, // 标签页当前选择项的下标
 				offsetTop: 0, //粘性定位布局下与顶部的最小距离
 			}
+		},
+		components: {
+			banner,
+			goodsList
 		},
 		mounted() {
 			uni.getSystemInfo({
@@ -58,38 +53,12 @@
 </script>
 
 <style lang="less" scoped>
-	.placeholder-block {
-		height: 50vh;
-		padding: 20rpx;
-		color: #FF9900;
+	.container{
+		background-color: #f7f7f7;
 	}
-
-	.placeholder-block2 {
-		height: 200vh;
-	}
-
-	.content-wrap {
-		height: 50vh;
-	}
-
-	.bg-red {
-		background-color: #F56C6C;
-	}
-
-
-	.bg-orange {
-		background-color: #FF9900;
-	}
-
-	.bg-blue {
-		background-color: #409EFF;
-	}
-
-	.bg-green {
-		background-color: #67C23A;
-	}
-
-	.bg-grey {
-		background-color: #EBEEF5;
+	.title-wrap{
+		font-size: 16px;
+		font-weight: 520;
+		padding: 16px 10px 10px;
 	}
 </style>
