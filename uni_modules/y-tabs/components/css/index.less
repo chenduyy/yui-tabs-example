@@ -7,13 +7,6 @@
 @dotColor: #e53935; //小红点、徽标背景色
 @badgeColor: #fff; //徽标内容颜色
 
-uni-view , swiper-item, view{
-	flex-direction: row;
-	display: block;
-}
-
-
-
 .yui-tabs {
 	position: relative;
 	width: 100%;
@@ -247,8 +240,9 @@ uni-view , swiper-item, view{
 	}
 
 
-	// 标签右侧的补充区域
-	&__extra {
+	// 标签左侧、右侧的补充区域
+	&__nav-left,
+	&__nav-right {
 		position: relative;
 		display: inline-flex;
 		white-space: nowrap;
@@ -313,5 +307,50 @@ uni-view , swiper-item, view{
 				flex-direction: column;
 			}
 		} 
+	}
+	
+	// 滚动导航模式下标签栏垂直展示
+	&--vertical{
+		display: flex;
+		flex-wrap: nowrap;
+		flex-direction: row;
+		justify-content: flex-end;
+		flex: 1;
+		.yui-tabs__wrap{
+			width: 100px;
+			display: flex;
+			flex: 1;
+			flex-direction: column;
+		}
+		
+		.yui-tabs__placeholder {
+		  display: none;
+		  width: 0;
+		}
+		
+		.yui-tabs__scroll{
+			height: auto;
+		}
+		
+		.yui-tabs__nav{
+			flex-direction: column;
+			height: auto;
+		}
+		
+		.yui-tabs__content {
+		   width: calc(100% - 100px);
+		}
+		
+		.yui-tabs__line {
+		    position: absolute;
+		    bottom: 0;
+		    left: 4px;
+		    background-color: #0022AB;
+		    border-radius: 0.1875rem;
+		    transform: translateY(-100%) translateY(-50%);
+		    width: 0.1875rem;
+		    height: 1.25rem;
+		    // transform: translateY(-44px) translateY(-50%) !important;
+		}
 	}
 }

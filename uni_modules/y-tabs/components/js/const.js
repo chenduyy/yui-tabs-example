@@ -8,7 +8,6 @@ const model = {
 	event: 'update:modelValue'
 	// #endif
 }
-console.log(model);
 
 const emits = [
 	// #ifndef VUE3
@@ -88,8 +87,6 @@ const props = {
 		type: Boolean,
 		default: false
 	},
-	// 滚动导航: 通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示。
-	scrollspy: Boolean,
 	// 切换标签前的回调函数，返回 false 可阻止切换，支持返回 Promise
 	beforeChange: Function,
 	// ---------------------------------- 用于内容区域左右滑动的配置 ----------------------------------------
@@ -126,6 +123,13 @@ const props = {
 		type: Number,
 		default: 99
 	},
+	// 滚动导航: 通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示。
+	scrollspy: Boolean,
+	// 滚动导航模式下标签栏的展示方位,可选值：vertical
+	direction:{
+		type: String,
+		default: "horizontal"
+	}
 }
 export {
 	model,

@@ -7,22 +7,12 @@
 			<view>本案例在微信小程序中，未吸顶时，标签栏背景色为灰色，且没有paddingTop值;吸顶时，标签栏背景色为白色，有paddingTop值，paddingTop撑开了透明的状态栏+导航栏区域</view>
 			<view>采用了sticky属性开启吸顶，并在页面生命周期onPageScroll中调用uni.$emit('onPageScroll', e)</view>
 		</view>
-		<yui-tabs :tabs="tabs" v-model="activeIndex" animated :background="background" swipeable swipeAnimated
-			:isLazyRender="false" sticky :wrapStyle="wrapStyle" :offsetTop="offsetTop" :stickyThreshold="navHeight"
-			@scroll="handleScroll">
-			<view class="content-wrap" slot="pane0">
-				<goods-list :activeIndex="0" />
-			</view>
-			<view class="content-wrap" slot="pane1">
-				<goods-list :activeIndex="1" />
-			</view>
-			<view class="content-wrap" slot="pane2">
-				<goods-list :activeIndex="2" />
-			</view>
-			<view class="content-wrap" slot="pane3">
-				<goods-list :activeIndex="3" />
-			</view>
-		</yui-tabs>
+		<y-tabs v-model="activeIndex" :background="background" animated :isLazyRender="false" sticky
+			:wrapStyle="wrapStyle" :offsetTop="offsetTop" :stickyThreshold="navHeight" @scroll="handleScroll">
+			<y-tab v-for="(title, index) in tabs" :title="title" :key="index">
+				<goods-list :activeIndex="index" />
+			</y-tab>
+		</y-tabs>
 	</view>
 </template>
 
@@ -101,7 +91,6 @@
 
 				//状态栏的高度+导航栏的高度
 				this.navHeight = navBarH + statusBarH
-				// this.offsetTop = this.navHeight
 			},
 			// 滚动时触发，仅在 sticky 模式下生效
 			handleScroll({

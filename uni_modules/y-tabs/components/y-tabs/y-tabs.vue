@@ -4,19 +4,25 @@
 		<view class="depend-wrap"></view>
 		<!-- 标签区域 -->
 		<view class="yui-tabs__wrap" :style="[innerWrapStyle,wrapStyle]">
-			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX"
-				:scroll-anchoring="true" enable-flex :scroll-left="scrollLeft"
+			<view class="yui-tabs__nav-left">
+				<slot name="nav-left"></slot>
+			</view>
+			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX" :scroll-anchoring="true" enable-flex :scroll-left="scrollLeft"
 				:scroll-into-view="!scrollToCenter?scrollId:''" scroll-with-animation :style="[scrollStyle]">
 				<view class="yui-tabs__nav" :class="[navClass]" :style="[navStyle]">
-					<view class="yui-tab" v-for="(tab,index) in tabs" :key="index" @tap.stop="onClick(index,true)"
-						:id="`tab_${index}`" :class="[tabClass(index,tab),tab.titleClass]"
+					<view class="yui-tab" v-for="(tab,index) in tabs" :key="index" @tap.stop="onClick(index)" :id="`tab_${index}`" :class="[tabClass(index,tab),tab.titleClass]"
 						:style="[tabStyle(index),tab.titleStyle]">
 						<view class="yui-tab__text">
 							<!-- #ifndef VUE3 -->
 							<slot :name="tab.titleSlot">{{tab.title}}</slot>
 							<!-- #endif -->
 							<!-- #ifdef VUE3 -->
+							<!-- #ifndef APP-PLUS || H5 -->
 							{{tab.title}}
+							<!-- #endif -->
+							<!-- #ifdef APP-PLUS || H5 -->
+							<slot :name="tab.titleSlot">{{tab.title}}</slot>
+							<!-- #endif -->
 							<!-- #endif -->
 							<text :class="[infoClass(tab)]" v-if="tab.badge || tab.dot">{{tab.badge}}</text>
 						</view>
@@ -24,15 +30,14 @@
 					<view v-if="isLine" class="yui-tabs__line" :style="[lineStyle,lineAnimatedStyle]"></view>
 				</view>
 			</scroll-view>
-			<view class="yui-tabs__extra">
-				<slot name="extra"></slot>
+			<view class="yui-tabs__nav-right">
+				<slot name="nav-right"></slot>
 			</view>
 		</view>
 
 		<view v-if="isFixed" class="yui-tabs__placeholder" :style="[{height:placeholderHeight+'px'}]"></view>
 		<!-- 标签内容 -->
-		<view class="yui-tabs__content"
-			:class="{'yui-tabs__content--animated':animated,'yui-tabs__content--scrollspy':scrollspy}">
+		<view class="yui-tabs__content" :class="{'yui-tabs__content--animated':animated,'yui-tabs__content--scrollspy':scrollspy}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
 				<slot></slot>
 			</view>
@@ -71,7 +76,7 @@
 		props,
 		data() {
 			return {
-				childrens: [], // 存放子组件数组
+				children: [], // 存放子组件数组
 				tabs: [],
 				watchTabKey: `watchTab_${this.pKey}`, //监听导航变化事件
 				putChangeKey: `putChange_${this.pKey}`, //推动导航变化事件
@@ -89,7 +94,6 @@
 				extraWidth: 0, //标签栏右侧额外区域宽度
 				contentWidth: 0, //标签内容宽度
 				trackStyle: null, //标签内容滑动轨道样式
-				isTabClick: false, //是否为标签标题点击
 				placeholderHeight: 0, //标题栏占位高度
 				windowHeight: 0, //屏幕高度
 				paneHeight: 0, //标签内容当前默认的高度
@@ -97,13 +101,17 @@
 			}
 		},
 		computed: {
+			// 滚动导航模式下标签栏是否垂直展示
+			isVertical() {
+				return this.direction === "vertical"
+			},
 			// 样式风格是否为line
 			isLine() {
 				return this.type === "line"
 			},
 			// 标签页容器class
 			tabsClass() {
-				return `yui-tabs--${this.type} ${ this.isFixed?'yui-tabs--fixed':''}`
+				return `yui-tabs--${this.type} ${ this.isFixed?'yui-tabs--fixed':''} ${ this.isVertical?'yui-tabs--vertical':''} `
 			},
 			// 标签栏class
 			navClass() {
@@ -117,7 +125,9 @@
 			},
 			// 标签栏包裹层样式
 			innerWrapStyle() {
-				const style = { background: this.background }
+				const style = {
+					background: this.background
+				}
 				// 滚动吸顶下
 				if (this.isFixed) {
 					style.top = this.offsetTop + "px"
@@ -128,7 +138,7 @@
 			// 滚动区域样式
 			scrollStyle() {
 				return {
-					width: `calc(100% - ${this.extraWidth}px)`
+					width: !this.isVertical ? `calc(100% - ${this.extraWidth}px)` : ""
 				}
 			},
 			// 标签栏底部线条样式
@@ -163,7 +173,17 @@
 			},
 			// 粘性布局下的滚动偏移量
 			scrollOffset() {
-				return this.sticky ? this.offsetTop + this.placeholderHeight : 0;
+				if (this.sticky) {
+					return !this.isVertical ? this.offsetTop + this.placeholderHeight : this.offsetTop
+				} else {
+					return 0
+				}
+			},
+			currentName() {
+				const activeTab = this.children[this.currentIndex];
+				if (activeTab) {
+					return activeTab.computedName;
+				}
 			},
 		},
 		watch: {
@@ -172,23 +192,24 @@
 				deep: true,
 				immediate: true,
 				handler(newValue) {
-					this.childrens.forEach((child) => {
+					this.children.forEach((child) => {
 						child.swipeable = newValue.swipeable;
 						child.swipeAnimated = newValue.swipeAnimated;
+						child.rendered = !newValue.isLazyRender || newValue.scrollspy
 					});
 				},
 			},
 			// 监听子组件数组长度变化，赋index值
-			"childrens.length"() {
-				this.childrens.forEach((child, index) => {
+			"children.length"() {
+				this.children.forEach((child, index) => {
 					child.index = index;
 					child.swipeable = this.swipeable;
 					child.swipeAnimated = this.swipeAnimated;
+					child.rendered = !this.isLazyRender || this.scrollspy; //标记是否渲染过，非懒加载与滚动导航模式下默认渲染
 				});
 			},
 			// 监听选中下标变化
 			currentIndex(newIdx, oldIdx) {
-				// console.log(this.currentIndex);
 				this.changeStatus(newIdx, oldIdx) // 状态变更
 				this.setLine(); //设置底部线条位置
 				this.scrollIntoView() //将激活的tab滚动到视图中
@@ -210,9 +231,18 @@
 				// 外层元素大小或组件显示状态变化时，可以调用此方法来触发重绘
 				this.init()
 			},
+			// @exposed-api
+			scrollTo(name) {
+				this.$nextTick(() => {
+					this.setCurrentIndexByName(name);
+					this.scrollToCurrentContent(true);
+				});
+			},
 			// 添加tab
 			putTab({ newValue, oldValue }) {
-				this.tabs.push({ ...newValue })
+				this.tabs.push({
+					...newValue
+				})
 				if (this.timer) clearTimeout(this.timer);
 				this.timer = setTimeout(() => {
 					this.init() //初始化
@@ -303,10 +333,7 @@
 							// TODO 优化触发边界值
 							that.isFixed = rect.bottom - stickyThreshold <= offsetTop
 							// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
-							that.$emit("scroll", {
-								scrollTop: e.scrollTop,
-								isFixed: that.isFixed
-							})
+							that.$emit("scroll", { scrollTop: e.scrollTop, isFixed: that.isFixed })
 						})
 
 						// 滚动导航模式下对选中标签的处理
@@ -321,7 +348,7 @@
 			// 滚动时获取要选中的下标
 			getCurrIndexOnScroll(res = []) {
 				return new Promise((resolve, rejct) => {
-					const promises = this.childrens.map(child => child.getRect())
+					const promises = this.children.map(child => child.getRect())
 					Promise.all(promises).then(res => {
 						// 标签内容的top小于标题栏的top，则说明已经与标题栏部分重合
 						let index = res.reduce((idx, o, i) => o.top < this.scrollOffset ? i : idx, 0)
@@ -338,11 +365,13 @@
 				this.windowHeight = uni.getSystemInfoSync().windowHeight;
 
 				//获取额外区域的宽度
-				let rect = await this.getRect('.yui-tabs__extra')
-				this.extraWidth = rect ? rect.width : 0
+				const [rect1, rect2] = await this.getRect('.yui-tabs__nav-left', '.yui-tabs__nav-right')
+				const navleftWidth = rect1 ? rect1.width : 0
+				const navRightWidth = rect2 ? rect2.width : 0
+				this.extraWidth = navleftWidth + navRightWidth
 
 				//获取标签内容区域的宽度
-				rect = await this.getRect('.yui-tabs__content')
+				let rect = await this.getRect('.yui-tabs__content')
 				this.contentWidth = rect ? rect.width : 0
 
 				// 获取标题栏包裹层的rect
@@ -359,8 +388,6 @@
 				this.tabs.forEach((tab, index) => {
 					this.$set(tab, "titleSlot", 'title' + index) ////标题插槽名，以"title"+下标命名,vue3不支持自定义标题插槽
 					this.$set(tab, "show", this.scrollspy) //是否显示内容（滚动导航模式默认显示）
-					//标记是否渲染过，非懒加载与滚动导航模式下默认渲染
-					this.childrens[index].rendered = !this.isLazyRender || this.scrollspy
 				})
 
 				// 计算每个tab的相关参数
@@ -369,61 +396,76 @@
 					return arr
 				}, [])
 				const rects = await this.getRect(...selectors);
-				this.tabs.forEach((tab) => {
+				let len = this.tabs.length - 1
+				this.tabs.forEach((tab, index) => {
 					const [r] = rects.splice(0, 1)
-					const translateX = r ? r.left + r.width / 2 - parentLeft : 0
-					this.$set(tab, "translateX", translateX) //标签线条偏移量
+					const translateX = r ? r.left + r.width / 2 - parentLeft - navleftWidth : 0
+					const translateY = r.height * len * -1
+					len--
+					this.$set(tab, "translateX", translateX) //标签线条水平偏移量
+					this.$set(tab, "translateY", translateY) //标签线条垂直偏移量
 					this.$set(tab, "scrollLeft", translateX - halfWrapWidth) //标签相对于屏幕左侧的距离值
 				})
 
 				if (this.scrollspy) { //滚动导航模式
-					const promises = this.childrens.map(child => child.getRect())
+					const promises = this.children.map(child => child.getRect())
 					const res = await Promise.all(promises) || [];
 					res.forEach((r, index) => {
 						this.$set(this.tabs[index], "paneTop", r ? r.top : 0) //标签内容相对于屏幕顶部的距离值
 					})
-					console.log(this.tabs);
 				}
 
-				this.setCurrentIndex(this[model.prop]) //设置当前下标
+				// this.setCurrentIndex(this[model.prop]) //设置当前下标
+				this.setCurrentIndexByName(this[model.prop])
 			},
 			// 标签点击事件
-			onClick(index, isTabClick = false) {
-				this.isTabClick = isTabClick // 是否为标签标题点击
-				if (isTabClick) this.$emit('click', index, this.tabs[index], this.isTabClick) // 标签点击事件
-				callInterceptor({
-					interceptor: this.beforeChange,
-					args: [index],
-					done: () => {
-						this.setCurrentIndex(index) //设置当前下标
-						setTimeout(() => {
-							this.scrollToTop() //滚动到顶 
-							this.scrollToCurrContent() //滚动到当前标签内容
-						}, 0)
-					},
-				});
+			onClick(index) {
+				const { title, disabled, computedName } = this.children[index];
+				if (disabled) {
+					this.$emit('disabled', title, title);
+				} else {
+					callInterceptor({
+						interceptor: this.beforeChange,
+						args: [computedName],
+						done: () => {
+							this.setCurrentIndex(index) //设置当前下标
+							setTimeout(() => {
+								this.scrollToTop() //滚动到顶 
+								this.scrollToCurrentContent() //滚动到当前标签内容
+							}, 0)
+						},
+					});
+
+					this.$emit('click', computedName, title) // 标签点击事件
+				}
+			},
+			// 更正活动选项卡的索引
+			setCurrentIndexByName(name) {
+				const matched = this.children.find(child => child.computedName === name);
+				const defaultIndex = (this.children[0] || {}).index || 0;
+				this.setCurrentIndex(matched ? matched.index : defaultIndex);
 			},
 			// 设置当前下标
-			setCurrentIndex(newIdx) {
-				newIdx = this.findAvailableTab(newIdx) //查询可用tab
-				if (!isDef(newIdx)) {
+			setCurrentIndex(currentIndex) {
+				const newIndex = this.findAvailableTab(currentIndex) //查询可用tab
+				if (!isDef(newIndex)) {
 					return;
 				}
 
-				const shouldEmit = this.currentIndex !== newIdx
+				const shouldEmit = newIndex !== this.currentIndex
 				const shouldEmitChange = this.currentIndex !== null
-				const currTab = this.tabs[newIdx] //当前tab
+				const { title, computedName, rendered } = this.children[newIndex];
 				// 非滚动导航模式下,触发rendered事件
-				if (this.isLazyRender && !this.scrollspy && !currTab.rendered) {
-					this.$emit('rendered', newIdx, this.tabs[newIdx])
+				if (this.isLazyRender && !this.scrollspy && !rendered) {
+					this.$emit('rendered', computedName, title)
 				}
 
-				this.currentIndex = newIdx
+				this.currentIndex = newIndex
 				if (shouldEmit) { //禁止重复切换
-					this.$emit(emits[0], newIdx) // 更新v-model绑定的值
+					this.$emit(emits[0], computedName) // 更新v-model绑定的值
 
 					if (shouldEmitChange) {
-						this.$emit('change', newIdx, this.tabs[newIdx], this.isTabClick)
+						this.$emit('change', computedName, title)
 					}
 				}
 			},
@@ -440,8 +482,14 @@
 			// 设置底部线条位置
 			setLine() {
 				if (this.isLine) { // 仅在 type="line" 时有效
-					const val = this.tabs[this.currentIndex].translateX
-					const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
+					const { translateX, translateY } = this.tabs[this.currentIndex]
+					let transform = ""
+					if (this.isVertical) {
+						transform = `translateY(${isDef(translateY) ? translateY + "px" : '-100%'}) translateY(-50%)`
+					} else {
+						transform = `translateX(${isDef(translateX) ? translateX + "px" : '-100%'}) translateX(-50%)`
+					}
+
 					const duration = `${this.lineAnimated?this.duration:'0'}s`
 					this.$set(this.lineAnimatedStyle, 'transform', transform)
 					this.$set(this.lineAnimatedStyle, 'transitionDuration', duration)
@@ -466,7 +514,7 @@
 				}
 			},
 			// 滚动到当前标签内容
-			scrollToCurrContent(immediate = false) {
+			scrollToCurrentContent(immediate = false) {
 				if (this.scrollspy) { //滚动导航模式下
 					const duration = immediate ? 0 : this.msDuration
 					this.lockedScrollspy = true
@@ -478,14 +526,13 @@
 			},
 			// 状态变更
 			changeStatus(newIdx, oldIdx) {
-				console.log("newIdx：", newIdx);
 				if (!this.scrollspy) { //非滚动导航模式下
 					(this.tabs[oldIdx] || {}).show = false; //隐藏旧tab的内容
 					(this.tabs[newIdx] || {}).show = true; //显示当前tab的内容
-					this.childrens[newIdx].rendered = true; //标记当前tab的内容渲染过
+					this.children[newIdx].rendered = true; //标记当前tab的内容渲染过
 				}
 
-				this.childrens.forEach((child, index) => {
+				this.children.forEach((child, index) => {
 					child.active = newIdx === index
 				})
 			},
@@ -503,23 +550,24 @@
 				if (this.animated) {
 					// isSlide为true，表示左右滑动；false表示点击标签的转场动画
 					this.trackStyle = {
-						'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` :
-							`translateX(${-100 * this.currentIndex}%)`,
+						'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` : `translateX(${-100 * this.currentIndex}%)`,
 						'transition': `transform ${duration}s ease-in-out`
 					}
 				}
 			},
 			// 改变标签内容样式
 			async changePaneStyle() {
-				const rect = await this.childrens[this.currentIndex].getRect();
+				const rect = await this.children[this.currentIndex].getRect();
 				const height = rect && this.swipeAnimated ? rect.height : 0 //拖拽动画时才需要该高度
 				this.tabs.forEach((tab, index) => {
 					// 有拖动动画时或指定标签内容显示时，为visible
 					const paneStyle = this.animated ? {
 						visibility: this.swipeAnimated || tab.show ? 'visible' : 'hidden',
 						height: tab.show ? 'auto' : height + 'px'
-					} : { display: tab.show ? 'block' : 'none' };
-					this.childrens[index].paneStyle = paneStyle
+					} : {
+						display: tab.show ? 'block' : 'none'
+					};
+					this.children[index].paneStyle = paneStyle
 				})
 			},
 		}

@@ -10,6 +10,7 @@
         "nvueCompiler" : "uni-app",
         "nvueStyleCompiler" : "uni-app",
         "modules" : {},
+		"splashscreen": {},
         "distribute" : {
             "android" : {
                 "permissions" : [
@@ -46,7 +47,8 @@
             "postcss" : true,
             "minified" : true
         },
-        "usingComponents" : true
+        "usingComponents" : true,
+        "lazyCodeLoading" : "requiredComponents"
     },
-    "vueVersion" : "2"
+    "vueVersion" : "3"
 }

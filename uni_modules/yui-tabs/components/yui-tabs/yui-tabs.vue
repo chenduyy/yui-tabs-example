@@ -6,14 +6,17 @@
 
 		<view class="yui-tabs__wrap" :style="[innerWrapStyle,wrapStyle]">
 			<!-- scrollX为true，表示允许横向滚动 -->
-			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX"
-				:scroll-anchoring="true" enable-flex :scroll-left="scrollLeft"
+			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX" :scroll-anchoring="true" enable-flex :scroll-left="scrollLeft"
 				:scroll-into-view="!scrollToCenter?scrollId:''" scroll-with-animation :style="[scrollStyle]">
 				<view class="yui-tabs__nav" :class="[navClass]" :style="[navStyle]">
-					<view class="yui-tab" v-for="(tab,index) in tabList" :key="index" @tap.stop="onClick(index,true)"
-						:id="`tab_${index}`" :class="[tabClass(index, tab)]" :style="[tabStyle(tab)]">
+					<view class="yui-tab" v-for="(tab,index) in tabList" :key="index" @tap.stop="onClick(index,true)" :id="`tab_${index}`" :class="[tabClass(index, tab)]" :style="[tabStyle(tab)]">
 						<view class="yui-tab__text">
+							<!-- #ifndef VUE3 -->
 							<slot :name="tab.titleSlot">{{tab.label}}</slot>
+							<!-- #endif -->
+							<!-- #ifdef VUE3 -->
+							{{tab.label}}
+							<!-- #endif -->
 							<text :class="[infoClass(tab)]" v-if="tab.badge || tab.dot">{{tab.badge}}</text>
 						</view>
 					</view>
@@ -27,12 +30,10 @@
 		</view>
 		<view v-if="isFixed" class="yui-tabs__placeholder" :style="[{height:placeholderHeight+'px'}]"></view>
 		<!-- 标签内容：普通实现 -->
-		<view v-if="!noRenderConent && !swiper" class="yui-tabs__content"
-			:class="{'yui-tabs__content--animated':animated,'yui-tabs__content--scrollspy':scrollspy}">
+		<view v-if="!noRenderConent && !swiper" class="yui-tabs__content" :class="{'yui-tabs__content--animated':animated,'yui-tabs__content--scrollspy':scrollspy}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
-				<view class="yui-tab__pane" :class="[paneClass(index,tab)]" v-for="(tab,index) in tabList" :key="index"
-					:style="[tab.paneStyle]" @touchstart="touchStart" @touchmove="touchMove($event,index)"
-					@touchend="touchEnd($event,index)">
+				<view class="yui-tab__pane" :class="[paneClass(index,tab)]" v-for="(tab,index) in tabList" :key="index" :style="[tab.paneStyle]" @touchstart="touchStart"
+					@touchmove="touchMove($event,index)" @touchend="touchEnd($event,index)">
 					<view v-if="tab.rendered ? true :value == index">
 						<slot :name="tab.slot"></slot>
 					</view>
@@ -41,10 +42,8 @@
 		</view>
 
 		<!-- 标签内容：使用swiper组件实现左右滑动 -->
-		<swiper v-if="!noRenderConent && swiper" class="yui-tabs__swiper" :current="current" :duration="swiperDuration"
-			@change="onSwiperChange">
-			<swiper-item class="yui-tabs__swiper--item" v-for="(tab,index) in tabList" :key="index"
-				@touchmove="stopTouchMove">
+		<swiper v-if="!noRenderConent && swiper" class="yui-tabs__swiper" :current="current" :duration="swiperDuration" @change="onSwiperChange">
+			<swiper-item class="yui-tabs__swiper--item" v-for="(tab,index) in tabList" :key="index" @touchmove="stopTouchMove">
 				<view class="yui-tabs__swiper--wrap" v-if="tab.rendered ? true :value == index">
 					<slot :name="tab.slot"></slot>
 				</view>
@@ -194,7 +193,6 @@
 					this.tabChange(newIdx, oldIdx) //标签切换
 					this.changeStyle() // 样式切换
 				},
-				deep: true
 			},
 		},
 		created() {
@@ -253,7 +251,7 @@
 			},
 			// 标签内容class
 			paneClass(index, tab) {
-				return `yui-tab_pane${index} ${tab.active?'yui-pane--active':''}`
+				return `yui-tab__pane${index} ${tab.active?'yui-pane--active':''}`
 			},
 			// 标签项style
 			tabStyle(tab) {
@@ -305,6 +303,7 @@
 						// 粘性定位布局的吸顶处理
 						that.getRect('.depend-wrap').then((rect) => {
 							that.isFixed = rect.bottom - stickyThreshold <= offsetTop
+							
 							// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
 							that.$emit("scroll", {
 								scrollTop: e.scrollTop,
@@ -324,8 +323,7 @@
 			// 滚动时获取要选中的下标
 			getCurrIndexOnScroll(res = []) {
 				return new Promise((resolve, rejct) => {
-					const selectors = this.tabList.map((o, i) => '.yui-tab_pane' + i)
-					console.log(selectors);
+					const selectors = this.tabList.map((o, i) => '.yui-tab__pane' + i)
 					this.getRect(...selectors).then(res => {
 						// 标签内容的top小于标题栏的top，则说明已经与标题栏部分重合
 						let index = res.reduce((idx, o, i) => o.top < this.scrollOffset ? i : idx, 0)
@@ -426,6 +424,7 @@
 				const isSpy = this.scrollspy //是否滚动导航模式
 				const selectors = this.tabList.reduce((arr, tab, index) => {
 					arr.push('.yui-tab_' + index)
+					if(isSpy) arr.push('.yui-tab__pane' + index)
 					return arr
 				}, [])
 				const rects = await this.getRect(...selectors);
@@ -534,6 +533,7 @@
 			// 设置标签栏底部线条位置
 			setLine() {
 				if (this.isLine) { // 仅在 type="line" 时有效
+					console.log("currentIndex:", this.currentIndex);
 					const val = this.tabList[this.currentIndex].translateX
 					const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
 					const duration = `${this.lineAnimated?this.duration:'0'}s`
@@ -547,8 +547,7 @@
 				if (this.animated) {
 					// isSlide为true，表示左右滑动；false表示点击标签的转场动画
 					this.trackStyle = {
-						'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` :
-							`translateX(${-100 * this.currentIndex}%)`,
+						'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` : `translateX(${-100 * this.currentIndex}%)`,
 						'transition': `transform ${duration}s ease-in-out`
 					}
 				}

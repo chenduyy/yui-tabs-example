@@ -1,6 +1,5 @@
 <template>
-	<view class="yui-tab__pane" :class="[paneClass()]" :style="[paneStyle]" @touchstart="touchStart"
-		@touchmove="touchMove" @touchend="touchEnd">
+	<view class="yui-tab__pane" :class="[paneClass()]" :style="[paneStyle]" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd">
 		<view class="yui-tab__pane--wrap" v-if="rendered ? true : active">
 			<slot></slot>
 		</view>
@@ -46,6 +45,11 @@
 				},
 			}
 		},
+		computed: {
+			computedName() {
+				return !isNull(this.name) ? this.name : this.index
+			}
+		},
 		watch: {
 			$props: {
 				deep: true,
@@ -67,7 +71,7 @@
 		},
 		mounted() {
 			if (this.parent) {
-				this.parent.childrens.push(this);
+				this.parent.children.push(this);
 				this.parent.putTab({ newValue: { ...this.$props } })
 			}
 		},
@@ -109,8 +113,8 @@
 			// 卸载组件的处理
 			unInit() {
 				if (this.parent) {
-					const index = this.parent.childrens.findIndex(item => item === this)
-					this.parent.childrens.splice(index, 1)
+					const index = this.parent.children.findIndex(item => item === this)
+					this.parent.children.splice(index, 1)
 					this.parent.tabs.splice(index, 1)
 				}
 			},

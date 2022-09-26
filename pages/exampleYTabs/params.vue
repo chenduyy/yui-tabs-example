@@ -5,14 +5,26 @@
 		</view>
 
 		<view class="title-wrap">
-			基础用法
+			基础用法:
 		</view>
 		<y-tabs v-model="activeIndex1" :isLazyRender="false" animated>
 			<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
 		</y-tabs>
-
+		
+		
+		<view class="title-wrap">
+			通过名称匹配
+			<view class="title-wrap__desc">
+				在标签指定 name 属性的情况下，v-model 的值为当前标签的 name（此时无法通过索引值来匹配标签）。
+			</view>
+		</view>
+		<y-tabs v-model="activeIndex17" :isLazyRender="false" animated>
+			<y-tab v-for="index in 5" :key="index" :title="'标签'+index"  :name="'tab'+index">
+				<view class="content-wrap"> 内容{{index}} </view>
+			</y-tab>
+		</y-tabs>
 
 		<view class="title-wrap">
 			样式风格
@@ -20,8 +32,7 @@
 				默认为line，可选：text、card、button、line-button
 			</view>
 		</view>
-		<y-tabs ref="styleTabs" :ellipsis="false" :background="styleType==='button'?'#f5f5f5':''" :type="styleType"
-			v-model="activeIndex13" lineWidth="20" color="#ee0a24">
+		<y-tabs ref="styleTabs" :ellipsis="false" :background="styleType==='button'?'#f5f5f5':''" :type="styleType" v-model="activeIndex13" lineWidth="20" color="#ee0a24">
 			<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
@@ -47,8 +58,7 @@
 			<view class="title-wrap__desc">4、底部线条宽度/高度(lineWidth/lineHeight)</view>
 		</view>
 		<view style="padding: 20px;">
-			<y-tabs v-model="activeIndex2" lineWidth="20" lineHeight="3" color="#ee0a24" background="#fff"
-				titleActiveColor="#ee0a24" titleInactiveColor="#333">
+			<y-tabs v-model="activeIndex2" lineWidth="20" lineHeight="3" color="#ee0a24" background="#fff" titleActiveColor="#ee0a24" titleInactiveColor="#333">
 				<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
 					<view class="content-wrap"> 内容{{index}} </view>
 				</y-tab>
@@ -68,10 +78,10 @@
 		</y-tabs>
 
 		<view class="title-wrap">
-			点击、标签切换事件
+			点击、标签切换、禁用触发的事件
 		</view>
-		<y-tabs v-model="activeIndex4" @click="tabClick" @change="tabChange">
-			<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
+		<y-tabs v-model="activeIndex4" @click="tabClick" @change="tabChange" @disabled="tabDislabled">
+			<y-tab v-for="index in 5" :key="index" :title="'标签'+index" :disabled="index==3">
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
 		</y-tabs>
@@ -115,13 +125,13 @@
 		</y-tabs>
 
 		<view class="title-wrap">
-			自定义标签栏右侧额外内容
-			<view class="title-wrap__desc">通过插槽extra自定义内容</view>
+			自定义标签栏右侧内容
+			<view class="title-wrap__desc">通过插槽nav-right自定义内容</view>
 		</view>
 		<y-tabs v-model="activeIndex8" animated>
-			<!-- 标签栏右侧额外内容 -->
-			<template #extra>
-				<view class="extra-wrapper">
+			<!-- 标签栏右侧内容 -->
+			<template #nav-right>
+				<view class="nav-right-wrap">
 					<text class="text">更多</text>
 					<uni-icons type="right" :color="'#5e6d82'" size="14" />
 				</view>
@@ -137,8 +147,7 @@
 		</view>
 		<button size="mini" type="primary" style="margin: 0 0 10rpx 30rpx;" @click="updateBadge">更新徽标</button>
 		<y-tabs v-model="activeIndex9" animated ref="badgeTabs">
-			<y-tab v-for="index in 5" :key="index" :title="'标签'+index" :dot="index===2"
-				:badge="index===3?badgeValue:''">
+			<y-tab v-for="index in 5" :key="index" :title="'标签'+index" :dot="index===2" :badge="index===3?badgeValue:''">
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
 		</y-tabs>
@@ -146,7 +155,7 @@
 		<view class="title-wrap">
 			自定义标题
 			<view class="title-wrap__desc">1、标题插槽名默认为"title"+下标</view>
-			<view class="title-wrap__desc">2、仅支持vue2，vue3暂不支持v-for生成动态具名插槽</view>
+			<view class="title-wrap__desc">2、仅支持vue2，vue3暂不支持</view>
 		</view>
 		<y-tabs class="y-tabs" v-model="activeIndex10" animated scrollThreshold="4">
 			<template #title0>
@@ -167,7 +176,7 @@
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
 		</y-tabs>
-		
+
 		<view class="title-wrap" style="padding-bottom: 10rpx;">
 			滚动导航
 			<view class="title-wrap__desc">1.通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示</view>
@@ -256,6 +265,7 @@
 				activeIndex14: 0,
 				activeIndex15: 0,
 				activeIndex16: 0,
+				activeIndex17: "tab2",
 				paddingLeft: 0,
 				styleType: 'line',
 				badgeValue: 7,
@@ -305,12 +315,19 @@
 		},
 		methods: {
 			// 标签点击事件
-			tabClick(index, item) {
-				console.log("tabClick", index, item);
+			tabClick(index, title) {
+				console.log("tabClick", index, title);
 			},
 			// 标签切换事件
-			tabChange(index, item) {
-				console.log("tabChange", index, item);
+			tabChange(index, title) {
+				console.log("tabChange", index, title);
+			},
+			// 标签禁用触发的事件
+			tabDislabled(index, title) {
+				uni.showToast({
+					icon: "none",
+					title: "禁用：" + title
+				})
 			},
 			// 更新徽标
 			updateBadge() {
@@ -367,7 +384,7 @@
 </script>
 
 <style lang="less" scoped>
-	.extra-wrapper {
+	.nav-right-wrap {
 		padding: 0 12rpx;
 		font-size: 22rpx;
 		height: 80rpx;

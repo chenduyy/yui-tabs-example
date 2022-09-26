@@ -1,17 +1,13 @@
 <template>
 	<view class="media-item view" @click="click">
-		<view class="view"
-			:style="{flexDirection: (newsItem.article_type === 1 || newsItem.article_type === 2)?(newsItem.article_type === 2 ?'row':'row-reverse'):'column' }">
-			<text class="media-title"
-				:class="{'media-title2': newsItem.article_type === 1 || newsItem.article_type === 2}">{{newsItem.title}}</text>
+		<view class="view" :style="{flexDirection: (newsItem.article_type === 1 || newsItem.article_type === 2)?(newsItem.article_type === 2 ?'row':'row-reverse'):'column' }">
+			<text class="media-title" :class="{'media-title2': newsItem.article_type === 1 || newsItem.article_type === 2}">{{newsItem.title}}</text>
 			<view v-if="newsItem.image_list || newsItem.image_url" class="image-section flex-row"
 				:class="{'image-section-right': newsItem.article_type === 2, 'image-section-left': newsItem.article_type === 1}">
-				<image :fade-show="false" class="image-list1"
-					:class="{'image-list2': newsItem.article_type === 1 || newsItem.article_type === 2}"
-					v-if="newsItem.image_url" :src="newsItem.image_url"></image>
+				<image :fade-show="false" class="image-list1" :class="{'image-list2': newsItem.article_type === 1 || newsItem.article_type === 2}" v-if="newsItem.image_url" :src="newsItem.image_url">
+				</image>
 				<template v-if="newsItem.image_list">
-					<image :fade-show="false" class="image-list3" :src="source.url"
-						v-for="(source, i) in newsItem.image_list" :key="i" />
+					<image :fade-show="false" class="image-list3" :src="source.url" v-for="(source, i) in newsItem.image_list" :key="i" />
 				</template>
 			</view>
 		</view>
@@ -54,8 +50,6 @@
 </script>
 
 <style scoped>
-	 
-
 	.view {
 		display: flex;
 		flex-direction: column;
@@ -167,11 +161,12 @@
 	}
 
 	.media-foot {
-		display: flex;
 		margin-top: 12px;
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
+		flex-wrap: nowrap;
+		display: flex;
 	}
 
 	.close-view {

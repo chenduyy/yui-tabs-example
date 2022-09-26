@@ -4,7 +4,7 @@
 			color="#1989fa" title-active-color="#000" title-inactive-color="#555" background="#fff"
 			@change="switchTab">
 			<template v-for="(tab, index) in tabs" :slot="'pane'+index">
-				<newsPage class="page-item" :nid="tab.newsid" :ref="'page' + index"></newsPage>
+				<newsPage class="page-item" :nid="tab.newsid" :ref="'page' + index" />
 			</template>
 		</yui-tabs>
 	</view>
@@ -45,7 +45,7 @@
 				pageList:[]
 			}
 		},
-		onReady() {
+		mounted() {
 			this.pageList = [];
 			for (let i = 0; i < this.tabs.length; i++) {
 				const item = this.$refs['page' + i]
@@ -58,6 +58,7 @@
 			this.switchTab(this.activeIndex);
 		},
 		methods: {
+			toJSON() {},
 			switchTab(index) {
 				const tabPage = this.pageList[index]
 				if ( tabPage.dataList && tabPage.dataList.length === 0) {
