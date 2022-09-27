@@ -22,7 +22,7 @@ export const touchMixin = {
 	},
 	methods: {
 		touchStart(event) {
-			if (!this.parent.swipeable) { return }
+			if (!this.swipeable) { return }
 			this.resetTouchStatus();
 			this.startX = event.touches[0].clientX;
 			this.startY = event.touches[0].clientY;
@@ -40,32 +40,29 @@ export const touchMixin = {
 			}
 
 			if (this.direction === "horizontal") { //水平滑动
-				const { dataLen, contentWidth, currentIndex, tabs, swipeAnimated } = this.parent
-				const { deltaX } = this
+				const { deltaX, dataLen, contentWidth, currentIndex, swipeAnimated } = this
 				// 如果当前为第一页内容，则不允许向右滑；最后一页内容，则不允许左滑
 				if ((deltaX > 0 && currentIndex === 0) || (deltaX < 0 && currentIndex === dataLen - 1)) {
 					return
 				}
 				this.nextIndex = currentIndex + (deltaX > 0 ? -1 : 1)
-				if (tabs[this.nextIndex].disabled) { return } //禁用的标签不允许滑动
 
 				this.moved = true //标记为一次水平滑动
 
 				// 改变标签内容的样式，模拟拖动动画效果
 				if (swipeAnimated) {
 					const offsetWidth = contentWidth * currentIndex * -1 + deltaX
-					this.parent.changeTrackStyle(true, 0, offsetWidth)
+					this.changeTrackStyle(true, 0, offsetWidth)
 				}
 			}
 		},
 		touchEnd() {
 			if (!this.moved) { return }
-			const { deltaX, nextIndex } = this;
-			const { dataLen, swipeThreshold } = this.parent
+			const { deltaX, nextIndex, dataLen, swipeThreshold } = this;
 			if (Math.abs(deltaX) >= swipeThreshold) { //当滑动距离大于某个值时切换标签
-				this.parent.setCurrentIndex(nextIndex)
+				this.setCurrentIndex(nextIndex)
 			} else { //否则还原
-				this.parent.changeTrackStyle(false)
+				this.changeTrackStyle(false)
 			}
 		},
 		resetTouchStatus() {

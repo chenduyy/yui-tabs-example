@@ -66,9 +66,11 @@
 		props,
 		valueField
 	} from "../yui-tabs/utils/const"
+	import { touchMixin } from "../yui-tabs/utils/touchMixin"
 
 	export default {
 		name: "yui-tabs",
+		mixins: [touchMixin],
 		emits,
 		// shared:表示页面 wxss 样式将影响到自定义组件
 		options: {
@@ -576,74 +578,6 @@
 			// swiper组件的current改变时会触发 change 事件
 			onSwiperChange(e) {
 				this.setCurrentIndex(e.target.current || e.detail.current) //设置当前下标
-			},
-			touchStart(e) {
-				if (this.swipeable) { // 允许滑动
-					this.touchInfo.inited = true //touch开始时,将touchInfo对象设置为已初始化状态
-					const touch = e.touches[0];
-					// 记录touch位置的横坐标与纵坐标
-					this.touchInfo.startX = touch.pageX
-					this.touchInfo.startY = touch.pageY
-					this.touchInfo.moved = false //用来判断是否是一次移动
-				}
-			},
-			touchMove(e, index) {
-				if (!this.touchInfo.inited) {
-					return
-				}
-
-				const {
-					pageX,
-					pageY
-				} = e.changedTouches[0]
-				const {
-					startX,
-					startY
-				} = this.touchInfo || {}
-
-				// 滑动方向不为左右时阻止
-				const direction = getDirection(startX, startY, pageX, pageY)
-				if (direction != 3 && direction != 4) {
-					e.stopPropagation()
-					return
-				}
-
-				// 横坐标偏移量
-				const deltaX = pageX - startX
-
-				// 标记是左滑还是右滑
-				const isLeftSide = deltaX >= 0
-				// 如果当前为第一页内容，则不允许左滑；最后一页内容，则不允许右滑
-				if ((isLeftSide && index == 0) || (!isLeftSide && index == this.dataLen - 1)) {
-					return
-				}
-				this.touchInfo.isLeftSide = isLeftSide
-				this.touchInfo.moved = true
-				this.touchInfo.deltaX = Math.abs(deltaX)
-				// 改变标签内容的样式，模拟拖动动画效果
-				if (this.swipeAnimated) {
-					const offsetWidth = this.contentWidth * this.value * -1 + deltaX
-					this.changeTrackStyle(true, 0, offsetWidth)
-				}
-			},
-			touchEnd(e, index) {
-				if (!this.touchInfo.moved) {
-					return
-				}
-				const {
-					isLeftSide,
-					deltaX
-				} = this.touchInfo || {}
-				// 移动的横坐标偏移量大于指定的滚动阈值时,则切换显示状态,否则还原
-				if (Math.abs(deltaX) > Number(this.swipeThreshold)) {
-					// 根据是否为左滑查找需要滑动到的标签内容页下标，切换标签内容
-					index = index + (isLeftSide ? -1 : 1)
-					if (index > -1 && index < this.dataLen) this.onClick(index)
-				} else {
-					this.changeTrackStyle(false, this.duration)
-				}
-				// 一次touch完成后,重置touchInfo对象尚未初始化状态
-				this.touchInfo.inited = false
 			},
 		}
 	}
