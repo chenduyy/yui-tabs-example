@@ -10,7 +10,7 @@
         "nvueCompiler" : "uni-app",
         "nvueStyleCompiler" : "uni-app",
         "modules" : {},
-		"splashscreen": {},
+        "splashscreen" : {},
         "distribute" : {
             "android" : {
                 "permissions" : [

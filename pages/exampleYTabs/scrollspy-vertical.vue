@@ -1,32 +1,28 @@
 <template>
 	<view class="container">
-		<view class="placeholder-block"></view>
-		<y-tabs v-model="activeIndex" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy
-			 direction="vertical" @click="handleClick">
-			<y-tab title="618返场">
-				<view class="content-wrap bg-red"></view>
-			</y-tab>
-			<y-tab title="颜值水杯">
-				<view class="content-wrap bg-orange"></view>
-			</y-tab>
-			<y-tab title="家居日用">
-				<view class="content-wrap bg-blue"></view>
-			</y-tab>
-			<y-tab title="冲调零食">
-				<view class="content-wrap bg-green"></view>
-			</y-tab>
-			<y-tab title="美味小吃">
-				<view class="content-wrap bg-grey"></view>
+		<banner />
+		<y-tabs v-model="activeIndex" background="#fff" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy
+			direction="vertical" @click="handleClick">
+			<y-tab v-for="(title, index) in tabs" :title="title" :key="index">
+				<view class="title-wrap">{{title}}</view>
+				<goods-list :activeIndex="index" />
 			</y-tab>
 		</y-tabs>
 	</view>
 </template>
 
 <script>
+	import banner from '@/pages/home/banner'
+	import goodsList from '@/pages/home/goods-list'
 	export default {
+		components: {
+			banner,
+			goodsList
+		},
 		data() {
 			return {
-				activeIndex: 0, // 标签页当前选择项的下标
+				tabs: ['618返场', '颜值水杯', '家居日用', '冲调零食'],
+				activeIndex: 3, // 标签页当前选择项的下标
 				offsetTop: 0, //粘性定位布局下与顶部的最小距离
 			}
 		},
@@ -56,37 +52,17 @@
 </script>
 
 <style lang="less" scoped>
-	.container{
-		background-color: #fff;
-	}
-	.placeholder-block {
-		height: 30vh;
-		padding: 20rpx;
-		color: #FF9900;
+	.container {
+		background-color: #f9f9f9;
 	}
 
 	.content-wrap {
 		height: 50vh;
 	}
 
-	.bg-red {
-		background-color: #F56C6C;
-	}
-
-
-	.bg-orange {
-		background-color: #FF9900;
-	}
-
-	.bg-blue {
-		background-color: #409EFF;
-	}
-
-	.bg-green {
-		background-color: #67C23A;
-	}
-
-	.bg-grey {
-		background-color: #EBEEF5;
+	.title-wrap {
+		font-size: 16px;
+		font-weight: 520;
+		padding: 12px 10px 6px;
 	}
 </style>

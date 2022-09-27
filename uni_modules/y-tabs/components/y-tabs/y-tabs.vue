@@ -7,10 +7,12 @@
 			<view class="yui-tabs__nav-left">
 				<slot name="nav-left"></slot>
 			</view>
-			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX" :scroll-anchoring="true" enable-flex :scroll-left="scrollLeft"
+			<scroll-view class="yui-tabs__scroll" :class="[scrollX?'enable-sroll':'']" :scroll-x="scrollX"
+				:scroll-anchoring="true" enable-flex :scroll-left="scrollLeft"
 				:scroll-into-view="!scrollToCenter?scrollId:''" scroll-with-animation :style="[scrollStyle]">
 				<view class="yui-tabs__nav" :class="[navClass]" :style="[navStyle]">
-					<view class="yui-tab" v-for="(tab,index) in tabs" :key="index" @tap.stop="onClick(index)" :id="`tab_${index}`" :class="[tabClass(index,tab),tab.titleClass]"
+					<view class="yui-tab" v-for="(tab,index) in tabs" :key="index" @tap.stop="onClick(index)"
+						:id="`tab_${index}`" :class="[tabClass(index,tab),tab.titleClass]"
 						:style="[tabStyle(index),tab.titleStyle]">
 						<view class="yui-tab__text">
 							<!-- #ifndef VUE3 -->
@@ -37,7 +39,8 @@
 
 		<view v-if="isFixed" class="yui-tabs__placeholder" :style="[{height:placeholderHeight+'px'}]"></view>
 		<!-- 标签内容 -->
-		<view class="yui-tabs__content" :class="{'yui-tabs__content--animated':animated,'yui-tabs__content--scrollspy':scrollspy}">
+		<view class="yui-tabs__content"
+			:class="{'yui-tabs__content--animated':animated,'yui-tabs__content--scrollspy':scrollspy}">
 			<view class="yui-tabs__track" :style="[trackStyle]">
 				<slot></slot>
 			</view>
@@ -98,6 +101,7 @@
 				windowHeight: 0, //屏幕高度
 				paneHeight: 0, //标签内容当前默认的高度
 				lockedScrollspy: false, //锁定滚动导航模式下点击标题栏触发的滚动逻辑
+				basicTop: 0,
 			}
 		},
 		computed: {
@@ -331,7 +335,8 @@
 						// 粘性定位布局的吸顶处理
 						that.getRect('.depend-wrap').then((rect) => {
 							// TODO 优化触发边界值
-							that.isFixed = rect.bottom - stickyThreshold <= offsetTop
+							const bottom = rect ? rect.bottom : 0
+							that.isFixed = bottom - stickyThreshold <= offsetTop
 							// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
 							that.$emit("scroll", { scrollTop: e.scrollTop, isFixed: that.isFixed })
 						})
@@ -407,16 +412,12 @@
 					this.$set(tab, "scrollLeft", translateX - halfWrapWidth) //标签相对于屏幕左侧的距离值
 				})
 
-				if (this.scrollspy) { //滚动导航模式
-					const promises = this.children.map(child => child.getRect())
-					const res = await Promise.all(promises) || [];
-					res.forEach((r, index) => {
-						this.$set(this.tabs[index], "paneTop", r ? r.top : 0) //标签内容相对于屏幕顶部的距离值
-					})
-				}
+				// this.setCurrentIndexByName(this[model.prop])
+				// this.scrollToCurrentContent(true);
 
-				// this.setCurrentIndex(this[model.prop]) //设置当前下标
-				this.setCurrentIndexByName(this[model.prop])
+				setTimeout(() => {
+					this.scrollTo(this[model.prop])
+				}, 50)
 			},
 			// 标签点击事件
 			onClick(index) {
@@ -514,11 +515,15 @@
 				}
 			},
 			// 滚动到当前标签内容
-			scrollToCurrentContent(immediate = false) {
+			async scrollToCurrentContent(immediate = false) {
 				if (this.scrollspy) { //滚动导航模式下
-					const duration = immediate ? 0 : this.msDuration
 					this.lockedScrollspy = true
-					uni.pageScrollTo({ scrollTop: this.tabs[this.currentIndex].paneTop, duration });
+					const duration = immediate ? 0 : this.msDuration
+					const rect = await this.children[this.currentIndex].getRect()
+					const top = rect ? rect.top : 0
+					const scrollTop = Math.trunc(this.basicTop + top)
+					this.basicTop = scrollTop
+					uni.pageScrollTo({ scrollTop, duration });
 					setTimeout(() => {
 						this.lockedScrollspy = false
 					}, duration * 2)
@@ -550,7 +555,8 @@
 				if (this.animated) {
 					// isSlide为true，表示左右滑动；false表示点击标签的转场动画
 					this.trackStyle = {
-						'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` : `translateX(${-100 * this.currentIndex}%)`,
+						'transform': isSlide ? `translate3d(${offsetWidth}px,0,0)` :
+							`translateX(${-100 * this.currentIndex}%)`,
 						'transition': `transform ${duration}s ease-in-out`
 					}
 				}

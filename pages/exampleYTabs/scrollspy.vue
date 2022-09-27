@@ -16,16 +16,16 @@
 	import banner from '@/pages/home/banner'
 	import goodsList from '@/pages/home/goods-list'
 	export default {
+		components: {
+			banner,
+			goodsList
+		},
 		data() {
 			return {
 				tabs: ['618返场', '颜值水杯', '家居日用', '冲调零食'],
 				activeIndex: 0, // 标签页当前选择项的下标
 				offsetTop: 0, //粘性定位布局下与顶部的最小距离
 			}
-		},
-		components: {
-			banner,
-			goodsList
 		},
 		mounted() {
 			uni.getSystemInfo({
