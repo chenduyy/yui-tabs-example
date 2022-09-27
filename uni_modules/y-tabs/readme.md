@@ -133,7 +133,6 @@
 	<tr><td> animated    </td><td> boolean </td><td> 是否开启切换标签内容时的转场动画  </td><td> false </td></tr>
 	<tr><td> tab-click-scroll-top    </td><td> boolean </td><td> 在点击标签标题时，页面是否会滚动回到顶部 </td><td>  false </td></tr>
 	<tr><td> before-change    </td><td> (index) => boolean | Promise </td><td> 切换标签前的回调函数，返回 false 可阻止切换，支持返回 Promise</td><td> - </td></tr>
-	<tr><td> scrollspy    </td><td> boolean </td><td> 是否开启滚动导航；该模式下，内容将会平铺展示  </td><td> false </td></tr>
 	<tr><td colspan="4"> ------------ 手势滑动切换相关属性 ------------ </td></tr>
 	<tr><td> swipeable    </td><td> boolean </td><td> 是否开启手势滑动切换 </td><td>  false </td></tr>
 	<tr><td> swipe-threshold    </td><td> number、string </td><td> 滑动切换的滑动距离阈值，手指滑动页面触发切换的阈值,单位为px；表示开启手势滑动时，横向滑动整个可视区域的多少px时才切换标签内容  </td><td> 50 </td></tr>
@@ -143,6 +142,8 @@
 	<tr><td> sticky-threshold </td><td> number </td><td> 粘性定位布局的判断阈值（可以理解在滚动过程中，） </td><td> 0</td></tr>
 	<tr><td> offset-top    </td><td> number </td><td> 粘性定位布局下标签栏与顶部的最小距离，默认 px </td><td> 0 </td></tr>
 	<tr><td> z-index    </td><td> number </td><td> 粘性定位布局下，标签栏的z-index值  </td><td> 99 </td></tr>
+	<tr><td> scrollspy    </td><td> boolean </td><td> 是否开启滚动导航；该模式下，内容将会平铺展示  </td><td> false </td></tr>
+	<tr><td> direction    </td><td> string </td><td> 滚动导航模式下标签栏的展示方位,可选值：vertical  </td><td> horizontal </td></tr>
 	</table>
 
 <div id="tabProps" style="color:#4fc08d;">Tab Props</div>

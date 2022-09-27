@@ -80,6 +80,5 @@
 		/* #ifdef H5 */
 		height: calc(100vh - 88px);
 		/* #endif */
-		overflow: hidden auto;
 	}
 </style>

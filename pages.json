@@ -88,49 +88,54 @@
 				"navigationBarTitleText": "新闻详情",
 				"enablePullDownRefresh": false
 			}
-		}, {
-			"path": "pages/exampleYTabs/params",
-			"style": {
-				"navigationBarTitleText": "yTabs基础用法",
-				"enablePullDownRefresh": false
-			}
-		}, {
-			"path": "pages/exampleYTabs/scrollspy",
-			"style": {
-				"navigationBarTitleText": "滚动导航",
-				"enablePullDownRefresh": false
-			}
-		}, {
-			"path": "pages/exampleYTabs/scrollspy-vertical",
-			"style": {
-				"navigationBarTitleText": "侧边栏导航",
-				"enablePullDownRefresh": false
-			}
-		}, {
-			"path": "pages/exampleYTabs/news/index",
-			"style": {
-				"navigationBarTitleText": "新闻列表",
-				"enablePullDownRefresh": false
-			}
-		}, {
-			"path": "pages/exampleYTabs/sticky",
-			"style": {
-				"navigationBarTitleText": "滚动吸顶"
-			}
-		},
-		{
-			"path": "pages/exampleYTabs/transparent_sticky",
-			"style": {
-				"navigationBarTitleText": "透明导航栏下的滚动吸顶",
-				"navigationStyle": "custom"
-			}
-		}, {
-			"path": "pages/exampleYTabs/slide_switch",
-			"style": {
-				"navigationBarTitleText": "滑动切换"
-			}
 		}
 	],
+	"subPackages": [{
+		"root": "pagesYTabs",
+		"pages": [{
+				"path": "example/params",
+				"style": {
+					"navigationBarTitleText": "yTabs基础用法",
+					"enablePullDownRefresh": false
+				}
+			}, {
+				"path": "example/scrollspy",
+				"style": {
+					"navigationBarTitleText": "滚动导航",
+					"enablePullDownRefresh": false
+				}
+			}, {
+				"path": "example/scrollspy-vertical",
+				"style": {
+					"navigationBarTitleText": "侧边栏导航",
+					"enablePullDownRefresh": false
+				}
+			}, {
+				"path": "example/news/index",
+				"style": {
+					"navigationBarTitleText": "新闻列表",
+					"enablePullDownRefresh": false
+				}
+			}, {
+				"path": "example/sticky",
+				"style": {
+					"navigationBarTitleText": "滚动吸顶"
+				}
+			},
+			{
+				"path": "example/transparent_sticky",
+				"style": {
+					"navigationBarTitleText": "透明导航栏下的滚动吸顶",
+					"navigationStyle": "custom"
+				}
+			}, {
+				"path": "example/slide_switch",
+				"style": {
+					"navigationBarTitleText": "滑动切换"
+				}
+			}
+		]
+	}],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",

@@ -197,8 +197,6 @@
 				immediate: true,
 				handler(newValue) {
 					this.children.forEach((child) => {
-						child.swipeable = newValue.swipeable;
-						child.swipeAnimated = newValue.swipeAnimated;
 						child.rendered = !newValue.isLazyRender || newValue.scrollspy
 					});
 				},
@@ -207,8 +205,6 @@
 			"children.length"() {
 				this.children.forEach((child, index) => {
 					child.index = index;
-					child.swipeable = this.swipeable;
-					child.swipeAnimated = this.swipeAnimated;
 					child.rendered = !this.isLazyRender || this.scrollspy; //标记是否渲染过，非懒加载与滚动导航模式下默认渲染
 				});
 			},
@@ -412,12 +408,11 @@
 					this.$set(tab, "scrollLeft", translateX - halfWrapWidth) //标签相对于屏幕左侧的距离值
 				})
 
-				// this.setCurrentIndexByName(this[model.prop])
-				// this.scrollToCurrentContent(true);
+				this.setCurrentIndexByName(this[model.prop])
 
-				setTimeout(() => {
-					this.scrollTo(this[model.prop])
-				}, 50)
+				// setTimeout(() => {
+				// 	this.scrollTo(this[model.prop])
+				// }, 50)
 			},
 			// 标签点击事件
 			onClick(index) {

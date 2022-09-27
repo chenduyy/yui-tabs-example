@@ -112,11 +112,14 @@
 			滑动切换
 			<view class="title-wrap__desc">1.通过swipeable开启手势滑动切换</view>
 			<view class="title-wrap__desc">2.可通过swipeAnimated开启标签内容的拖动动画，拖动动画开启后需将isLazyRender设为false</view>
+			<view class="title-wrap__desc">3.该方式会和上下滑动有部分冲突，可将swipe-threshold设大一点</view>
+			<view class="title-wrap__desc">
+				4.如果无法接收与上下滑动有部分冲突，可将标签内容(.y-tabs__pane)的高度设为固定高度，在每个标签内容页中使用scroll-view实现局部滚动，目前示例中的新闻列表就是采用此方式</view>
 		</view>
 		<y-tabs v-model="activeIndex7" animated swipeable swipeAnimated :isLazyRender="false">
 			<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
 				<view class="content-wrap">
-					<view v-for="(idx) in 10" :key="idx">内容{{index}}</view>
+					<view v-for="(idx) in (index+1)*3" :key="idx">内容{{index}}</view>
 				</view>
 			</y-tab>
 		</y-tabs>

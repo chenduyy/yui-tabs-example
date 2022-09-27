@@ -20,15 +20,15 @@
 + 如需详细的了解本组件，请下载示例项目ZIP运行查看效果(标签页组件在uni_modules/yui-tabs下)。
 + 旧版本放在uni_modules/yui-tabs/version中。
 + 关于标签栏滚动吸顶提供了两种实现方式,具体可查看示例项目中的演示。
-+ 重构了一个新的标签页组件，以后的优化会侧重于此；本组件仍旧会修复相关bug。 [新标签页组件地址](https://ext.dcloud.net.cn/plugin?id=9600)
-
++ 由于vue3不支持小程序端的标签内容展示，为此重构了一个新的标签页组件，以后的优化同样会侧重于此；本组件仍旧会修复相关bug。 [新标签页组件地址](https://ext.dcloud.net.cn/plugin?id=9600)
++ 右侧的微信小程序码可以查看具体的效果。
 
 
 <div id="supportPlatform" style="color:#4fc08d;">支持的平台：</div>
 
 + H5、app-vue、微信、支付宝、钉钉、百度、字节、QQ小程序可用，其他的小程序平台可自行测试。
 + 暂不支持nvue。
-+ vue3版本支持H5、app-vue、小程序端。
++ vue3版本仅支持H5、app-vue，若想支持小程序端，请移步上面的新标签页地址。
 
 
 

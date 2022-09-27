@@ -1,11 +1,14 @@
 <template>
 	<view class="page-container">
-		<y-tabs v-model="activeIndex" :background="'#fff'" animated swipeable swipeAnimated :isLazyRender="false"
-			:offsetTop="offsetTop">
+		<view class="info-wrap">
+			<h3>滚动吸顶</h3>
+			<view>采用了sticky属性开启粘性定位布局,使得标签栏吸顶</view>
+			<view>需在页面生命周期onPageScroll中调用uni.$emit('onPageScroll', e),否则无法吸顶</view>
+		</view>
+		<y-tabs v-model="activeIndex" :background="'#fff'" animated :isLazyRender="false" sticky :offsetTop="offsetTop"
+			tab-click-scroll-top>
 			<y-tab v-for="(title, index) in tabs" :title="title" :key="index">
-				<scroll-view class="scroll-wrap" scroll-y>
-					<goods-list :activeIndex="index" />
-				</scroll-view>
+				<goods-list :activeIndex="index" />
 			</y-tab>
 		</y-tabs>
 	</view>
@@ -71,15 +74,5 @@
 		.collapse-content {
 			padding-left: 10rpx;
 		}
-	}
-
-	.scroll-wrap {
-		/* #ifndef H5 */
-		height: calc(100vh - 44px);
-		/* #endif */
-		/* #ifdef H5 */
-		height: calc(100vh - 88px);
-		/* #endif */
-		overflow: hidden auto;
 	}
 </style>
