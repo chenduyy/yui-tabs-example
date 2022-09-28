@@ -2,6 +2,8 @@
 	<view class="yui-tabs" :class="[tabsClass]">
 		<!-- 依赖元素，用于处理滚动吸顶所需 -->
 		<view class="depend-wrap"></view>
+		<!-- 置顶元素，用于处理滚动导航所需 -->
+		<view class="top-wrap"></view>
 		<!-- 标签区域 -->
 		<view class="yui-tabs__wrap" :style="[innerWrapStyle,wrapStyle]">
 			<view class="yui-tabs__nav-left">
@@ -327,6 +329,7 @@
 				const that = this
 				if (that.sticky || that.scrollspy) {
 					uni.$on('onPageScroll', function(e) {
+						that.basicTop = e.scrollTop
 						const { stickyThreshold, offsetTop, scrollspy, lockedScrollspy } = that
 						// 粘性定位布局的吸顶处理
 						that.getRect('.depend-wrap').then((rect) => {
@@ -409,6 +412,12 @@
 				})
 
 				this.setCurrentIndexByName(this[model.prop])
+				console.log(this.currentIndex, this.children[0].index)
+				if (this.currentIndex !== this.children[0].index) { //非第一个标签页时内容滚动到指定位置
+					setTimeout(() => {
+						this.scrollToCurrentContent(true)
+					}, 50)
+				}
 
 				// setTimeout(() => {
 				// 	this.scrollTo(this[model.prop])
@@ -514,10 +523,9 @@
 				if (this.scrollspy) { //滚动导航模式下
 					this.lockedScrollspy = true
 					const duration = immediate ? 0 : this.msDuration
-					const rect = await this.children[this.currentIndex].getRect()
-					const top = rect ? rect.top : 0
-					const scrollTop = Math.trunc(this.basicTop + top)
-					this.basicTop = scrollTop
+					const r = await this.children[this.currentIndex].getRect()
+					const offsetTop = this.direction === "horizontal" ? this.offsetTop : 0
+					const scrollTop = Math.trunc(this.basicTop + (r?.top || 0) - offsetTop)
 					uni.pageScrollTo({ scrollTop, duration });
 					setTimeout(() => {
 						this.lockedScrollspy = false

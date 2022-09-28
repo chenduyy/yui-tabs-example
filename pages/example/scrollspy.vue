@@ -5,19 +5,19 @@
 		<yui-tabs :tabs="tabs" v-model="activeIndex" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy
 			@click="handleClick">
 			<template #pane0>
-				<view class="content-wrap bg-red"></view>
+				<view class="content-wrap bg-red">618返场</view>
 			</template>
 			<template #pane1>
-				<view class="content-wrap bg-orange"></view>
+				<view class="content-wrap bg-orange">颜值水杯</view>
 			</template>
 			<template #pane2>
-				<view class="content-wrap bg-blue"></view>
+				<view class="content-wrap bg-blue">家居日用</view>
 			</template>
 			<template #pane3>
-				<view class="content-wrap bg-green"></view>
+				<view class="content-wrap bg-green">冲调零食</view>
 			</template>
 			<template #pane4>
-				<view class="content-wrap bg-grey"></view>
+				<view class="content-wrap bg-grey">美味小吃</view>
 			</template>
 		</yui-tabs>
 	</view>
@@ -66,6 +66,9 @@
 
 	.content-wrap {
 		height: 50vh;
+		font-size: 14px;
+		color: #fff;
+		padding: 10px;
 	}
 
 	.bg-red {
