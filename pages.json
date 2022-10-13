@@ -133,6 +133,13 @@
 				"style": {
 					"navigationBarTitleText": "滑动切换"
 				}
+			},
+			{
+				"path": "example/transparent-title-bar",
+				"style": {
+					"navigationBarTitleText": "透明渐变标题栏",
+					"enablePullDownRefresh": false
+				}
 			}
 		]
 	}],

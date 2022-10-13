@@ -1,7 +1,7 @@
 <template>
 	<view class="container">
 		<banner />
-		<y-tabs v-model="activeIndex" background="#fff" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy
+		<y-tabs v-model="activeIndex" background="#fff" :ellipsis="false" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy
 			direction="vertical" @click="handleClick">
 			<y-tab v-for="(title, index) in tabs" :title="title" :key="index">
 				<view class="title-wrap">{{title}}</view>
@@ -13,7 +13,7 @@
 
 <script>
 	import banner from '@/pages/home/banner'
-	import goodsList from '@/pages/home/goods-list'
+	import goodsList from '@/pagesYTabs/parts/goods-list'
 	export default {
 		components: {
 			banner,
@@ -53,7 +53,7 @@
 
 <style lang="less" scoped>
 	.container {
-		background-color: #f9f9f9;
+		background-color: #fff;
 	}
 
 	.content-wrap {

@@ -7,6 +7,7 @@
 			<uni-list-item title="侧边栏导航" showArrow clickable @click="onClick('scrollspy-vertical')" />
 			<uni-list-item title="滑动切换" showArrow clickable @click="onClick('slide_switch')" />
 			<uni-list-item title="滚动吸顶" showArrow clickable @click="onClick('sticky')" />
+			<uni-list-item title="透明渐变标题栏" showArrow clickable @click="onClick('transparent-title-bar')" />
 			<uni-list-item title="透明导航栏下的滚动吸顶" showArrow clickable @click="onClick('transparent_sticky')" />
 		</uni-list>
 	</view>

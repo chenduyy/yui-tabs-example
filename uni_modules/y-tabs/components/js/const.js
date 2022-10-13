@@ -23,8 +23,14 @@ const emits = [
 ]
 
 const props = {
-	color: String, //标签主题色, 默认值为"#0022AB"
-	background: String, //标签栏背景色,默认值为"#fff"
+	color: {
+		type: String,
+		default: "#0022AB"
+	}, //标签主题色, 默认值为"#0022AB"
+	background: {
+		type: String,
+		default: "#fff"
+	}, //标签栏背景色,默认值为"#fff"
 	lineWidth: [Number, String], //底部条宽度，默认单位为px, 默认值为20px
 	lineHeight: [Number, String], //底部条高度，默认单位为px,默认值为3px
 	titleActiveColor: String, //标题选中态颜色
@@ -37,7 +43,7 @@ const props = {
 	// 动画时间，单位秒
 	duration: {
 		type: [Number, String],
-		default: 0.3,
+		default: 0.2,
 	},
 	// v-model绑定属性，绑定当前选中标签的标识符（标签的下标）
 	// #ifndef VUE3
@@ -55,7 +61,10 @@ const props = {
 	// 样式风格类型，可选值为 text、card、button、line-button
 	type: {
 		type: String,
-		default: "line"
+		default: "line",
+		validator(value) {
+			return ['line', 'text', 'card', 'button', 'line-button'].includes(value)
+		}
 	},
 	// 是否省略过长的标题文字
 	ellipsis: {
@@ -67,7 +76,7 @@ const props = {
 		type: Boolean,
 		default: true,
 	},
-	//  标签栏的滚动阈值(仅在ellipsis="false"且type不为"card"下时有效)，标签数量超过阈值时开始横向滚动(切换时会自动将当前标签居中)
+	//  标签栏的滚动阈值(仅在ellipsis="false"时有效)，标签数量超过阈值时开始横向滚动(切换时会自动将当前标签居中)
 	scrollThreshold: {
 		type: [Number, String],
 		default: 5
@@ -126,9 +135,22 @@ const props = {
 	// 滚动导航: 通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示。
 	scrollspy: Boolean,
 	// 滚动导航模式下标签栏的展示方位,可选值：vertical
-	direction:{
+	direction: {
 		type: String,
-		default: "horizontal"
+		default: "horizontal",
+		validator(value) {
+			return ['horizontal', 'vertical'].includes(value)
+		}
+	},
+	// 标题栏背景色是否透明渐变
+	transparent: {
+		type: Boolean,
+		default: false
+	},
+	// 标题栏背景色透明的滚动距离
+	transparentOffset: {
+		type: Number,
+		default: 150
 	}
 }
 export {

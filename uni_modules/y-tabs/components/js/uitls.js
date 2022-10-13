@@ -93,3 +93,23 @@ export function callInterceptor(options) {
 		done();
 	}
 }
+
+const rgbaRegex = /^rgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d*(?:\.\d+)?)\)$/;
+export const getColor = function(colorStr) {
+	const matches = colorStr.match(rgbaRegex);
+	if (matches && matches.length === 5) {
+		return [
+			matches[1],
+			matches[2],
+			matches[3],
+			matches[4]
+		];
+	}
+	return [];
+};
+
+export function toClass(classObj, ...classArray) {
+	const arr = Object.keys(classObj || {}).filter(key => classObj[key])
+	arr.push(...classArray)
+	return arr.join(" ")
+}

@@ -4,7 +4,6 @@
 		<yui-tabs :tabs="tabs" v-model="activeIndex" animated background="transparent" swipeable swipeAnimated
 			:isLazyRender="false" sticky :wrapStyle="wrapStyle" :offsetTop="offsetTop" :stickyThreshold="navHeight"
 			@scroll="handleScroll">
-			<!-- 标签栏右侧额外内容 -->
 			<template #extra>
 				<view class="extra-wrapper">
 					<text class="text">更多</text>
@@ -12,7 +11,10 @@
 				</view>
 			</template>
 		</yui-tabs>
-		<goods-list :activeIndex="activeIndex" />
+		<view style="background-color: #fff;padding: 20px;text-align: center;">
+			<view v-for="index in 200" :key="index">内容{{index}}</view>
+		</view>
+		<!-- <goods-list :activeIndex="activeIndex" /> -->
 	</view>
 </template>
 

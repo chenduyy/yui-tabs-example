@@ -7,7 +7,7 @@
 		<uni-swiper-dot :info="swiperList" :current="current" field="content" mode="round" :dots-styles="dotsStyles">
 			<swiper class="swiper-box" :autoplay="autoplay" :interval="interval" :duration="duration"
 				@change="handleChange">
-				<swiper-item v-for="(img ,index) in swiperList" :key="index">
+				<swiper-item v-for="(img ,index) in swiperList" :key="index" class="swpier-item-wrap">
 					<view class="swiper-item">
 						<image class="swpier-item-img" :src="img" />
 					</view>
@@ -25,7 +25,7 @@
 					length: 5
 				}, (o, i) => `${this.$imgUrl}banner/banner${i+1}.png`),
 				current: 0,
-				autoplay: true,
+				autoplay: false,
 				interval: 3000,
 				duration: 500,
 				dotsStyles: {

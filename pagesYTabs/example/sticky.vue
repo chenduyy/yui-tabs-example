@@ -5,8 +5,7 @@
 			<view>采用了sticky属性开启粘性定位布局,使得标签栏吸顶</view>
 			<view>需在页面生命周期onPageScroll中调用uni.$emit('onPageScroll', e),否则无法吸顶</view>
 		</view>
-		<y-tabs v-model="activeIndex" :background="'#fff'" animated :isLazyRender="false" sticky :offsetTop="offsetTop"
-			tab-click-scroll-top>
+		<y-tabs v-model="activeIndex" :background="'#fff'" animated :isLazyRender="false" sticky :offsetTop="offsetTop">
 			<y-tab v-for="(title, index) in tabs" :title="title" :key="index">
 				<goods-list :activeIndex="index" />
 			</y-tab>

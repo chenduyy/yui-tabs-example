@@ -1,6 +1,5 @@
 <template>
-	<view class="yui-tab__pane" :class="[paneClass()]" :style="[paneStyle]" @touchstart="touchStart"
-		@touchmove="touchMove" @touchend="touchEnd">
+	<view class="yui-tab__pane" :class="[paneClass()]" :style="[paneStyle]" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd">
 		<view class="yui-tab__pane--wrap" v-if="rendered ? true : active">
 			<slot></slot>
 		</view>
@@ -24,10 +23,35 @@
 			title: String, // 标题
 			disabled: Boolean, // 是否禁用标签
 			dot: Boolean, // 是否在标题右上角显示小红点
-			badge: [Number, String], // 图标右上角徽标的内容
+			badge: {
+				type: [Number, String],
+				default: ""
+			}, // 图标右上角徽标的内容
 			name: String, // 标签名称，作为匹配的标识符
 			titleStyle: String, //	自定义标题样式
 			titleClass: String, //	自定义标题类名
+			iconType: String, //图标图案，为uniapp扩展组件（uni-ui）下的uni-icons的type值，customPrefix用法等同
+			iconSize: {
+				type: Number,
+				default: 16,
+			}, //图标大小
+			customPrefix: String, //自定义图标
+			imageSrc: String, //图片路径
+			imageMode: {
+				type: String,
+				default: "scaleToFill",
+				validator(value) {
+					return ['scaleToFill', 'aspectFit', 'aspectFill', 'widthFix', 'heightFix', 'top', 'bottom', 'center', 'left', 'right', 'top left', 'top right', 'bottom left', 'bottom right']
+						.includes(value)
+				}
+			}, //图片裁剪、缩放的模式，为uniapp内置组件->媒体组件—>image下的mode值
+			position: {
+				type: String,
+				default: "right",
+				validator(value) {
+					return ['top', 'bottom', 'left', 'right'].includes(value)
+				}
+			}, //如果存在图片或图标，标题围绕它们的位置
 		},
 		data() {
 			return {
@@ -37,12 +61,13 @@
 				rendered: false, //是否渲染过
 				swipeable: false, //是否开启手势滑动切换
 				paneStyle: null, //内容样式
+				scrollspy: false,
 			}
 		},
 		computed: {
 			computedName() {
 				return !isNull(this.name) ? this.name : this.index
-			}
+			},
 		},
 		watch: {
 			$props: {
@@ -125,7 +150,7 @@
 			},
 			// 内容class
 			paneClass() {
-				return `yui-tab__pane${this.index} ${this.active?'yui-tab__pane--active':''}`
+				return `yui-tab__pane${this.index} ${this.active?'yui-tab__pane--active':''} ${ this.scrollspy?'yui-tabs__pane--scrollspy':''}`
 			},
 		},
 	}
@@ -133,10 +158,4 @@
 
 <style lang="less" scoped>
 	@import url("../css/index.less");
-
-	/deep/ .yui-tab__pane {
-		flex-shrink: 0;
-		box-sizing: border-box;
-		width: 100%;
-	}
 </style>

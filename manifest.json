@@ -1,6 +1,6 @@
 {
-    "name" : "Tabs标签页 灵活配置 简单易用(仿vant的tabs)示例",
-    "appid" : "__UNI__806A80E",
+    "name" : "y-tabs 灵活配置，简单易用(写法靠近vant的tabs组件)示例",
+    "appid" : "__UNI__4349878",
     "description" : "",
     "versionName" : "1.0.2",
     "versionCode" : 102,
@@ -52,6 +52,5 @@
             "subPackages" : true
         }
     },
-    // "lazyCodeLoading" : "requiredComponents"
     "vueVersion" : "2"
 }

@@ -15,6 +15,7 @@
 
 <div id="tips" style="color:#4fc08d;">Tips</div>
 
++ 代码更新于2022/10/13 11:02，若有问题，请下载最新代码
 + 请保证HBuilderX正式版为 v3.4.18、Alpha版为 v3.5.2。
 + 该插件使用的预编译，需要自行安装less插件。
 + 如果发现组件有bug或者不完善可以留言交流。
@@ -116,14 +117,14 @@
  
 <table>
 	<tr><th>参数</th><th>类型</th><th>描述</th><th>默认值</th></tr>
-	<tr><td> v-model   </td><td> string </td><td> 绑定当前选中标签的标识符（即tab选中项的下标） </td><td> 0 </td></tr>
+	<tr><td> v-model   </td><td>  number / string </td><td> 绑定当前选中标签的标识符（即tab选中项的下标） </td><td> 0 </td></tr>
 	<tr><td> type   </td><td> string </td><td> 样式风格类型，可选值为 text、card、button、line-button </td><td> line</td></tr>
 	<tr><td> color </td><td> string </td><td> 标签主题色 </td><td> #0022AB </td></tr>
 	<tr><td> background    </td><td> string </td><td> 标签栏背景色  </td><td> #fff </td></tr>
 	<tr><td> title-active-color    </td><td> string </td><td> 标题选中态颜色  </td><td> - </td></tr>
 	<tr><td> title-inactive-color    </td><td> string </td><td> 标题默认态颜色  </td><td> - </td></tr>
 	<tr><td> wrapStyle    </td><td> object </td><td> 标签栏样式  </td><td> - </td></tr>
-	<tr><td> duration    </td><td> number、string </td><td> 动画时间，单位秒(用于标签栏底部线条切换及标签内容转场动画时长)  </td><td> 0.3 </td></tr>
+	<tr><td> duration    </td><td> number、string </td><td> 动画时间，单位秒(用于标签栏底部线条切换及标签内容转场动画时长)  </td><td> 0.2 </td></tr>
 	<tr><td> line-width    </td><td> number、string </td><td> 底部条宽度，默认单位 px，仅在 type="line" 时有效  </td><td> 20px </td></tr>
 	<tr><td> line-height    </td><td>number、string </td><td> 底部条高度，默认单位 px，仅在 type="line" 时有效  </td><td> 3px </td></tr>
 	<tr><td> ellipsis    </td><td> boolean </td><td> 是否省略过长的标题文字  </td><td> true </td></tr>
@@ -133,6 +134,8 @@
 	<tr><td> animated    </td><td> boolean </td><td> 是否开启切换标签内容时的转场动画  </td><td> false </td></tr>
 	<tr><td> tab-click-scroll-top    </td><td> boolean </td><td> 在点击标签标题时，页面是否会滚动回到顶部 </td><td>  false </td></tr>
 	<tr><td> before-change    </td><td> (index) => boolean | Promise </td><td> 切换标签前的回调函数，返回 false 可阻止切换，支持返回 Promise</td><td> - </td></tr>
+	<tr><td> transparent    </td><td> boolean </td><td> 标题栏背景色是否透明渐变 ;如果开启该属性，那么background属性值必须为rgba格式  </td><td> false </td></tr>
+	<tr><td> transparentOffset    </td><td> number </td><td> 标题栏背景色透明的滚动距离  </td><td> 150 </td></tr>
 	<tr><td colspan="4"> ------------ 手势滑动切换相关属性 ------------ </td></tr>
 	<tr><td> swipeable    </td><td> boolean </td><td> 是否开启手势滑动切换 </td><td>  false </td></tr>
 	<tr><td> swipe-threshold    </td><td> number、string </td><td> 滑动切换的滑动距离阈值，手指滑动页面触发切换的阈值,单位为px；表示开启手势滑动时，横向滑动整个可视区域的多少px时才切换标签内容  </td><td> 50 </td></tr>
@@ -157,7 +160,12 @@
 | name | number / string | 标签名称，作为匹配的标识符 | 标签的索引值
 | title-style | object | 自定义标题样式 | -
 | title-class | string | 自定义标题类名 | -
-
+| icon-type | string | 图标图案，为uniapp扩展组件（uni-ui）下的uni-icons的type值，customPrefix用法等同 | -
+| icon-size | number | 图标大小 | 16
+| custom-prefix | string | 自定义图标 | -
+| image-src | string | 图片路径 | -
+| image-mode | string | 图片裁剪、缩放的模式，为uniapp内置组件->媒体组件—>image下的mode属性的可选值 | -
+| position | string | 在存在图片或图标的情况下，标题围绕它们所在的位置，可选值：left、top、bottom | right
 
 <div id="tabsEvents" style="color:#4fc08d;">Tabs Events</div>
 
@@ -198,3 +206,5 @@
   * 直接给标签内容具体的高度，使用scroll-view实现局部滚动
   * 但是这种方式会无法触发页面级的上拉加载与下拉刷新事件，因此需要去插件市场找类似的插件
  
+ 
+ 2.如果为侧边栏导航，需要对当前标签附近的两个标签项定义样式，直接可使用yui-tab__prev与yui-tab__next 类

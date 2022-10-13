@@ -12,8 +12,8 @@
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
 		</y-tabs>
-		
-		
+
+
 		<view class="title-wrap">
 			通过名称匹配
 			<view class="title-wrap__desc">
@@ -21,7 +21,7 @@
 			</view>
 		</view>
 		<y-tabs v-model="activeIndex17" :isLazyRender="false" animated>
-			<y-tab v-for="index in 5" :key="index" :title="'标签'+index"  :name="'tab'+index">
+			<y-tab v-for="index in 5" :key="index" :title="'标签'+index" :name="'tab'+index">
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
 		</y-tabs>
@@ -32,7 +32,7 @@
 				默认为line，可选：text、card、button、line-button
 			</view>
 		</view>
-		<y-tabs ref="styleTabs" :ellipsis="false" :background="styleType==='button'?'#f5f5f5':''" :type="styleType" v-model="activeIndex13" lineWidth="20" color="#ee0a24">
+		<y-tabs ref="styleTabs" :ellipsis="false" :type="styleType" v-model="activeIndex13" lineWidth="20" color="#ee0a24">
 			<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
@@ -90,9 +90,9 @@
 			标签栏滚动
 			<view class="title-wrap__desc">标签数量（swipeThreshold）超过 5
 				个且总宽度超过标签栏宽度时，标签栏可以在水平方向上滚动，切换时会自动将当前标签居中(scrollToCenter="false"可取消)</view>
-			<view class="title-wrap__desc font-danger">注意：仅在ellipsis="false"且type不为"card"下时有效</view>
+			<view class="title-wrap__desc font-danger">注意：仅在ellipsis="false"有效</view>
 		</view>
-		<y-tabs v-model="activeIndex5" scroll-to-center :ellipsis="false">
+		<y-tabs v-model="activeIndex5" :ellipsis="false">
 			<y-tab v-for="index in 15" :key="index" :title="'标签'+index">
 				<view class="content-wrap"> 内容{{index}} </view>
 			</y-tab>
@@ -143,12 +143,21 @@
 		</y-tabs>
 
 		<view class="title-wrap">
-			标题右上角显示小红点（dot）、徽标（badge）
+			标题图标（iconType）、图片（image）；右上角小红点（dot）、徽标（badge）
 		</view>
 		<button size="mini" type="primary" style="margin: 0 0 10rpx 30rpx;" @click="updateBadge">更新徽标</button>
 		<y-tabs v-model="activeIndex9" animated ref="badgeTabs">
-			<y-tab v-for="index in 5" :key="index" :title="'标签'+index" :dot="index===2" :badge="index===3?badgeValue:''">
-				<view class="content-wrap"> 内容{{index}} </view>
+			<y-tab title="标签1" dot>
+				<view class="content-wrap"> 右上角小红点</view>
+			</y-tab>
+			<y-tab title="标签2" :badge="badgeValue">
+				<view class="content-wrap"> 右上角徽标</view>
+			</y-tab>
+			<y-tab title="标签3" iconType="info">
+				<view class="content-wrap"> 图标 </view>
+			</y-tab>
+			<y-tab title="标签4" :imageSrc="imgUrl" position="right">
+				<view class="content-wrap"> 图片 </view>
 			</y-tab>
 		</y-tabs>
 
@@ -293,6 +302,7 @@
 				],
 				offsetTop: 0, //粘性定位布局下与顶部的最小距离
 				stickyOffsetTop: 44,
+				imgUrl: this.$imgUrl + `goods/goods12.png`
 			}
 		},
 		mounted() {

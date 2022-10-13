@@ -28,6 +28,7 @@ export const touchMixin = {
 			this.startY = event.touches[0].clientY;
 		},
 		touchMove(event) {
+			if (!this.parent.swipeable) { return }
 			const touch = event.touches[0];
 			this.deltaX = touch.clientX < 0 ? 0 : touch.clientX - this.startX;
 			this.deltaY = touch.clientY - this.startY;
@@ -59,10 +60,11 @@ export const touchMixin = {
 			}
 		},
 		touchEnd() {
-			if (!this.moved) { return }
+			// if (!this.moved) { return }
+			if (!this.parent.swipeable) { return }
 			const { deltaX, nextIndex } = this;
 			const { dataLen, swipeThreshold } = this.parent
-			if (Math.abs(deltaX) >= swipeThreshold) { //当滑动距离大于某个值时切换标签
+			if (this.moved && Math.abs(deltaX) >= swipeThreshold) { //当滑动距离大于某个值时切换标签
 				this.parent.setCurrentIndex(nextIndex)
 			} else { //否则还原
 				this.parent.changeTrackStyle(false)
