@@ -31,8 +31,8 @@ const props = {
 		type: String,
 		default: "#fff"
 	}, //标签栏背景色,默认值为"#fff"
-	lineWidth: [Number, String], //底部条宽度，默认单位为px, 默认值为20px
-	lineHeight: [Number, String], //底部条高度，默认单位为px,默认值为3px
+	lineWidth: [Number, String], //底部条宽度，默认单位为px, 默认值为20px(支持数字，支持rpx、vh、vw等单位及calc() 函数)
+	lineHeight: [Number, String], //底部条高度，默认单位为px,默认值为3px (支持数字，支持rpx、vh、vw等单位及calc() 函数)
 	titleActiveColor: String, //标题选中态颜色
 	titleInactiveColor: String, //标题默认态颜色
 	// 标签栏样式
@@ -132,16 +132,6 @@ const props = {
 		type: Number,
 		default: 99
 	},
-	// 滚动导航: 通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示。
-	scrollspy: Boolean,
-	// 滚动导航模式下标签栏的展示方位,可选值：vertical
-	direction: {
-		type: String,
-		default: "horizontal",
-		validator(value) {
-			return ['horizontal', 'vertical'].includes(value)
-		}
-	},
 	// 标题栏背景色是否透明渐变
 	transparent: {
 		type: Boolean,
@@ -151,7 +141,30 @@ const props = {
 	transparentOffset: {
 		type: Number,
 		default: 150
-	}
+	},
+	// 滚动导航: 通过 scrollspy 属性可以开启滚动导航模式，该模式下，内容将会平铺展示并滚动
+	scrollspy: Boolean,
+	// 滚动导航模式下标签栏的展示方位,可选值：vertical(若scrollspy为true，direction为vertical，则标签栏与内容均垂直滚动，即为侧边栏导航)
+	direction: {
+		type: String,
+		default: "horizontal",
+		validator(value) {
+			return ['horizontal', 'vertical'].includes(value)
+		}
+	},
+	// 标签栏高度，单位默认为px(支持数字、rpx、vh、vw等单位及calc() 函数)
+	// 在direction="horizontal"下，即为标签栏水平展示时，默认为40px；
+	// 在侧边栏导航下，默认该值为侧边栏在屏幕可见区域的高度（如果自行设置该值的话，在H5端则需减去顶部导航栏高度）
+	navHeight: [Number, String, null],
+	// 标签栏宽度，单位默认为px(支持数字、rpx、vh、vw等单位及calc() 函数)
+	// 在direction="horizontal"下，即为标签栏水平展示时，跟随父容器的宽度；
+	// 在direction="vertical"下，即为侧边栏导航下，默认为100px；
+	navWidth: [Number, String, null],
+	// 内容区域是否为页面级滚动：为true时，整体区域跟随页面而滚动，为false时，内容区域是放在scroll-view中实现的局部滚动
+	pageScroll: Boolean,
+	// 滚动导航模式（局部滚动）下的内容高度(该属性仅在scrollspy为true、且pageScroll为false下生效，用于设置内容滚动为局部滚动时所需要的高度)
+	// 默认为内容区域在屏幕视口中的可见高度
+	contentHeight: [Number, String, null],
 }
 export {
 	model,

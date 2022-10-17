@@ -60,11 +60,11 @@ export const touchMixin = {
 			}
 		},
 		touchEnd() {
-			// if (!this.moved) { return }
-			if (!this.parent.swipeable) { return }
+			if (!this.moved) { return }
+			// if (!this.parent.swipeable) { return }
 			const { deltaX, nextIndex } = this;
 			const { dataLen, swipeThreshold } = this.parent
-			if (this.moved && Math.abs(deltaX) >= swipeThreshold) { //当滑动距离大于某个值时切换标签
+			if (Math.abs(deltaX) >= swipeThreshold) { //当滑动距离大于某个值时切换标签
 				this.parent.setCurrentIndex(nextIndex)
 			} else { //否则还原
 				this.parent.changeTrackStyle(false)

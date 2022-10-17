@@ -101,16 +101,37 @@
 			}, {
 				"path": "example/scrollspy",
 				"style": {
-					"navigationBarTitleText": "滚动导航",
+					"navigationBarTitleText": "滚动导航(页面级滚动)",
 					"enablePullDownRefresh": false
 				}
 			}, {
+				"path": "example/scrollspy-area",
+				"style": {
+					"navigationBarTitleText": "滚动导航(区域滚动)",
+					"enablePullDownRefresh": false
+				}
+			},
+			{
 				"path": "example/scrollspy-vertical",
 				"style": {
-					"navigationBarTitleText": "侧边栏导航",
+					"navigationBarTitleText": "侧边栏导航(页面级滚动)",
 					"enablePullDownRefresh": false
 				}
 			}, {
+				"path": "example/scrollspy-vertical-area",
+				"style": {
+					"navigationBarTitleText": "侧边栏导航(区域滚动)-仿奶茶点单",
+					"enablePullDownRefresh": false
+				}
+			}, 
+			{
+				"path": "example/scrollspy-vertical-compose",
+				"style": {
+					"navigationBarTitleText": "组合导航(侧边栏导航+滚动导航)-仿京东商品分类",
+					"enablePullDownRefresh": false
+				}
+			}, 
+			{
 				"path": "example/news/index",
 				"style": {
 					"navigationBarTitleText": "新闻列表",

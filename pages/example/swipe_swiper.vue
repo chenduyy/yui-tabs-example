@@ -17,7 +17,7 @@
 			</template>
 			<template #pane0>
 				<view class="content-wrap">
-					<view style="margin: 12px;background-color: f5f5f5;" @touchstart.stop="touchStart">
+					<view style="margin: 12px;background-color: f5f5f5;">
 						<banner />
 					</view>
 					<goods-list :activeIndex="0" />

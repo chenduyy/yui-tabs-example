@@ -3,17 +3,18 @@
 		<!-- 依赖元素，用于处理滚动吸顶所需 -->
 		<view class="yui-tabs__depend"></view>
 		<!-- 标签区域 -->
-		<view class="yui-tabs__wrap" :style="[innerWrapStyle, wrapStyle]" :class="[wrapClass]">
+		<view class="yui-tabs__wrap" :style="[innerWrapStyle, wrapStyle]" :class="[wrapClass]" @touchmove.stop.prevent="touchmove">
 			<view class="yui-tabs__nav-left"><slot name="nav-left"></slot></view>
 			<scroll-view
 				class="yui-tabs__scroll"
 				:class="[scrollX ? 'yui-tabs__scroll--enable' : '']"
 				:scroll-x="scrollX"
+				:scroll-y="scrollY"
 				:scroll-anchoring="true"
 				enable-flex
 				:scroll-left="scrollLeft"
-				:scroll-into-view="!scrollToCenter ? scrollId : ''"
-				scroll-with-animation
+				:scroll-into-view="!scrollToCenter || this.scrollY ? scrollId : ''"
+				:scroll-with-animation="animated && reseted"
 				:style="[scrollStyle]"
 			>
 				<view class="yui-tabs__nav" :class="[navClass]">
@@ -61,14 +62,31 @@
 			<view class="yui-tabs__nav-right"><slot name="nav-right"></slot></view>
 		</view>
 
-		<view v-if="isFixed && !isVertical" class="yui-tabs__placeholder" :style="[{ height: placeholderHeight + 'px' }]"></view>
+		<view v-if="isFixed && !scrollY" class="yui-tabs__placeholder" :style="[{ height: placeholderHeight + 'px' }]" />
 		<!-- 标签内容 -->
-		<view class="yui-tabs__content" :class="[contentClass]">
-			<view class="yui-tabs__track" :class="[{ 'yui-tabs__track--scrollspy': scrollspy }]" :style="[trackStyle]"><slot></slot></view>
+		<view class="yui-tabs__content" :class="[contentClass]" :style="[contentStyle]">
+			<view class="yui-tabs__track" :class="[{ 'yui-tabs__track--scrollspy': scrollspy }]" :style="[trackStyle]">
+				<!-- 滚动导航与侧边栏导航的内容区域：使用scroll-view实现区域滚动，否则就是页面级滚动 -->
+				<scroll-view
+					v-if="scrollspy && !pageScroll"
+					scroll-y
+					:scroll-top="paneScrollTop"
+					:scroll-anchoring="true"
+					enable-flex
+					:scroll-with-animation="animated"
+					:style="[paneScrollStyle]"
+					@scroll="handleScrollByPane"
+					@touchstart="touchstartByPane"
+				>
+					<slot></slot>
+				</scroll-view>
+				<slot v-else></slot>
+			</view>
 		</view>
 	</view>
 </template>
 <script>
+// 滚动导航增加局部滚动模式
 import { isNull, addUnit, isDef, isObject, callInterceptor, getColor, toClass } from '../js/uitls';
 import { model, emits, props } from '../js/const';
 
@@ -86,33 +104,51 @@ export default {
 			children: [], // 存放子组件数组
 			tabs: [], //存放标题栏数据
 			timer: null,
-			currentIndex: -1, //当前选中下标
+			initTimer: null,
+			reseted: false,
+			currentIndex: null, //当前选中下标
+			// 标签栏的scroll-view相关
 			scrollId: '', //值应为某子元素id（id不能以数字开头）；设置哪个方向可滚动，则在哪个方向滚动到该元素
 			scrollLeft: 0, //设置横向滚动条位置
+			// scrollTop: 0, //设置竖向滚动条位置
+			// 内容区域的scroll-view相关
+			paneScrollTop: 0, //设置竖向滚动条位置
 			// 标签栏底部线条动画相关
-			lineWidthValue: 20, //底部线条宽度
+			lineWidthValue: 20, //底部线条宽度值
+			lineHeightValue: 20, //底部线条高度值
 			lineAnimated: false, //是否开启标签栏底部线条动画（首次不开启）
 			lineAnimatedStyle: {
 				transform: 'translateX(-100%) translateX(0%)',
 				transition: 'none'
 			}, //标签栏底部线条动画样式
 			isFixed: false, //是否吸顶
-			extraWidth: 0, //标签栏右侧额外区域宽度
-			contentWidth: 0, //标签内容宽度
-			halfWrapWidth: 0, //一半的wrap宽度
+			halfWrapWidth: 0, //一半的标题栏区域宽度
 			placeholderHeight: 0, //标题栏占位高度
-			windowHeight: 0, //屏幕高度
-			paneHeight: 0, //标签内容当前默认的高度
+			wrapBottom: 0, //标题栏区域底部距离屏幕顶部的高度值
+			extraWidth: 0, //标签栏nav-left、nav-right插槽宽度
+			extraHeight: 0, //标签栏nav-left、nav-right插槽高度
+			contentWidth: 0, //内容区域宽度
+			dependOffsetTop: 0, //依赖元素与屏幕顶端的最小距离
+			// windowHeight: 0, //可使用窗口高度
 			trackStyle: null, //标签内容滑动轨道样式
 			lockedScrollspy: false, //锁定滚动导航模式下点击标题栏触发的滚动逻辑
 			scrollTop: 0, //页面垂直滚动距离
-			transparentBgColor: 'rgba(255,255,255,0)' //标题栏透明背景色
+			transparentBgColor: 'rgba(255,255,255,0)', //标题栏透明背景色
+			defaultNavHeight: '100vh' //默认导航区域高度
 		};
 	},
 	computed: {
-		// 滚动导航模式下标签栏是否垂直展示
-		isVertical() {
+		// 标签栏是否垂直展示
+		scrollY() {
 			return this.direction === 'vertical';
+		},
+		// 是否为滚动导航
+		scrollNav() {
+			return this.scrollspy && !this.scrollY;
+		},
+		// 是否为侧边栏导航
+		sidebarNav() {
+			return this.scrollspy && this.scrollY;
 		},
 		// 样式风格是否为line
 		isLine() {
@@ -120,7 +156,7 @@ export default {
 		},
 		// 标签页class
 		tabsClass() {
-			return toClass({ 'yui-tabs--vertical': this.isVertical }, `yui-tabs--${this.type}`);
+			return toClass({ 'yui-tabs--vertical': this.scrollY }, `yui-tabs--${this.type}`);
 		},
 		// 导航栏区域class
 		wrapClass() {
@@ -128,26 +164,26 @@ export default {
 				{
 					'yui-tabs__wrap--fixed': this.isFixed,
 					'yui-tabs__wrap--transparent': this.transparent,
-					'yui-tabs__wrap--vertical': this.isVertical
+					'yui-tabs__wrap--vertical': this.scrollY
 				},
 				`yui-tabs__wrap--${this.type}`
 			);
 		},
 		// 导航栏class
 		navClass() {
-			return toClass({ 'yui-tabs__nav--vertical': this.isVertical }, `yui-tabs__nav--${this.type}`);
+			return toClass({ 'yui-tabs__nav--vertical': this.scrollY }, `yui-tabs__nav--${this.type}`);
 		},
 		// 内容卡片class
 		contentClass() {
 			return toClass({
 				'yui-tabs__content--animated': this.animated,
 				'yui-tabs__content--scrollspy': this.scrollspy,
-				'yui-tabs__content--vertical': this.isVertical
+				'yui-tabs__content--vertical': this.scrollY
 			});
 		},
 		// 底部条class
 		lineClass() {
-			return toClass({ 'yui-tabs__line--vertical': this.isVertical });
+			return toClass({ 'yui-tabs__line--vertical': this.scrollY });
 		},
 		// 导航栏区域样式
 		innerWrapStyle() {
@@ -156,15 +192,51 @@ export default {
 			// 滚动吸顶下
 			if (this.isFixed) {
 				style.top = this.offsetTop + 'px';
-				style.zIndex = this.zIndex;
 			}
+			style.width = !isNull(this.navWidth) ? addUnit(this.navWidth) : '';
 			return style;
 		},
-		// 滚动区域样式
+		// 内容区域样式
+		contentStyle() {
+			const style = {};
+			if (this.scrollY) style.width = !isNull(this.navWidth) ? `calc(100% - ${addUnit(this.navWidth)})` : '';
+			return style;
+		},
+		// 标签栏scroll-view样式
 		scrollStyle() {
+			let { scrollY, extraWidth, extraHeight, navHeight, offsetTop, dependOffsetTop } = this;
+			// 标签栏垂直展示时，计算其高度
+			let height = '';
+			if (scrollY) {
+				if (isNull(navHeight)) {
+					// 用户未给定导航高度时，内部处理：吸顶，需减去offsetTop;  不吸顶则减去依赖元素与顶部的最小距离dependOffsetTop
+					height = `100vh - ${this.isFixed ? this.offsetTop : this.dependOffsetTop}px`;
+					// 减去nav-left、nav-right插槽的高度
+					height = `calc(${height} - ${extraHeight}px)`;
+				} else {
+					// 用户给定导航高度时，只需减去nav-left、nav-right插槽的高度
+					height = `calc(${navHeight} - ${extraHeight}px)`;
+				}
+			}
 			return {
-				width: !this.isVertical ? `calc(100% - ${this.extraWidth}px)` : ''
+				width: scrollY ? '' : `calc(100% - ${extraWidth}px)`, //标签栏水平时scroll-view需要减去插槽所占区域，垂直时无需设置
+				height
 			};
+		},
+		// 标签内容scroll-view样式
+		paneScrollStyle() {
+			if (!this.scrollspy) return {};
+			let height = '';
+			// 计算为区域滚动的滚动导航模式下的内容高度（需减去标题栏底部距离屏幕顶部的大小值）
+			if (this.scrollNav && !this.pageScroll) {
+				height = isNull(this.contentHeight) ? `calc(100vh - ${this.wrapBottom}px)` : addUnit(this.contentHeight);
+			}
+
+			// 计算为区域滚动的侧边栏导航模式下的内容高度
+			if (this.sidebarNav && !this.pageScroll) {
+				height = isNull(this.navHeight) ? `calc(100px - ${this.dependOffsetTop}px)` : addUnit(this.navHeight);
+			}
+			return { height };
 		},
 		// 底部线条样式
 		lineStyle() {
@@ -182,7 +254,7 @@ export default {
 		},
 		// 是否允许横向滚动
 		scrollX() {
-			return !this.ellipsis && this.tabs.length > this.scrollThreshold;
+			return !this.scrollY && !this.ellipsis && this.tabs.length > this.scrollThreshold;
 		},
 		// 标签数量
 		dataLen() {
@@ -195,7 +267,7 @@ export default {
 		// 粘性布局下的滚动偏移量
 		scrollOffset() {
 			if (this.sticky) {
-				return !this.isVertical ? this.offsetTop + this.placeholderHeight : this.offsetTop;
+				return !this.scrollY ? this.offsetTop + this.placeholderHeight : this.offsetTop;
 			} else {
 				return 0;
 			}
@@ -206,7 +278,7 @@ export default {
 			if (activeTab) {
 				return activeTab.computedName;
 			}
-		},
+		}
 	},
 	watch: {
 		// 监听父组件的props，设置给子组件
@@ -252,6 +324,9 @@ export default {
 					}
 				}
 			}
+		},
+		scrollTop() {
+			this.handleScroll();
 		}
 	},
 	created() {
@@ -262,8 +337,31 @@ export default {
 			}
 		});
 	},
+	mounted() {
+		this.$nextTick(() => {
+			this.init(); //初始化
+			this.bindListener(); //监听事件
+		});
+	},
 	methods: {
 		toJSON() {},
+		// @exposed-api
+		reset(callback) {
+			this.reseted = false;
+			this.scrollId = '';
+			this.scrollLeft = 0;
+			this.paneScrollTop = 0;
+			this.lineAnimated = false;
+			this.lineAnimatedStyle = {
+				transform: 'translateX(-100%) translateX(0%)',
+				transition: 'none'
+			};
+			this.lockedScrollspy = false;
+			this.$nextTick(() => {
+				this.reseted = true;
+				callback && callback();
+			});
+		},
 		// @exposed-api
 		resize() {
 			// 外层元素大小或组件显示状态变化时，可以调用此方法来触发重绘
@@ -281,11 +379,11 @@ export default {
 			this.tabs.push({
 				...newValue
 			});
-			if (this.timer) clearTimeout(this.timer);
-			this.timer = setTimeout(() => {
-				this.init(); //初始化
-				this.bindListener(); //监听事件
-			}, 5);
+			// if (this.initTimer) clearTimeout(this.initTimer);
+			// this.initTimer = setTimeout(() => {
+			// 	this.init(); //初始化
+			// 	this.bindListener(); //监听事件
+			// }, 5);
 		},
 		// 更新tab
 		updateTab({ newValue, oldValue, index }) {
@@ -347,11 +445,15 @@ export default {
 				if (isNull(color)) color = this.color;
 				if (isNull(defColor)) defColor = '#323233';
 			}
-			return {
+
+			const style = {
 				color: activated ? color : defColor,
 				background: activated ? background : '',
 				borderColor: activated ? borderColor : ''
 			};
+			// 水平导航下才给标签项设置高度
+			if (!this.scrollY && !isNull(this.navHeight)) style.height = addUnit(this.navHeight);
+			return style;
 		},
 		// 获取查询节点信息的对象
 		getSelectorQuery() {
@@ -381,35 +483,36 @@ export default {
 		// 绑定监听事件
 		bindListener() {
 			const that = this;
-
 			if (that.sticky || that.scrollspy) {
 				uni.$on('onPageScroll', function(e) {
 					that.scrollTop = e.scrollTop;
-					const { stickyThreshold, offsetTop, scrollspy, lockedScrollspy, transparent } = that;
-
-					// 粘性定位布局的吸顶处理
-					that.getRect('.yui-tabs__depend').then(rect => {
-						// TODO 优化触发边界值
-						const bottom = rect ? rect.bottom : 0;
-						that.isFixed = bottom - stickyThreshold <= offsetTop;
-						// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
-						that.$emit('scroll', { scrollTop: that.scrollTop, isFixed: that.isFixed });
-					});
-
-					// 滚动导航模式下对选中标签的处理
-					if (scrollspy && !lockedScrollspy) {
-						that.getCurrIndexOnScroll().then(index => {
-							that.setCurrentIndex(index); //设置当前下标
-						});
-					}
-
-					// 标题栏透明渐变
-					if (transparent) {
-						let opacity = (e.scrollTop - offsetTop) / that.transparentOffset + that._A;
-						opacity = Math.min(Math.max(that._A, opacity), 1);
-						that.transparentBgColor = `rgba(${that._R},${that._G},${that._B},${opacity})`;
-					}
 				});
+			}
+		},
+		// 滚动事件触发逻辑
+		handleScroll() {
+			const { stickyThreshold, offsetTop, sticky, scrollTop, scrollspy, lockedScrollspy, transparent } = this;
+
+			// 粘性定位布局的吸顶处理
+			if (sticky) {
+				this.getRect('.yui-tabs__depend').then(rect => {
+					// TODO 优化触发边界值
+					const bottom = rect?.bottom || 0;
+					this.isFixed = bottom - stickyThreshold <= offsetTop;
+					if (this.scrollspy) this.dependOffsetTop = rect?.top || 0;// 滚动导航模式下才设置
+					// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
+					this.$emit('scroll', { scrollTop, isFixed: this.isFixed });
+				});
+			}
+
+			// 滚动导航模式下,设置内容区域滚动时激活的下标
+			this.setActivedIndexToScroll();
+
+			// 标题栏透明渐变
+			if (transparent) {
+				let opacity = (scrollTop - offsetTop) / this.transparentOffset + this._A;
+				opacity = Math.min(Math.max(this._A, opacity), 1);
+				this.transparentBgColor = `rgba(${this._R},${this._G},${this._B},${opacity})`;
 			}
 		},
 		// 滚动时获取要选中的下标
@@ -428,55 +531,71 @@ export default {
 		},
 		// 初始化操作
 		async init() {
-			//屏幕高度
-			this.windowHeight = uni.getSystemInfoSync().windowHeight;
+			try {
+				// this.windowHeight = uni.getSystemInfoSync().windowHeight;//可使用窗口高度
+				const [r1, r2, r3, r4, r5, r6, r7] = await this.getRect(
+					'.yui-tabs',
+					'.yui-tabs__wrap',
+					'.yui-tabs__line',
+					'.yui-tabs__nav-left',
+					'.yui-tabs__nav-right',
+					'.yui-tabs__content',
+					'.yui-tabs__depend'
+				);
+				const parentLeft = r1?.left || 0; //标签容器距离视口左侧left值
+				const parentTop = r1?.top || 0; // 标签容器距离视口顶部的top值
 
-			//获取额外区域的宽度
-			const [rect1, rect2] = await this.getRect('.yui-tabs__nav-left', '.yui-tabs__nav-right');
-			const navleftWidth = rect1?.width || 0;
-			const navRightWidth = rect2?.width || 0;
-			this.extraWidth = navleftWidth + navRightWidth;
+				this.halfWrapWidth = r2?.width / 2 || 0; //一半的标签栏区域宽度
+				this.wrapBottom = r2.bottom || 0; //标签栏区域底部距离屏幕顶部的高度值
 
-			//获取标签内容区域的宽度
-			let rect = await this.getRect('.yui-tabs__content');
-			this.contentWidth = rect?.width || 0;
+				this.lineWidthValue = r3?.width || 0; //底部线条宽度
+				this.lineHeightValue = r3?.height || 0; //底部线条高度
 
-			// 底部线条宽度
-			rect = await this.getRect('.yui-tabs__line');
-			this.lineWidthValue = rect?.width || 0;
+				// nav-left、nav-right插槽宽度、高度
+				const navLeftWidth = r4?.width || 0;
+				const navLeftHeight = r4?.height || 0;
+				const navRightWidth = r5?.width || 0;
+				const navRightHeight = r5?.height || 0;
+				this.extraWidth = navLeftWidth + navRightWidth;
+				this.extraHeight = navLeftHeight + navRightHeight;
 
-			// 获取标题栏包裹层的rect
-			rect = await this.getRect('.yui-tabs__wrap');
-			this.halfWrapWidth = rect?.width / 2 || 0;
-			this.placeholderHeight = rect?.height || 0;
+				this.contentWidth = r6?.width || 0; //内容区域的宽度
+				this.dependOffsetTop = r7?.top || 0; //依赖元素与屏幕顶端的最小距离
 
-			//获取标签容器距离视口左侧的left值
-			rect = await this.getRect('.yui-tabs');
-			const parentLeft = rect?.left || 0;
+				// 添加额外属性
+				this.tabs.forEach((tab, i) => {
+					this.$set(tab, 'titleSlot', 'title' + i); ////标题插槽名，以"title"+下标命名,vue3只有H5、app支持自定义标题插槽
+					this.$set(tab, 'show', this.scrollspy); //是否显示内容（滚动导航模式默认显示）
+				});
 
-			// 添加额外属性
-			this.tabs.forEach((tab, index) => {
-				this.$set(tab, 'titleSlot', 'title' + index); ////标题插槽名，以"title"+下标命名,vue3不支持自定义标题插槽
-				this.$set(tab, 'show', this.scrollspy); //是否显示内容（滚动导航模式默认显示）
-			});
+				// 计算每个tab的相关参数
+				const selectors = this.tabs.map((_, i) => `.yui-tab_${i}`);
+				const rects = await this.getRect(...selectors);
+				let lastIndex = this.tabs.length - 1;
+				const leftSpace = parentLeft - navLeftWidth,
+					topSpace = parentTop - navLeftHeight;
+				this.tabs.forEach((tab, i) => {
+					const rect = rects[i],
+						rect2 = rects[lastIndex];
+					this.$set(tab, 'diffWidth', rect ? rect.left - leftSpace : 0); //标签线条宽度差量值
+					this.$set(tab, 'diffHeight', rect2 ? rect2.top - topSpace : 0); //标签线条高度差量值
+					lastIndex--;
 
-			// 计算每个tab的相关参数
-			const selectors = this.tabs.map((_, index) => `.yui-tab_${index}`);
-			const rects = await this.getRect(...selectors);
-			let len = this.tabs.length - 1;
-			this.tabs.forEach((tab, index) => {
-				const [r] = rects.splice(0, 1);
-				this.$set(tab, 'diffWidth', r ? r.left - parentLeft - navleftWidth : 0); //标签线条差量值
-				this.$set(tab, 'translateY', r ? r.height * len * -1 : 0); //标签线条垂直偏移量
-				len--;
-			});
+					if (i === 0) {
+						this.placeholderHeight = rect?.height || 0; //占位高度等于标签栏区域高度
+					}
+				});
 
-			this.setCurrentIndexByName(this[model.prop]);
-			if (this.currentIndex !== this.children[0].index) {
-				//非第一个标签页时内容滚动到指定位置
-				setTimeout(() => {
-					this.scrollToCurrentContent(true);
-				}, 50);
+				this.setCurrentIndexByName(this[model.prop]); //更正活动选项卡的索引
+				if (this.currentIndex !== this.children[0].index) {
+					//非第一个标签页时内容滚动到指定位置
+					setTimeout(() => {
+						this.scrollToCurrentContent(true);
+					}, 20);
+				}
+			} catch (e) {
+				console.log('e:', e);
+				throw new Error('y-tabs init():', e);
 			}
 		},
 		// 标签点击事件
@@ -491,6 +610,7 @@ export default {
 					done: () => {
 						this.setCurrentIndex(index); //设置当前下标
 						setTimeout(() => {
+							this.lockedScrollspy = true;
 							this.scrollToTop(); //滚动到顶
 							this.scrollToCurrentContent(); //滚动到当前标签内容
 						}, 0);
@@ -546,32 +666,36 @@ export default {
 			return new Promise(resolve => {
 				const { tabs } = this;
 				this.getRect(`.yui-tab_${index}`).then(rect => {
-					const { diffWidth } = this.tabs[index];
+					const { diffWidth, diffHeight } = this.tabs[index];
 					const translateX = diffWidth + (rect?.width || 0) / 2 - this.lineWidthValue / 2;
+					const translateY = diffHeight + (rect?.height || 0) / 2 - this.lineHeightValue / 2;
 					const scrollLeft = translateX - this.halfWrapWidth;
-					resolve({ translateX, scrollLeft });
+					resolve({ translateX, scrollLeft, translateY });
 				});
 			});
 		},
 		// 设置底部线条位置
 		async setLine() {
-			const { currentIndex, tabs } = this;
-			const { translateX, scrollLeft } = await this.getDynamicValue(currentIndex);
-			if (this.isLine) {
-				// 仅在 type="line" 时有效
-				let transform = '';
-				if (this.isVertical) {
-					const { translateY } = tabs[currentIndex];
-					transform = `translateY(${isDef(translateY) ? translateY + 'px' : '-100%'}) translateY(-50%)`;
-				} else {
-					transform = `translateX(${isDef(translateX) ? translateX + 'px' : '-100%'}) translateX(0%)`;
+			try {
+				const { currentIndex, tabs } = this;
+				const { translateX, scrollLeft, translateY } = await this.getDynamicValue(currentIndex);
+				if (this.isLine) {
+					// 仅在 type="line" 时有效
+					let transform = '';
+					if (this.scrollY) {
+						transform = `translateY(${isDef(translateY) ? `-${translateY}px` : '-100%'})`;
+					} else {
+						transform = `translateX(${isDef(translateX) ? `${translateX}px` : '-100%'})`;
+					}
+					this.$set(this.lineAnimatedStyle, 'transform', transform);
+					this.$set(this.lineAnimatedStyle, 'transition', this.lineAnimated ? `transform ${this.duration}s linear` : 'none');
+					this.lineAnimated = true; //是否开启标签栏动画
 				}
-				this.$set(this.lineAnimatedStyle, 'transform', transform);
-				this.$set(this.lineAnimatedStyle, 'transition', this.lineAnimated ? `transform ${this.duration}s linear` : 'none');
-				this.lineAnimated = true; //是否开启标签栏动画
-			}
 
-			this.scrollIntoView(scrollLeft); //将激活的tab滚动到可见区域中
+				this.scrollIntoView(scrollLeft); //将激活的tab滚动到可见区域中
+			} catch (e) {
+				throw new Error('y-tabs setLine():', e);
+			}
 		},
 		//将激活的tab滚动到可见区域中
 		scrollIntoView(scrollLeft) {
@@ -580,6 +704,7 @@ export default {
 				if (this.scrollToCenter) this.scrollLeft = scrollLeft;
 				else this.scrollId = `tab_${this.currentIndex - 1}`;
 			}
+			if (this.scrollY) this.scrollId = `tab_${this.currentIndex}`;
 		},
 		// 滚动到顶
 		scrollToTop() {
@@ -592,17 +717,38 @@ export default {
 		},
 		// 滚动到当前标签内容
 		async scrollToCurrentContent(immediate = false) {
-			if (this.scrollspy) {
-				//滚动导航模式下
-				this.lockedScrollspy = true;
-				const duration = immediate ? 0 : this.msDuration;
-				const r = await this.children[this.currentIndex].getRect();
-				const offsetTop = this.direction === 'horizontal' ? this.offsetTop : 0;
-				const scrollTop = Math.trunc(this.scrollTop + (r?.top || 0) - offsetTop);
-				uni.pageScrollTo({ scrollTop, duration });
-				setTimeout(() => {
-					this.lockedScrollspy = false;
-				}, duration * 2);
+			try {
+				if (this.scrollspy) {
+					const duration = immediate ? 0 : this.msDuration;
+					const r = await this.children[this.currentIndex].getRect();
+					let scrollTop = this.scrollTop + (r?.top || 0);
+					// 标签栏水平展示时，需要减去offsetTop与标签栏高度
+					if (this.direction === 'horizontal') {
+						const wRect = await this.getRect('.yui-tabs__wrap');
+						scrollTop = scrollTop - this.offsetTop;
+						// #ifndef H5
+						scrollTop -= wRect?.height || 0;
+						// #endif
+						// H5区域滚动要减去标签栏高度
+						// #ifdef H5
+						if (!this.pageScroll) scrollTop -= wRect?.height || 0;
+						// #endif
+					}
+
+					if (this.pageScroll) {
+						this.lockedScrollspy = true;
+						//滚动导航、侧边栏导航模式下的页面级滚动
+						uni.pageScrollTo({ scrollTop, duration });
+						setTimeout(() => {
+							this.lockedScrollspy = false;
+						}, duration * 2 + 100);
+					} else {
+						// 区域滚动
+						this.paneScrollTop = scrollTop - this.dependOffsetTop;
+					}
+				}
+			} catch (e) {
+				throw new Error('y-tabs scrollToCurrentContent():', e);
 			}
 		},
 		// 状态变更
@@ -614,6 +760,7 @@ export default {
 				this.children[newIdx].rendered = true; //标记当前tab的内容渲染过
 			}
 
+			// 子数组标记激活状态
 			this.children.forEach((child, index) => {
 				child.active = newIdx === index;
 			});
@@ -639,21 +786,57 @@ export default {
 		},
 		// 改变标签内容样式
 		async changePaneStyle() {
-			const rect = await this.children[this.currentIndex].getRect();
-			const height = rect && this.swipeAnimated ? rect.height : 0; //拖拽动画时才需要该高度
-			this.tabs.forEach((tab, index) => {
-				// 有拖动动画时或指定标签内容显示时，为visible
-				const paneStyle = this.animated
-					? {
-							visibility: this.swipeAnimated || tab.show ? 'visible' : 'hidden',
-							height: tab.show ? 'auto' : height + 'px'
-					  }
-					: {
-							display: tab.show ? 'block' : 'none'
-					  };
-				this.children[index].paneStyle = paneStyle;
-			});
-		}
+			try {
+				const rect = await this.children[this.currentIndex].getRect();
+				const height = rect && this.swipeAnimated ? rect.height : 0; //拖拽动画时才需要该高度
+				this.tabs.forEach((tab, index) => {
+					// 有拖动动画时或指定标签内容显示时，为visible
+					const paneStyle = this.animated
+						? {
+								visibility: this.swipeAnimated || tab.show ? 'visible' : 'hidden',
+								height: tab.show ? 'auto' : height + 'px'
+						  }
+						: {
+								display: tab.show ? 'block' : 'none'
+						  };
+					this.children[index].paneStyle = paneStyle;
+				});
+			} catch (e) {
+				throw new Error('y-tabs changePaneStyle():', e);
+			}
+		},
+		// 设置内容区域滚动时激活的下标
+		setActivedIndexToScroll() {
+			if (!this.scrollspy || this.lockedScrollspy) {
+				return;
+			}
+
+			// 侧边栏导航需要延时50ms
+			if (this.sidebarNav) {
+				if (this.timer) clearTimeout(this.timer);
+				this.timer = setTimeout(() => {
+					this.getCurrIndexOnScroll().then(index => {
+						this.setCurrentIndex(index); //设置当前下标
+					});
+				}, 50);
+			}
+
+			// 滚动导航
+			if (this.scrollNav) {
+				this.getCurrIndexOnScroll().then(index => {
+					this.setCurrentIndex(index); //设置当前下标
+				});
+			}
+		},
+		// 触摸内容的区域滚动时，不锁定滚动处理
+		touchstartByPane() {
+			this.lockedScrollspy = false;
+		},
+		// 内容区域的scroll-view的滚动事件
+		handleScrollByPane(e) {
+			this.scrollTop = e.detail.scrollTop;
+		},
+		touchmove() {}
 	}
 };
 </script>

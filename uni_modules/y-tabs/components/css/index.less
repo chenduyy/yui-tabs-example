@@ -23,6 +23,11 @@
 	overflow: hidden;
 	visibility: visible;
 	background: #fff;
+	touch-action: none;
+}
+
+.yui-tabs__placeholder{
+	position: relative;
 }
 
 // 不显示滚动条
@@ -51,15 +56,15 @@
 
 // 导航区域包裹层--卡片风格
 .yui-tabs__wrap--card {
-	margin: 0 32rpx;
-	border-radius: 8rpx;
+	margin: 0 16px;
+	border-radius: 4px;
 	box-sizing: border-box;
-	border: 2rpx solid #0022ab;
+	border: 1px solid #0022ab;
 }
 // 导航区域包裹层--按钮风格
 .yui-tabs__wrap--button,
 .yui-tabs__wrap--line-button {
-	padding: 0 16rpx;
+	padding: 0 8px;
 }
 
 // scroll-view组件样式
@@ -76,7 +81,7 @@
 // 导航区域
 .yui-tabs__nav {
 	position: relative;
-	box-sizing: content-box;
+	box-sizing: border-box;
 	user-select: none;
 	flex: 1;
 	display: flex;
@@ -85,38 +90,42 @@
 // 导航标签
 .yui-tab {
 	position: relative;
-	height: 80rpx;
-	font-size: 28rpx;
-	color: #646566;
-	text-align: center;
-	padding: 0 8rpx;
-	flex: 1;
-	cursor: pointer;
-	-webkit-tap-highlight-color: transparent;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	box-sizing: border-box;
+	height: 40px;
+	font-size: 28rpx;
+	color: #646566;
+	text-align: center;
+	padding: 0 4px;
+	flex: 1;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	transition-duration: .2s;
+	transition-property: background;
+	flex-shrink: 0;
 }
 
 //卡片风格
 .yui-tab--card{
-	height: 56rpx;
-	line-height: 56rpx;
+	height: 28px;
+	line-height: 28px;
 }
 // 按钮风格
 .yui-tab--button,
 .yui-tab--line-button {
-	height: 50rpx;
-	line-height: 50rpx;
-	margin: 15rpx 0;
+	height: 25px;
+	line-height: 25px;
+	margin: 7.5px 0;
 	flex: auto;
-	border-radius: 50rpx;
-	padding: 0 20rpx;
+	border-radius: 25px;
+	padding: 0 10px;
 }
 
 // 线性按钮风格
 .yui-tab--line-button {
-	border: 2rpx solid transparent;
+	border: 1px solid transparent;
 }
 
 // 选中状态
@@ -132,7 +141,7 @@
 }
 
 .yui-tab--animated {
-	transition: all 0.1s;
+	transition: all 0.2s;
 }
 
 // 标题区域
@@ -171,8 +180,8 @@
 
 //标题图片
 .yui-tab__image {
-	width: 40rpx;
-	height: 40rpx;
+	width: 20px;
+	height: 20px;
 }
 
 // 右上角信息区域
@@ -194,18 +203,18 @@
 
 // 小红点
 .yui-tab__info--dot {
-	width: 12rpx;
-	height: 12rpx;
+	width: 6px;
+	height: 6px;
 	border-radius: 100%;
 	transform: translate(0%, -180%);
 }
 
 // 徽标
 .yui-tab__info--badge {
-	line-height: 26rpx;
-	min-width: 36rpx;
-	border-radius: 36rpx;
-	padding: 0 4rpx;
+	line-height: 13px;
+	min-width: 18px;
+	border-radius: 18px;
+	padding: 0 2px;
 	transform: translate(0%, -120%);
 	font-size: 18rpx;
 	font-weight: 500;
@@ -224,12 +233,12 @@
 // 底部线条
 .yui-tabs__line {
 	position: absolute;
-	bottom: 6rpx;
+	bottom: 3px;
 	left: 0;
-	width: 40rpx;
-	height: 6rpx;
+	width: 20px;
+	height: 3px;
 	background-color: #0022ab;
-	border-radius: 6rpx;
+	border-radius: 3px;
 	transform: translateX(-100%) translateX(0%);
 }
 
@@ -237,10 +246,10 @@
 .yui-tabs__line--vertical {
 	position: absolute;
 	bottom: 0;
-	left: 8rpx;
+	left: 4px;
 	transform: translateY(-100%) translateY(-50%);
-	width: 6rpx;
-	height: 40rpx;
+	width: 3px;
+	height: 20px;
 }
 
 // 标签内容的滑动轨道容器
@@ -253,6 +262,7 @@
 
 // 标签内容
 .yui-tabs__content {
+	position: relative;
 	overflow: hidden;
 }
 
@@ -291,9 +301,8 @@
 }
 
 .yui-tabs__wrap--vertical {
-	width: 200rpx;
+	width: 100px;
 	display: flex;
-	flex: 1;
 	flex-direction: column;
 	flex-shrink: 0;
 }
@@ -303,5 +312,6 @@
 	height: auto;
 }
 .yui-tabs__content--vertical {
-	width: calc(100% - 200rpx);
+	width: calc(100% - 100px);
+	flex-shrink: 0;
 }

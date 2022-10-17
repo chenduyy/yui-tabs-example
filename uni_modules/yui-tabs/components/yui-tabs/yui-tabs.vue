@@ -564,7 +564,6 @@
 			// 设置标签栏底部线条位置
 			setLine() {
 				if (this.isLine) { // 仅在 type="line" 时有效
-					console.log("currentIndex:", this.currentIndex);
 					const val = this.tabList[this.currentIndex].translateX
 					const transform = `translateX(${isDef(val) ? val + "px" : '-100%'}) translateX(-50%)`
 					const duration = `${this.lineAnimated?this.duration:'0'}s`

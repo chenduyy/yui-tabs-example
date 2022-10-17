@@ -1,7 +1,7 @@
 {
 	"id": "y-tabs",
 	"displayName": "y-tabs 灵活配置，简单易用(写法靠近vant的tabs组件)",
-	"version": "1.0.7",
+	"version": "1.0.9",
 	"description": "tab标签页，支持标签栏滚动、左右滑动切换、滚动吸顶、滚动导航、侧边栏导航、标题超出隐藏，右上角角标等",
 	"keywords": [
         "tabs标签页",

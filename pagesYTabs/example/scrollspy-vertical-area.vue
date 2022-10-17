@@ -13,16 +13,12 @@
 		</view>
 		<!-- 
 		
-			侧边栏导航（页面级滚动）：
-				1.标签栏使用的scroll-view实现的局部滚动：
-				2.内容区域垂直铺开展示，跟随页面滚动;
-				3.在这种模式下，可以给定一个sticky，在内容区域滚动时使侧边导航进行吸顶，开启了sticky属性需要发射出uni.$emit('onPageScroll', e)，否则无法监听滚动事件进行吸顶
-				4.在H5端，由于有顶部导航栏的存在，需要设置一下offsetTop,让吸顶的导航栏减去这部分高度
-				5.如果手动设置了navHeight，会导致导航高度一直是这个值不变，那么就需要监听@scroll事件去根据是否吸顶计算具体的导航高度
+			侧边栏导航：标签栏与内容区域都是使用的scroll-view实现的局部滚动：
+				1.内容区域的高度等于标签栏的高度navHeight
+				2.如果未设置navHeight，组件内容会自动处理，但是在H5端，由于有顶部导航栏的存在，计算会有误，因此需要手动设置一下navHeight
 		 
 		 -->
-		<!--  :navHeight="navHeight" -->
-		<y-tabs ref="yTabs" v-model="activeIndex" background="#f7f7f7" color="#0050c8" line-height="108rpx" animated scrollspy direction="vertical" sticky pageScroll :offsetTop="offsetTop">
+		<y-tabs ref="yTabs" v-model="activeIndex" background="#f7f7f7" color="#0050c8" line-height="54px" animated scrollspy direction="vertical" :navHeight="navHeight">
 			<y-tab v-for="(tab, index) in tabs" :title="tab.title" :key="index" :position="tab.position || 'right'" :imageSrc="tab.imageSrc || ''" :titleStyle="{fontSize:'24rpx'}"
 				:titleClass="tab.titleClass || ''">
 				<div class="content-wrap">
@@ -45,6 +41,10 @@
 			banner,
 			teaList
 		},
+		// shared:表示页面 wxss 样式将影响到自定义组件
+		options: {
+			styleIsolation: 'shared'
+		},
 		data() {
 			return {
 				tabs: [
@@ -62,7 +62,6 @@
 				],
 				activeIndex: 0, // 标签页当前选择项的下标
 				infoHeight: 96, //信息区域高度
-				offsetTop: 0, //粘性布局下导航栏与顶部的最小距离
 			};
 		},
 		computed: {
@@ -77,20 +76,9 @@
 			}
 		},
 		mounted() {
-			// H5端导航栏高度为44px，吸顶时需要减去该高度
-			// #ifdef H5
-			this.offsetTop = 44
-			// #endif
-
-			// 获取信息区域高度
 			this.getRect(".info-panel").then(res => {
 				this.infoHeight = res?.height || 0
 			})
-		},
-		// 页面滚动触发事件
-		onPageScroll(e) {
-			//页面滚动事件
-			uni.$emit('onPageScroll', e)
 		},
 		methods: {
 			getSelectorQuery() {
@@ -122,6 +110,11 @@
 </script>
 
 <style lang="less" scoped>
+	.flex-row {
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+	}
 	::v-deep.container {
 		background-color: #fff;
 
@@ -184,7 +177,7 @@
 			}
 
 			.yui-tab {
-				height: 108rpx;
+				height: 54px;
 				background-color: #f7f7f7;
 
 				&.first-tab {
@@ -216,12 +209,6 @@
 				}
 			}
 		}
-
 	}
 
-	.flex-row {
-		display: flex;
-		align-items: center;
-		justify-content: flex-start;
-	}
 </style>

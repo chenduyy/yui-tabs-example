@@ -11,10 +11,10 @@
 				</view>
 			</template>
 		</yui-tabs>
-		<view style="background-color: #fff;padding: 20px;text-align: center;">
+		<!-- <view style="background-color: #fff;padding: 20px;text-align: center;">
 			<view v-for="index in 200" :key="index">内容{{index}}</view>
-		</view>
-		<!-- <goods-list :activeIndex="activeIndex" /> -->
+		</view> -->
+		<goods-list :activeIndex="activeIndex" />
 	</view>
 </template>
 

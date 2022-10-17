@@ -15,11 +15,12 @@
 
 <div id="tips" style="color:#4fc08d;">Tips</div>
 
-+ 代码更新于2022/10/13 11:02，若有问题，请下载最新代码
++ 代码更新于2022/10/16 17:11，若有问题，请下载最新代码
 + 请保证HBuilderX正式版为 v3.4.18、Alpha版为 v3.5.2。
 + 该插件使用的预编译，需要自行安装less插件。
 + 如果发现组件有bug或者不完善可以留言交流。
 + 扫描右侧图片中的微信小程序码可打开示例项目，查看具体的效果。
++ 示例项目中内置不少案例，若有其他场景的实现，可在评论中留言。
 
 <div id="supportPlatform" style="color:#4fc08d;">支持的平台：</div>
 
@@ -128,7 +129,7 @@
 	<tr><td> line-width    </td><td> number、string </td><td> 底部条宽度，默认单位 px，仅在 type="line" 时有效  </td><td> 20px </td></tr>
 	<tr><td> line-height    </td><td>number、string </td><td> 底部条高度，默认单位 px，仅在 type="line" 时有效  </td><td> 3px </td></tr>
 	<tr><td> ellipsis    </td><td> boolean </td><td> 是否省略过长的标题文字  </td><td> true </td></tr>
-	<tr><td> scroll-to-center    </td><td> boolean </td><td> 标签栏滚动时当前标签居中  </td><td> true</td></tr>
+	<tr><td> scroll-to-center    </td><td> boolean </td><td> 标签栏滚动时当前标签居中（侧边栏导航无效）  </td><td> true</td></tr>
 	<tr><td> scroll-threshold    </td><td> number、string </td><td> 标签栏的滚动阈值(仅在ellipsis="false"且type不为"card"下时有效)，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动(切换时会自动将当前标签居中)  </td><td> 5 </td></tr>
 	<tr><td> is-lazy-render    </td><td> boolean </td><td> 是否开启延迟渲染（首次切换到标签时才触发内容渲染）  </td><td> true </td></tr>
 	<tr><td> animated    </td><td> boolean </td><td> 是否开启切换标签内容时的转场动画  </td><td> false </td></tr>
@@ -146,7 +147,11 @@
 	<tr><td> offset-top    </td><td> number </td><td> 粘性定位布局下标签栏与顶部的最小距离，默认 px </td><td> 0 </td></tr>
 	<tr><td> z-index    </td><td> number </td><td> 粘性定位布局下，标签栏的z-index值  </td><td> 99 </td></tr>
 	<tr><td> scrollspy    </td><td> boolean </td><td> 是否开启滚动导航；该模式下，内容将会平铺展示  </td><td> false </td></tr>
-	<tr><td> direction    </td><td> string </td><td> 滚动导航模式下标签栏的展示方位,可选值：vertical  </td><td> horizontal </td></tr>
+	<tr><td> direction    </td><td> string </td><td> 滚动导航模式下标签栏的展示方位,可选值：vertical(若scrollspy为true，direction为vertical，则标签栏与内容均垂直滚动，即为侧边栏导航)  </td><td> horizontal </td></tr>
+	<tr><td> navHeight    </td><td> number/string </td><td> 标签栏高度，单位默认为px(支持数字、rpx、vh、vw等单位及calc() 函数)  </td><td> 在direction="horizontal"下，即为标签栏水平展示时，默认为40px； 在侧边栏导航下，默认该值为侧边栏在屏幕可见区域的高度（如果自行设置该值的话，在H5端则需减去顶部导航栏高度） </td></tr>
+	<tr><td> navWidth    </td><td> number/string </td><td> 标签栏宽度，单位默认为px(支持数字、rpx、vh、vw等单位及calc() 函数)  </td><td> 在direction="horizontal"下，即为标签栏水平展示时，跟随父容器的宽度； 在direction="vertical"下，即为侧边栏导航下，默认为100px； </td></tr>
+	<tr><td> pageScroll    </td><td> boolean </td><td>  内容区域是否为页面级滚动：为true时，整体区域跟随页面而滚动，为false时，内容区域是放在scroll-view中实现的局部滚动 </td><td> false </td></tr>
+	<tr><td> contentHeight    </td><td> number/string </td><td> 滚动导航模式（局部滚动）下的内容高度(该属性仅在scrollspy为true、且pageScroll为false下生效，用于设置内容滚动为局部滚动时所需要的高度)  </td><td> 默认为内容区域在屏幕视口中的可见高度 </td></tr>
 	</table>
 
 <div id="tabProps" style="color:#4fc08d;">Tab Props</div>
@@ -198,6 +203,7 @@
  | 方法名      | 说明		| 参数		| 返回值													
  | ---------	| -------	| --------	| --------------------------------------------------------
  | resize   | 外层元素大小或组件显示状态变化时，可以调用此方法来触发重绘 | - | -
+ | reset   | 重置组件的一些状态，主要是用于标题栏改变（个数或者标题文字）时调用，为了使resize方法能够正确的计算内部的一些数据（具体在组合导航中使用到） | callback: 回调函数 | -
  | scrollTo  | 滚动到指定的标签页，在滚动导航模式下可用 | name: 标识符 | -
  
   <div id="beCareful" style="color:#4fc08d;">注意事项及常见问题</div>
@@ -207,4 +213,12 @@
   * 但是这种方式会无法触发页面级的上拉加载与下拉刷新事件，因此需要去插件市场找类似的插件
  
  
- 2.如果为侧边栏导航，需要对当前标签附近的两个标签项定义样式，直接可使用yui-tab__prev与yui-tab__next 类
+ 2.如果为侧边栏导航，需要对当前标签附近的两个标签项定义样式，直接可使用"yui-tab__prev"与"yui-tab__next" 类
+ 
+ 3.侧边栏导航、滚动导航：
+ 
+ * 两者内容区域的滚动方式通过pageScroll属性控制
+ * 为false时，则表示内容区域是放在scroll-view中实现的局部滚动
+ * 为true时，则表示内容区域是屏幕在页面上的，跟随页面滚动而滚动(页面级滚动)
+ * 如何取舍两者之间的使用，具体就要看使用场景了，比如你的标签页上方有banner图，你需要在滚动过程中让标题栏浮动时，则需要页面级滚动,或者需要触发原生的上拉加载、下拉刷新事件也用该方式；
+ * 如果你想两种模式在一定高度内滚动，那么就使用默认的局部滚动实现方式。

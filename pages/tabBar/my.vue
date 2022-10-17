@@ -46,9 +46,7 @@
 </template>
 
 <script>
-	import newsPage from '@/pagesYTabs/example/news/news-page.vue';
 	export default {
-		comments: { newsPage },
 		data() {
 			return {
 				tabs: ['618返场', '颜值水杯', '家居日用', '冲调零食', '美味小吃'],

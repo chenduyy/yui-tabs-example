@@ -7,7 +7,7 @@
 		<view class="title-wrap">
 			基础用法
 		</view>
-		<yui-tabs :tabs="tabs" v-model="activeIndex1" :isLazyRender="false" animated >
+		<yui-tabs :tabs="tabs" v-model="activeIndex1" :isLazyRender="false" animated>
 			<template #pane0>
 				<view class="content-wrap">内容1</view>
 			</template>

@@ -1,24 +1,18 @@
 {
-	"id": "yui-tabs",
-	"name": "Tabs标签页 灵活配置 简单易用",
-	"version": "1.0.2",
-	"description": "tab标签页，支持标签栏滚动、滑动切换、模拟滚动吸顶、标题超出隐藏",
-	"keywords": [
-		"tabs标签页",
-		"tab切换",
-		"滑动"
-	],
-	"uni-app": {
-		"scripts": {
-			"mp-dingtalk": {
-				"title": "钉钉小程序",
-				"env": {
-					"UNI_PLATFORM": "mp-alipay"
-				},
-				"define": {
-					"MP-DINGTALK": true
-				}
-			}
-		}
-	}
+    "id": "xuan-switch",
+    "name": "switch开关，按钮可嵌套内容，支持异步关闭、滑动动画效果、禁用以及颜色配置",
+    "version": "1.5",
+    "description": "鉴于官方switch不能够支持字体配置，特写此插件。（组件代码简洁易懂，可在原有基础上二次开发）",
+    "keywords": [
+        "switch",
+        "switch开关",
+        "开关组件",
+        "异步开关"
+    ],
+    "dcloudext": {
+        "category": [
+            "前端组件",
+            "通用组件"
+        ]
+    }
 }

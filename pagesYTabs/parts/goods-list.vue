@@ -247,10 +247,11 @@
 			flex-wrap: nowrap;
 			justify-content: flex-start;
 			align-items: center;
+			height: 100px;
 
 			.image-wrap {
-				width: 120px;
-				height: 120px;
+				width: 100px;
+				height: 100px;
 				will-change: transform;
 				border-radius: 6px;
 				flex-shrink: 0;
@@ -265,7 +266,7 @@
 				display: flex;
 				flex-direction: column;
 				justify-content: space-between;
-				height: 120px;
+				height: 100px;
 
 				// 标题
 				.title {
@@ -357,141 +358,5 @@
 
 			}
 		}
-
-		// ::v-deep .uni-grid-wrap{
-		// 	width: 100vw;
-		// }
-
-		// ::v-deep .uni-grid-item {
-		// 	margin: 0px 12px 20px ;
-		// 	box-sizing: border-box;
-		// 	height: auto !important;
-		// 	box-shadow: 0px 0px 8px 6px rgba(0, 0, 0, 0.08);
-		// 	border-radius: 6px;
-		// 	width: calc(100vw - 124px) !important;
-
-		// 	.uni-grid-item__box {
-		// 		border: none;
-		// 	}
-		// }
-
-
-		// // 图片区域
-		// .image-wrapper {
-		// 	display: block;
-		// 	height: 200rpx;
-
-		// 	.image-content {
-		// 		border-radius: 6px 6px 0 0;
-		// 		width: 100%;
-		// 		height: 100%;
-		// 		background-color: #fff;
-		// 	}
-		// }
-
-		// ::v-deep .content-wrapper {
-		// 	background-color: #fff;
-		// 	border-radius: 0 0 6px 6px;
-		// 	padding: 24rpx 16rpx 24rpx;
-		// 	height: 160rpx;
-		// 	position: relative;
-		// 	display: flex;
-		// 	flex-direction: column;
-		// 	justify-content: space-between;
-
-		// 	// 标题
-		// 	.title {
-		// 		width: 100%;
-		// 		overflow: hidden;
-		// 		white-space: nowrap;
-		// 		text-overflow: ellipsis;
-		// 		font-size: 24rpx;
-		// 	}
-
-		// 	// 价格
-		// 	.price-wrapper {
-		// 		text-align: center;
-		// 		display: flex;
-		// 		align-items: center;
-		// 		justify-content: flex-start;
-
-		// 		.read-price {
-		// 			color: #212121;
-		// 			font-size: 24rpx;
-		// 			font-weight: 640;
-		// 		}
-
-		// 		.organ-price {
-		// 			position: relative;
-		// 			display: inline-block;
-		// 			color: #8b8b8b;
-		// 			font-size: 20rpx;
-		// 			margin-left: 8rpx;
-
-		// 			&::before {
-		// 				content: '';
-		// 				position: absolute;
-		// 				height: 1rpx;
-		// 				width: 100%;
-		// 				background-color: #8b8b8b;
-		// 				bottom: 50%;
-		// 				left: 50%;
-		// 				transform: translate(-50%, 100%);
-		// 			}
-		// 		}
-		// 	}
-
-
-		// 	// 标签
-		// 	.tag-wrapper {
-		// 		display: flex;
-		// 		justify-content: flex-start;
-		// 		align-items: center;
-
-		// 		.tag {
-		// 			position: relative;
-		// 			display: inline-block;
-		// 			border: none;
-		// 			color: #E76441;
-		// 			background-color: #FAEEEB;
-		// 			width: 50rpx;
-		// 			height: 24rpx;
-		// 			line-height: 24rpx;
-		// 			margin-right: 12rpx;
-		// 			border-radius: 4rpx;
-		// 			text-align: center;
-
-		// 			.tag-text {
-		// 				font-size: 18rpx;
-		// 				// transform: scale(0.5);
-		// 				// transform-origin: 0% 20%;
-		// 				// width: 200%;
-		// 				// height: 200%;
-		// 			}
-		// 		}
-		// 	}
-
-
-		// 	// 销售数量
-		// 	.salc-num-wrapper {
-		// 		color: #888;
-		// 		font-size: 20rpx;
-		// 	}
-
-		// 	// 添加图标
-		// 	.iconfont {
-		// 		position: absolute;
-		// 		right: 24rpx;
-		// 		bottom: 20rpx;
-		// 		font-size: 22rpx;
-		// 		height: 36rpx;
-		// 		width: 36rpx;
-		// 		background-color: #343893;
-		// 		color: #fff;
-		// 		border-radius: 50%;
-		// 		line-height: 36rpx;
-		// 		text-align: center;
-		// 	}
-		// }
 	}
 </style>

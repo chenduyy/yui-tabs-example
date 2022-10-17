@@ -192,7 +192,7 @@
 			<view class="title-wrap__desc">2.滚动导航的开启依赖于sticky，需要设置uni.$emit('onPageScroll', e)</view>
 			<view class="title-wrap__desc">3.本示例由于组件过多，可能导致内部计算有误，具体请查看示例中的滚动导航</view>
 		</view>
-		<y-tabs v-model="activeIndex16" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy>
+		<y-tabs v-model="activeIndex16" animated sticky duration="0.2" :offsetTop="offsetTop" scrollspy pageScroll>
 			<y-tab title="标签1">
 				<view class="scrollspy-content-wrap bg-red">标签1</view>
 			</y-tab>
@@ -306,17 +306,10 @@
 			}
 		},
 		mounted() {
-			uni.getSystemInfo({
-				success: (e) => {
-					let offsetTop = 0
-					// #ifdef H5
-					offsetTop = 43
-					this.stickyOffsetTop = this.stickyOffsetTop + offsetTop
-					// #endif
-
-					this.offsetTop = offsetTop;
-				}
-			})
+			// #ifdef H5
+			this.offsetTop = 44;
+			this.stickyOffsetTop = this.stickyOffsetTop + this.offsetTop
+			// #endif
 		},
 		// 页面滚动触发事件
 		onPageScroll(e) {
