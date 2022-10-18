@@ -2,9 +2,11 @@
 	<view class="yui-tabs" :class="[tabsClass]">
 		<!-- 依赖元素，用于处理滚动吸顶所需 -->
 		<view class="yui-tabs__depend"></view>
-		<!-- 标签区域 -->
+		<!-- 标签栏区域 -->
 		<view class="yui-tabs__wrap" :style="[innerWrapStyle, wrapStyle]" :class="[wrapClass]" @touchmove.stop.prevent="touchmove">
-			<view class="yui-tabs__nav-left"><slot name="nav-left"></slot></view>
+			<!-- 标签栏左侧插槽 -->
+			<view class="yui-tabs__nav-left"><slot name="nav-left" /></view>
+			<!-- 标签栏 -->
 			<scroll-view
 				class="yui-tabs__scroll"
 				:class="[scrollX ? 'yui-tabs__scroll--enable' : '']"
@@ -14,7 +16,7 @@
 				enable-flex
 				:scroll-left="scrollLeft"
 				:scroll-into-view="!scrollToCenter || this.scrollY ? scrollId : ''"
-				:scroll-with-animation="animated && reseted"
+				:scroll-with-animation="scrollWithAnimation"
 				:style="[scrollStyle]"
 			>
 				<view class="yui-tabs__nav" :class="[navClass]">
@@ -59,9 +61,11 @@
 					<view v-if="isLine" class="yui-tabs__line" :class="[lineClass]" :style="[lineStyle, lineAnimatedStyle]"></view>
 				</view>
 			</scroll-view>
-			<view class="yui-tabs__nav-right"><slot name="nav-right"></slot></view>
+			<!-- 标签栏右侧插槽 -->
+			<view class="yui-tabs__nav-right"><slot name="nav-right" /></view>
 		</view>
 
+		<!-- 标签栏占位 -->
 		<view v-if="isFixed && !scrollY" class="yui-tabs__placeholder" :style="[{ height: placeholderHeight + 'px' }]" />
 		<!-- 标签内容 -->
 		<view class="yui-tabs__content" :class="[contentClass]" :style="[contentStyle]">
@@ -105,7 +109,7 @@ export default {
 			tabs: [], //存放标题栏数据
 			timer: null,
 			initTimer: null,
-			reseted: false,
+			reseted: true,
 			currentIndex: null, //当前选中下标
 			// 标签栏的scroll-view相关
 			scrollId: '', //值应为某子元素id（id不能以数字开头）；设置哪个方向可滚动，则在哪个方向滚动到该元素
@@ -133,8 +137,12 @@ export default {
 			trackStyle: null, //标签内容滑动轨道样式
 			lockedScrollspy: false, //锁定滚动导航模式下点击标题栏触发的滚动逻辑
 			scrollTop: 0, //页面垂直滚动距离
+			// 色值相关
 			transparentBgColor: 'rgba(255,255,255,0)', //标题栏透明背景色
-			defaultNavHeight: '100vh' //默认导航区域高度
+			_R: '',
+			_G: '',
+			_B: '',
+			_A: ''
 		};
 	},
 	computed: {
@@ -149,6 +157,15 @@ export default {
 		// 是否为侧边栏导航
 		sidebarNav() {
 			return this.scrollspy && this.scrollY;
+		},
+		// 动画时长(ms)
+		msDuration() {
+			return this.duration * 1000;
+		},
+		// 标签栏的scroll-view组件的滚动动画
+		scrollWithAnimation() {
+			if (!this.reseted) return false;
+			return this.msDuration > 0;
 		},
 		// 样式风格是否为line
 		isLine() {
@@ -259,10 +276,6 @@ export default {
 		// 标签数量
 		dataLen() {
 			return this.tabs.length;
-		},
-		// 滑动动画时长(ms)
-		msDuration() {
-			return this.animated ? this.duration * 1000 : 0;
 		},
 		// 粘性布局下的滚动偏移量
 		scrollOffset() {
@@ -376,14 +389,7 @@ export default {
 		},
 		// 添加tab
 		putTab({ newValue, oldValue }) {
-			this.tabs.push({
-				...newValue
-			});
-			// if (this.initTimer) clearTimeout(this.initTimer);
-			// this.initTimer = setTimeout(() => {
-			// 	this.init(); //初始化
-			// 	this.bindListener(); //监听事件
-			// }, 5);
+			this.tabs.push({ ...newValue });
 		},
 		// 更新tab
 		updateTab({ newValue, oldValue, index }) {
@@ -418,34 +424,22 @@ export default {
 		// 标题项style
 		tabStyle(index) {
 			const activated = this.currentIndex === index;
-			let { titleActiveColor: color, titleInactiveColor: defColor } = this;
+			let { titleActiveColor: color = '#323233', titleInactiveColor: defColor = '#646566' } = this;
 			let background = '';
 			let borderColor = '';
-			// type="line" 时
-			if (this.type === 'line') {
-				if (isNull(color)) color = '#646566';
-				if (isNull(defColor)) defColor = '#323233';
-			} else if (this.type === 'text') {
-				// type="text" 时，选中时使用主题色
-				if (isNull(color)) color = this.color;
-				if (isNull(defColor)) defColor = '#323233';
+			if (this.type === 'text') {
+				color = this.color;
 			} else if (this.type === 'card') {
-				// type="card" 时，未选中则使用主题色
 				background = this.color;
-				if (isNull(color)) color = '#fff';
-				if (isNull(defColor)) defColor = this.color;
+				color = '#fff';
+				defColor = this.color;
 			} else if (this.type === 'button') {
-				// type="button" 时
 				background = this.color;
-				if (isNull(color)) color = '#fff';
-				if (isNull(defColor)) defColor = '#323233';
+				color = '#fff';
 			} else if (this.type === 'line-button') {
-				// type="line-button" 时
 				borderColor = this.color;
-				if (isNull(color)) color = this.color;
-				if (isNull(defColor)) defColor = '#323233';
+				color = this.color;
 			}
-
 			const style = {
 				color: activated ? color : defColor,
 				background: activated ? background : '',
@@ -483,7 +477,8 @@ export default {
 		// 绑定监听事件
 		bindListener() {
 			const that = this;
-			if (that.sticky || that.scrollspy) {
+			// 滚动吸顶或者滚动导航/侧边栏导航模式为页面级滚动时生效
+			if (that.sticky || (that.scrollspy || that.pageScroll)) {
 				uni.$on('onPageScroll', function(e) {
 					that.scrollTop = e.scrollTop;
 				});
@@ -499,7 +494,7 @@ export default {
 					// TODO 优化触发边界值
 					const bottom = rect?.bottom || 0;
 					this.isFixed = bottom - stickyThreshold <= offsetTop;
-					if (this.scrollspy) this.dependOffsetTop = rect?.top || 0;// 滚动导航模式下才设置
+					if (this.scrollspy) this.dependOffsetTop = rect?.top || 0; // 滚动导航模式下才设置
 					// 	滚动时触发，仅在 sticky 模式下生效,{ scrollTop: 距离顶部位置, isFixed: 是否吸顶 }
 					this.$emit('scroll', { scrollTop, isFixed: this.isFixed });
 				});
@@ -581,9 +576,7 @@ export default {
 					this.$set(tab, 'diffHeight', rect2 ? rect2.top - topSpace : 0); //标签线条高度差量值
 					lastIndex--;
 
-					if (i === 0) {
-						this.placeholderHeight = rect?.height || 0; //占位高度等于标签栏区域高度
-					}
+					if (i === 0) this.placeholderHeight = rect?.height || 0; //占位高度等于标签栏区域高度
 				});
 
 				this.setCurrentIndexByName(this[model.prop]); //更正活动选项卡的索引
@@ -594,7 +587,6 @@ export default {
 					}, 20);
 				}
 			} catch (e) {
-				console.log('e:', e);
 				throw new Error('y-tabs init():', e);
 			}
 		},
@@ -616,7 +608,6 @@ export default {
 						}, 0);
 					}
 				});
-
 				this.$emit('click', computedName, title); // 标签点击事件
 			}
 		},

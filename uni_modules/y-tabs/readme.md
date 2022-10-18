@@ -15,11 +15,11 @@
 
 <div id="tips" style="color:#4fc08d;">Tips</div>
 
-+ 代码更新于2022/10/16 17:11，若有问题，请下载最新代码
++ 代码更新于2022/10/18 10:40，若有问题，请下载最新代码（如果插件包有问题，请从示例项目中拷贝）
 + 请保证HBuilderX正式版为 v3.4.18、Alpha版为 v3.5.2。
 + 该插件使用的预编译，需要自行安装less插件。
 + 如果发现组件有bug或者不完善可以留言交流。
-+ 扫描右侧图片中的微信小程序码可打开示例项目，查看具体的效果。
++ 扫描右侧图片中的微信小程序码可打开示例项目，查看具体的效果（由于不符合微信小程序的发布规范，版本比较旧，不少新的示例都没有）。
 + 示例项目中内置不少案例，若有其他场景的实现，可在评论中留言。
 
 <div id="supportPlatform" style="color:#4fc08d;">支持的平台：</div>
@@ -73,11 +73,11 @@
 ```
 <template>
  <view>
-	 <yui-tabs v-model="activeIndex" sticky :offsetTop="offsetTop">
+	 <y-tabs v-model="activeIndex" sticky :offsetTop="offsetTop">
 		<y-tab v-for="index in 5" :key="index" :title="'标签'+index">
 			<view class="content-wrap"> 内容{{index}} </view>
 		</y-tab>
-	 </yui-tabs>
+	 </y-tabs>
  </view>
 </template>
 <script>
@@ -88,17 +88,10 @@
 				offsetTop: 0, //粘性定位布局下与顶部的最小距离
 			}
 		},
-		mounted() {
-			uni.getSystemInfo({
-				success: (e) => {
-					let offsetTop = 0
-					// #ifdef H5
-					offsetTop = 43
-					// #endif
-		
-					this.offsetTop = offsetTop;
-				}
-			})
+		created() {
+			// #ifdef H5
+			this.offsetTop = 44
+			// #endif
 		},
 		// 页面滚动触发事件
 		onPageScroll(e) {
@@ -125,14 +118,14 @@
 	<tr><td> title-active-color    </td><td> string </td><td> 标题选中态颜色  </td><td> - </td></tr>
 	<tr><td> title-inactive-color    </td><td> string </td><td> 标题默认态颜色  </td><td> - </td></tr>
 	<tr><td> wrapStyle    </td><td> object </td><td> 标签栏样式  </td><td> - </td></tr>
-	<tr><td> duration    </td><td> number、string </td><td> 动画时间，单位秒(用于标签栏底部线条切换及标签内容转场动画时长)  </td><td> 0.2 </td></tr>
 	<tr><td> line-width    </td><td> number、string </td><td> 底部条宽度，默认单位 px，仅在 type="line" 时有效  </td><td> 20px </td></tr>
 	<tr><td> line-height    </td><td>number、string </td><td> 底部条高度，默认单位 px，仅在 type="line" 时有效  </td><td> 3px </td></tr>
 	<tr><td> ellipsis    </td><td> boolean </td><td> 是否省略过长的标题文字  </td><td> true </td></tr>
+	<tr><td> duration    </td><td> number、string </td><td> 动画时间，单位秒(用于底部条移动、标签内容转场、滚动导航滚动的动画时长)  </td><td> 0.2 </td></tr>
 	<tr><td> scroll-to-center    </td><td> boolean </td><td> 标签栏滚动时当前标签居中（侧边栏导航无效）  </td><td> true</td></tr>
-	<tr><td> scroll-threshold    </td><td> number、string </td><td> 标签栏的滚动阈值(仅在ellipsis="false"且type不为"card"下时有效)，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动(切换时会自动将当前标签居中)  </td><td> 5 </td></tr>
+	<tr><td> scroll-threshold    </td><td> number、string </td><td> 标签栏的滚动阈值(仅在ellipsis="false"时生效)，标签数量超过阈值且总宽度超过标签栏宽度时开始横向滚动(切换时会自动将当前标签居中)  </td><td> 5 </td></tr>
+	<tr><td> animated    </td><td> boolean </td><td>是否开启切换标签内容时的转场动画 </td><td> false </td></tr>
 	<tr><td> is-lazy-render    </td><td> boolean </td><td> 是否开启延迟渲染（首次切换到标签时才触发内容渲染）  </td><td> true </td></tr>
-	<tr><td> animated    </td><td> boolean </td><td> 是否开启切换标签内容时的转场动画  </td><td> false </td></tr>
 	<tr><td> tab-click-scroll-top    </td><td> boolean </td><td> 在点击标签标题时，页面是否会滚动回到顶部 </td><td>  false </td></tr>
 	<tr><td> before-change    </td><td> (index) => boolean | Promise </td><td> 切换标签前的回调函数，返回 false 可阻止切换，支持返回 Promise</td><td> - </td></tr>
 	<tr><td> transparent    </td><td> boolean </td><td> 标题栏背景色是否透明渐变 ;如果开启该属性，那么background属性值必须为rgba格式  </td><td> false </td></tr>
@@ -143,7 +136,7 @@
 	<tr><td> swipe-animated </td><td> boolean </td><td> 是否开启标签内容滑动时的拖动动画（该属性依赖于animated、swipeable、is-lazy-render的开启;该属性开启时考虑给包裹内容的容器增加一个min-height，因为开启该属性后，其他未显示出来的标签内容会沿用当前显示的高度，拖动切换后由于高度不一致会有回弹）</td><td> 0</td></tr>
 	<tr><td colspan="4"> ------------ 滚动吸顶相关属性：结合页面生命周期onPageScroll实现 ------------ </td></tr>
 	<tr><td> sticky	</td><td> boolean	</td><td> 是否使用粘性定位布局开启滚动吸顶(请查看示例项目中的具体用法；yTabs -> 滚动吸顶	</td><td> false</td></tr>
-	<tr><td> sticky-threshold </td><td> number </td><td> 粘性定位布局的判断阈值（可以理解在滚动过程中，） </td><td> 0</td></tr>
+	<tr><td> sticky-threshold </td><td> number </td><td> 粘性定位布局的判断阈值 </td><td> 0</td></tr>
 	<tr><td> offset-top    </td><td> number </td><td> 粘性定位布局下标签栏与顶部的最小距离，默认 px </td><td> 0 </td></tr>
 	<tr><td> z-index    </td><td> number </td><td> 粘性定位布局下，标签栏的z-index值  </td><td> 99 </td></tr>
 	<tr><td> scrollspy    </td><td> boolean </td><td> 是否开启滚动导航；该模式下，内容将会平铺展示  </td><td> false </td></tr>
