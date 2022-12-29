@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { isNull, getDirection } from '../js/uitls';
+import { isNull } from '../js/uitls';
 import { touchMixin } from '../js/touchMixin';
 export default {
 	name: 'yTab',
@@ -73,7 +73,7 @@ export default {
 			rendered: false, //是否渲染过
 			swipeable: false, //是否开启手势滑动切换
 			paneStyle: null, //内容样式
-			scrollspy: false, //是否为滚动导航模式
+			scrollspy: false //是否为滚动导航模式
 		};
 	},
 	computed: {

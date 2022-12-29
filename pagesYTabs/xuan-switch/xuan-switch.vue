@@ -173,7 +173,7 @@ export default {
       width: 60%;
       height: 100%;
       border-radius: 100upx;
-      background: $uni-color-primary;
+      // background: $uni-color-primary;
     }
     .disabled{
       position: absolute;

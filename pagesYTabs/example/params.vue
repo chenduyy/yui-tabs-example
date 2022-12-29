@@ -89,7 +89,7 @@
 		<view class="title-wrap">
 			标签栏滚动
 			<view class="title-wrap__desc">标签数量（swipeThreshold）超过 5
-				个且总宽度超过标签栏宽度时，标签栏可以在水平方向上滚动，切换时会自动将当前标签居中(scrollToCenter="false"可取消)</view>
+				个且总宽度超过标签栏宽度时，标签栏可以在水平方向上滚动，切换时会自动将当前标签居中(scrollToCenter="false"可取消居中)</view>
 			<view class="title-wrap__desc font-danger">注意：仅在ellipsis="false"有效</view>
 		</view>
 		<y-tabs v-model="activeIndex5" :ellipsis="false">

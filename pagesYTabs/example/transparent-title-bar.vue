@@ -1,12 +1,12 @@
 <template>
 	<view class="container">
 		<view class="banner-wrap"><banner /></view>
-		<y-tabs v-model="activeIndex" background="rgba(255,255,255,0)" animated sticky :offsetTop="offsetTop" scrollspy transparent>
+		<y-tabs v-model="activeIndex" background="rgba(255,255,255,0)" animated sticky :offsetTop="offsetTop" scrollspy pageScroll transparent>
 			<y-tab v-for="(title, index) in tabs" :title="title" :key="index">
 				<view class="info-wrap" v-for="idx in 30" :key="idx">{{ title }}</view>
 			</y-tab>
 		</y-tabs>
-		<view class="placeholder-block2"></view>
+		<!-- <view class="placeholder-block2"></view> -->
 	</view>
 </template>
 
