@@ -102,10 +102,12 @@
 				isFixed: false, //是否吸顶
 				halfWrapWidth: 0, //一半的标题栏区域宽度
 				placeholderHeight: 0, //标题栏占位高度
-				wrapBottom: 0, //标题栏区域底部距离屏幕顶部的高度值
+				wrapTop: 0, //标签栏区域顶部与屏幕顶部的距离
+				wrapBottom: 0, //标题栏区域底部与屏幕顶部的距离
 				extraWidth: 0, //标签栏nav-left、nav-right插槽宽度
 				extraHeight: 0, //标签栏nav-left、nav-right插槽高度
 				contentWidth: 0, //内容区域宽度
+				contentTop: 0, //内容区域与屏幕顶部的距离
 				dependOffsetTop: 0, //依赖元素与屏幕顶端的最小距离
 				// windowHeight: 0, //可使用窗口高度
 				trackStyle: null, //标签内容滑动轨道样式
@@ -241,13 +243,13 @@
 			msDuration() {
 				return this.animated ? this.duration * 1000 : 0;
 			},
-			// 粘性布局下的滚动偏移量
+			// 用于判断滚动的内容区域与屏幕顶部比较时所需的滚动偏移量
 			scrollOffset() {
-				if (this.sticky) {
-					return !this.scrollY ? this.offsetTop + this.placeholderHeight : this.offsetTop;
-				} else {
-					return 0;
-				}
+				// 滚动导航：区域滚动时，滚动偏移量为用户设置的'粘性布局下与顶部的最小距离'+'标签栏占位高度'；页面滚动时为'标签栏占位高度'
+				if (this.scrollNav) return !this.pageScroll ? this.offsetTop + this.placeholderHeight : this.placeholderHeight;
+				// 侧边栏导航：区域滚动时，滚动偏移量为内容容器距离顶部的高度；页面滚动时为0
+				if (this.sidebarNav) return !this.pageScroll ? this.contentTop : 0;
+				return 0;
 			},
 			// 当前激活标签的name值
 			currentName() {
@@ -524,7 +526,8 @@
 					const parentTop = r1?.top || 0; // 标签容器距离视口顶部的top值
 
 					this.halfWrapWidth = r2?.width / 2 || 0; //一半的标签栏区域宽度
-					this.wrapBottom = r2.bottom || 0; //标签栏区域底部距离屏幕顶部的高度值
+					this.wrapTop = r2.top || 0; //标签栏区域顶部与屏幕顶部的距离
+					this.wrapBottom = r2.bottom || 0; //标签栏区域底部与屏幕顶部的距离
 
 					this.lineWidthValue = r3?.width || 0; //底部线条宽度
 					this.lineHeightValue = r3?.height || 0; //底部线条高度
@@ -538,6 +541,7 @@
 					this.extraHeight = navLeftHeight + navRightHeight;
 
 					this.contentWidth = r6?.width || 0; //内容区域的宽度
+					this.contentTop = r6?.top || 0; //内容区域与屏幕顶部的距离
 					this.dependOffsetTop = r7?.top || 0; //依赖元素与屏幕顶端的最小距离
 
 					// 计算每个tab的相关参数
@@ -783,12 +787,12 @@
 
 				// 侧边栏导航需要延时50ms
 				if (this.sidebarNav) {
-					if (this.timer) clearTimeout(this.timer);
-					this.timer = setTimeout(() => {
-						this.getCurrIndexOnScroll().then(index => {
-							this.setCurrentIndex(index); //设置当前下标
-						});
-					}, 50);
+					// if (this.timer) clearTimeout(this.timer);
+					// this.timer = setTimeout(() => {
+					this.getCurrIndexOnScroll().then(index => {
+						this.setCurrentIndex(index); //设置当前下标
+					});
+					// }, 50);
 				}
 
 				// 滚动导航
